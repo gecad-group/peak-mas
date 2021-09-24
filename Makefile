@@ -17,7 +17,7 @@ e1:
 	@echo 'Exemplo 1'
 	@echo ''
 	@echo '' 
-	@$(PYTHON) exemplo_basico.py
+	@$(PYTHON) examples/exemplo_basico.py
 
 e2:
 	@echo 'Exemplo Emissor/Recetor'

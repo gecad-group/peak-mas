@@ -5,7 +5,6 @@ class Gestor(mas.SyncAgent):
     
     class ReceberConsumos(mas.OneShotBehaviour):
         
-        
         async def run(self):
             for _ in range(self.agent.n_agents):
                 msg = await self.receive(10)
@@ -20,6 +19,7 @@ class Gestor(mas.SyncAgent):
     async def setup(self):
         self.n_agents = 2
         self.consumptio_per_period = 0
+        
 
     def step(self):
         template = mas.Template()

@@ -1,3 +1,12 @@
+'''
+Multi-Agent System framework based on SPADE framework.
+
+This package is built upon SPADE framework and it has 
+the same features as SPADE. Furthermore it adds a new 
+XMPP feature, the Multi User Chat (MUC) service.
+Agents are now capable of joining group-chats'''
+
+
 import logging as _logging
 import time as _time
 
@@ -6,7 +15,7 @@ from spade.template import Template
 
 from mas.agent import Agent
 from mas.behaviour import OneShotBehaviour, CyclicBehaviour, PeriodicBehaviour, FSMBehaviour
-from mas.message import *
+import mas.jid
 from mas.simulation import Synchronizer, SyncAgent
 
 _logging.getLogger("spade.Agent").setLevel(_logging.ERROR)
@@ -34,9 +43,3 @@ def run(*agents):
         except KeyboardInterrupt:
             break
 
-
-
-if __name__ == '__main__':
-    import sys
-    import mas.config
-    mas.config(sys.argv)

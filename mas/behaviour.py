@@ -9,9 +9,22 @@ import mas
 class _MUCBehaviour:
 
     async def send_to_group(self, msg: mas.Message, group = None, *, leave = False):
+        """Sends a message to a group chat.
+
+        When sending a message to a group the agent joins the group first. The parameter
+        'leave' tells the method if the agent leaves, or not, the group after sending the 
+        message. (If the intention is to send a single request to a new group the best 
+        option would be to leave the group chat, if the intention is to send a message 
+        to a group wich the agent already belongs to, it's better to not leave)
+        Args:
+            msg (mas.Message): The Message.
+            group (str, optional): Name of the group to send the message to. If None is given the
+                                   the message is sent to the MAS group. Defaults to None.
+            leave (bool, optional): If true, agent leaves the group after sending the message. Defaults to False.
+        """
         jid = ''
         mas_muc_jid = self.agent.mas_name + '@conference.' + self.agent.jid.domain
-        if group:
+        if group and group != self.agent.mas_name:
             jid = group + '-at-' + mas_muc_jid
         else:
             jid = mas_muc_jid

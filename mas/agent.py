@@ -1,24 +1,21 @@
 import logging as _logging
+import typing as _typing
 
-import aioxmpp
-import aioxmpp.callbacks
-import spade
-import spade.agent
-import spade.behaviour
-import spade.message
+import aioxmpp as _aioxmpp
+import spade as _spade
 
 
 _logger = _logging.getLogger('mas.Agent')
 
 
-class Agent(spade.agent.Agent):
+class Agent(_spade.agent.Agent):
     '''This class integrates the XMPP Multi-User Chat (MUC) feature into the SPADE arquitecture.
     '''
     
-    class DFRegister(spade.behaviour.OneShotBehaviour):
+    class _DFRegister(_spade.behaviour.OneShotBehaviour):
 
         async def run(self):
-            msg = spade.message.Message()
+            msg = _spade.message.Message()
             msg.to = 'df@' + self.agent.jid.domain
             msg.set_metadata('register', 'agent')
             msg.set_metadata('types', self.setToString(self.agent.group_names))
@@ -30,7 +27,16 @@ class Agent(spade.agent.Agent):
                 s += v + ';'
             return s[:len(s)-1]
 
-    def __init__(self, name, server, mas_name, group_names: set[str] = {}, verify_security=False):
+    def __init__(self, name: str, server: str, mas_name: str, group_names: set[str] = {}, verify_security=False):
+        """Agent base class.
+
+        Args:
+            name (str): Name of the agent.
+            server (str): Domain of the XMPP server to connect the agent to.
+            mas_name (str): Name of the MAS. Joins the group with this name.
+            group_names (set[str], optional): A set of group names for the agent to join. Creates if do not exists. Defaults to {}.
+            verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
+        """
         self.rooms = dict()
         self.muc_client = None
         self.mas_name = mas_name
@@ -39,7 +45,7 @@ class Agent(spade.agent.Agent):
         self.server = server
         jid = name + '@' + server
         super().__init__(jid, jid, verify_security)
-        self.add_behaviour(self.DFRegister())
+        self.add_behaviour(self._DFRegister())
 
     async def _hook_plugin_after_connection(self):
         '''
@@ -49,9 +55,9 @@ class Agent(spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         '''
         self.muc_client = self.client.summon(
-                    aioxmpp.MUCClient)
+                    _aioxmpp.MUCClient)
         self.message_dispatcher.register_callback(
-            aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
+            _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
         )
         self._join_mucs()
 
@@ -89,17 +95,24 @@ class Agent(spade.agent.Agent):
         muc_jids, self.room_jids = self._create_muc_jids()
         for jid in muc_jids:
             room, _ = self.muc_client.join(
-                aioxmpp.JID.fromstr(jid), self.jid.localpart)
+                _aioxmpp.JID.fromstr(jid), self.jid.localpart)
             room.on_failure.connect(self._on_muc_failure_handler)
             self.rooms[jid] = room
 
-    def group_members(self, group) -> list:
-        '''
-        Get's the list of room members in a specific room.
-        '''
+    def group_members(self, group) -> _typing.List:
+        """Extracts list of group members from a group chat.
+
+        Args:
+            group (str): Name of the group. Must be registered previously in the gorup
+
+        Returns:
+            List: A copy of the list of occupants. The local user is always the first item in the list. 
+        """
 
         jid = self.room_jids[group]
         return self.rooms[jid].members
 
 
 
+if __name__ == '__main__':
+    a = Agent('', '', '')
