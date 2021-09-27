@@ -27,6 +27,6 @@ class Gestor(mas.SyncAgent):
         self.add_behaviour(self.ReceberConsumos(), template)
 
 
-agent = Gestor('Gestor', 'localhost', 'mas')
+agent = Gestor('Gestor', 'mas.gecad.isep.ipp.pt', 'mas')
 
 mas.run(agent)

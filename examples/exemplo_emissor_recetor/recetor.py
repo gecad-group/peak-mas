@@ -27,6 +27,6 @@ class AgenteRecetor(mas.Agent):
 
 
 
-agent = AgenteRecetor(name='recetor', server='localhost', mas_name='mas')
+agent = AgenteRecetor(name='recetor', server='mas.gecad.isep.ipp.pt', mas_name='mas')
 
 mas.run(agent)

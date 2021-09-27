@@ -21,6 +21,6 @@ class Consumidor(mas.SyncAgent):
         self.add_behaviour(self.GerarConsumo())
 
 name = sys.argv[1]
-agent = Consumidor(name, 'localhost', 'mas')
+agent = Consumidor(name, 'mas.gecad.isep.ipp.pt', 'mas')
 
 mas.run(agent)

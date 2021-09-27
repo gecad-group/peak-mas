@@ -25,6 +25,6 @@ class AgenteEmissor(mas.Agent):
 
 
 
-agent = AgenteEmissor(name='emissor', server='localhost', mas_name='mas', group_names={'prosumer', 'buyer'})
+agent = AgenteEmissor(name='emissor', server='mas.gecad.isep.ipp.pt', mas_name='mas', group_names={'prosumer', 'buyer'})
 
 mas.run(agent)  #executa os agentes num loop e sai dele quando todos os agentes tiverem sido encerrados

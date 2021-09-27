@@ -43,7 +43,7 @@ class Agent(_spade.agent.Agent):
         self.group_names = group_names
         self.room_jids = None
         self.server = server
-        jid = name + '@' + server
+        jid = name + '-at-' + mas_name + '@' + server
         super().__init__(jid, jid, verify_security)
         self.add_behaviour(self._DFRegister())
 
