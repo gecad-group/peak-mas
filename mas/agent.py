@@ -19,6 +19,7 @@ class Agent(_spade.agent.Agent):
             msg.to = 'df@' + self.agent.jid.domain
             msg.set_metadata('register', 'agent')
             msg.set_metadata('types', self.setToString(self.agent.group_names))
+            msg.set_metadata('mas', self.agent.mas_name)
             await self.send(msg)
 
         def setToString(self, value):
@@ -54,6 +55,7 @@ class Agent(_spade.agent.Agent):
         This method adds the MUC service to the Agent XMPP Client and
         adds a message dispatcher for the group(MUC) messages.
         '''
+        self.presence.approve_all = True
         self.muc_client = self.client.summon(
                     _aioxmpp.MUCClient)
         self.message_dispatcher.register_callback(

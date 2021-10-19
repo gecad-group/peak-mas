@@ -4,6 +4,8 @@
 
 PYTHON = ~/Documentos/miniconda3/envs/spade/bin/python
 
+restart: prosody_stop prosody_start prosody
+
 prosody:
 	@tail -f -n 50 /var/log/prosody/prosody.log
 
