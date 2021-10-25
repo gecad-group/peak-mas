@@ -17,7 +17,8 @@ class SyncAgent(mas.Agent, metaclass=_ABCMeta):
             msg = await self.receive(10)
             if msg:
                 if msg.get_metadata('sync') == 'step':
-                    self.agent.step()
+                    self.agent.period = int(msg.get_metadata('period'))
+                    await self.agent.step()
                 if msg.get_metadata('sync') == 'stop':
                     await self.agent.stop()
 
@@ -35,6 +36,7 @@ class SyncAgent(mas.Agent, metaclass=_ABCMeta):
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
         super().__init__(name, server, mas_name, group_names, verify_security)
+        self.period = 0
         template_step = mas.Template()
         template_step.set_metadata('sync', 'step')
         template_stop = mas.Template()
