@@ -82,7 +82,6 @@ class Synchronizer(mas.Agent):
             _logger.info('Starting simulation...')
 
         async def run(self):
-            self.current_period += 1
             msg = mas.Message()
             if self.current_period > self.agent.periods:
                 msg.set_metadata('sync', 'stop')
@@ -93,6 +92,7 @@ class Synchronizer(mas.Agent):
                 msg.set_metadata('sync', 'step')
                 msg.set_metadata('period', str(self.current_period))
             await self.send_to_group(msg)
+            self.current_period += 1
 
         async def on_end(self):
             _logger.info('Ending simulation...')
