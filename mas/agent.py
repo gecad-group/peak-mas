@@ -1,14 +1,16 @@
 import logging as _logging
+from random import shuffle
 import typing as _typing
 
 import aioxmpp as _aioxmpp
+import pandas as _pd
 import spade as _spade
 
 
 _logger = _logging.getLogger('mas.Agent')
 
 
-class Agent(_spade.agent.Agent):
+class XMPPAgent(_spade.agent.Agent):
     '''This class integrates the XMPP Multi-User Chat (MUC) feature into the SPADE arquitecture.
     '''
     
@@ -28,7 +30,7 @@ class Agent(_spade.agent.Agent):
                 s += v + ';'
             return s[:len(s)-1]
 
-    def __init__(self, name: str, server: str, mas_name: str, group_names: set[str] = {}, verify_security=False):
+    def __init__(self, name: str, server: str, verify_security=False):
         """Agent base class.
 
         Args:
@@ -38,15 +40,12 @@ class Agent(_spade.agent.Agent):
             group_names (set[str], optional): A set of group names for the agent to join. Creates if do not exists. Defaults to {}.
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
-        self.rooms = dict()
+        self.groups = dict()
         self.muc_client = None
-        self.mas_name = mas_name
-        self.group_names = group_names
-        self.room_jids = None
         self.server = server
-        jid = name + '-at-' + mas_name + '@' + server
+        jid = name +  '@' + server
         super().__init__(jid, jid, verify_security)
-        self.add_behaviour(self._DFRegister())
+        #self.add_behaviour(self._DFRegister())
 
     async def _hook_plugin_after_connection(self):
         '''
@@ -61,25 +60,6 @@ class Agent(_spade.agent.Agent):
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
         )
-        self._join_mucs()
-
-    def _create_muc_jids(self):
-        '''
-        Creates JIDs based on the groups' names'''
-
-        muc_jids = set()
-        room_jids = dict()
-
-        mas_muc_jid = self.mas_name + '@conference.' + self.jid.domain
-        muc_jids.add(mas_muc_jid)
-        room_jids[self.mas_name] = mas_muc_jid
-
-        for name in self.group_names:
-            jid = name + '-at-' + mas_muc_jid
-            muc_jids.add(jid)
-            room_jids[name] = jid
-
-        return muc_jids, room_jids
 
     def _on_muc_failure_handler(self, exc):
         '''
@@ -89,19 +69,17 @@ class Agent(_spade.agent.Agent):
         _logger.critical('Failed to enter MUC room: ' + str(self.agent.jid))
         raise exc
 
-    def _join_mucs(self):
-        '''
-        Connects Agent to the XMPP room.
-        '''
+    async def join_group(self, jid):
+        room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
+        room.on_failure.connect(self._on_muc_failure_handler)
+        await fut
+        self.groups[jid] = room
 
-        muc_jids, self.room_jids = self._create_muc_jids()
-        for jid in muc_jids:
-            room, _ = self.muc_client.join(
-                _aioxmpp.JID.fromstr(jid), self.jid.localpart)
-            room.on_failure.connect(self._on_muc_failure_handler)
-            self.rooms[jid] = room
-
-    def group_members(self, group) -> _typing.List:
+    async def leave_group(self, jid):
+        room = self.groups.pop(jid, None)
+        await room.leave()
+            
+    def group_members(self, jid) -> _typing.List:
         """Extracts list of group members from a group chat.
 
         Args:
@@ -111,10 +89,40 @@ class Agent(_spade.agent.Agent):
             List: A copy of the list of occupants. The local user is always the first item in the list. 
         """
 
-        jid = self.room_jids[group]
-        return self.rooms[jid].members
+        return self.groups[jid].members
 
+class Agent(XMPPAgent):
 
+    def __init__(self, name: str, server: str, properties=None, verify_security=False):
+        super().__init__(name, server, verify_security=verify_security)
+        if properties:
+            self._parse(properties[name])
+
+    def _parse(self, properties):
+        for key in properties:
+            setattr(self, key, properties[key])
+
+class Property:
+
+    def __init__(self, value, random = False) -> None:
+        if random:
+            shuffle(value)
+        
+        def gen():
+            f = True
+            while f:
+                try:
+                    for i in value:
+                        yield i
+                except TypeError:
+                    f = False
+            while True:
+                yield value
+
+        self.value = gen()
+    
+    def __repr__(self) -> str:
+        return str(self.value.__next__()) 
 
 if __name__ == '__main__':
     a = Agent('', '', '')
