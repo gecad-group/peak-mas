@@ -92,7 +92,12 @@ class Agent(_XMPPAgent):
     def __init__(self, name: str, server: str, properties=None, verify_security=False):
         super().__init__(name, server, verify_security=verify_security)
         if properties:
+            self.properties = properties
             self._parse(properties)
+
+    def iterate_properties(self):
+        for key in self.properties:
+            getattr(self, key).next()
 
     def _parse(self, properties):
         for key in properties:

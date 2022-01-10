@@ -18,6 +18,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             if msg:
                 if msg.get_metadata('sync') == 'step':
                     self.agent.period = int(msg.get_metadata('period'))
+                    self.agent.iterate_properties()
                     await self.agent.step()
                 if msg.get_metadata('sync') == 'stop':
                     self.kill()
