@@ -2,15 +2,15 @@ from abc import ABCMeta as _ABCMeta, abstractmethod
 import asyncio as _asyncio
 import logging as _logging
 
-import mas
+from mas import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
 
-_logger = _logging.getLogger('mas.simulation')
-
-
-class SyncAgent(mas.Agent, metaclass=_ABCMeta):
+_logger = _logging.getLogger('mas.Simulation')
 
 
-    class _StepBehaviour(mas.CyclicBehaviour):
+class SyncAgent(Agent, metaclass=_ABCMeta):
+
+
+    class _StepBehaviour(CyclicBehaviour):
         '''Listens for the Synchronizer messages.'''
 
         async def run(self):
@@ -20,10 +20,12 @@ class SyncAgent(mas.Agent, metaclass=_ABCMeta):
                     self.agent.period = int(msg.get_metadata('period'))
                     await self.agent.step()
                 if msg.get_metadata('sync') == 'stop':
-                    await self.agent.stop()
+                    self.kill()
 
+        async def on_end(self):
+            await self.agent.stop()
 
-    def __init__(self, name: str, server: str, mas_name: str, group_names: set[str] = {}, verify_security=False):
+    def __init__(self, name: str, server: str, properties=None, verify_security=False):
         """Agent that listens to the Synchronizer.
 
         This is an abstract class. Step method must be overriden.
@@ -35,17 +37,17 @@ class SyncAgent(mas.Agent, metaclass=_ABCMeta):
             group_names (set[str], optional): Set of group names to join to. Defaults to {}.
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
-        super().__init__(name, server, mas_name, group_names, verify_security)
+        super().__init__(name, server, properties, verify_security)
         self.period = 0
-        template_step = mas.Template()
+        template_step = Template()
         template_step.set_metadata('sync', 'step')
-        template_stop = mas.Template()
+        template_stop = Template()
         template_stop.set_metadata('sync', 'stop')
         template = template_step | template_stop
         self.add_behaviour(self._StepBehaviour(), template)
 
     @abstractmethod
-    def step(self):
+    async def step(self):
         """This method is executed at each step.
 
         It must be overriden.
@@ -56,34 +58,27 @@ class SyncAgent(mas.Agent, metaclass=_ABCMeta):
         raise NotImplementedError('The step method must be overriden.')
 
 
-class Synchronizer(mas.Agent):
+class Synchronizer(Agent):
 
-    class _WaitForMembersBehaviour(mas.PeriodicBehaviour):
-        '''Checks if all the expected agents are in the MAS group.
-        
-        Starts the simulation after all agents are connected to the group.'''
-
-        async def on_start(self):
-            _logger.info('Waiting for agents to connect...')
-
-        async def run(self):
-            if len(self.agent.group_members(self.agent.mas_name)) > self.agent.n_agents:
-                self.kill()
-
-        async def on_end(self):
-            _logger.info('Every agent is up and running!')
-            self.agent.add_behaviour(self.agent._StepBehaviour(self.agent.time_per_period))
-
-    class _StepBehaviour(mas.PeriodicBehaviour):
+    class _StepBehaviour(PeriodicBehaviour):
         '''Sends a message to MAS group for each step.'''
 
+        def __init__(self, group_jid, n_agents: int, periods: int, time_per_period:float, start_at=None):
+            super().__init__(time_per_period, start_at=start_at)
+            self.group_jid = group_jid
+            self.n_agents = n_agents
+            self.periods = periods
+
         async def on_start(self):
+            while not len(self.agent.group_members(self.group_jid)) >= self.n_agents:
+                await _asyncio.sleep(1)
             self.current_period = 0
             _logger.info('Starting simulation...')
 
         async def run(self):
-            msg = mas.Message()
-            if self.current_period > self.agent.periods:
+            msg = Message()
+            msg.to = self.group_jid
+            if self.current_period >= self.periods:
                 msg.set_metadata('sync', 'stop')
                 self.kill()
             else:
@@ -99,24 +94,8 @@ class Synchronizer(mas.Agent):
             await _asyncio.sleep(5)
             await self.agent.stop()
 
-    NAME = 'synchronizer'
+    async def sync_group(self, jid, n_agents: int, time_per_period: float, periods: int):
+        await self.join_group(jid)
+        self.add_behaviour(self._StepBehaviour(jid, n_agents, periods, time_per_period))
 
-    def __init__(self, server: str, mas_name: str, n_agents: int, time_per_period: float, periods: int, verify_security=False):
-        """Agent responsible for synchronizing the simulation.
-
-        Args:
-            server (str): Domain of the XMPP server to connect to.
-            mas_name (str): Name of the MAS to be used to create a group chat between the agents.
-            n_agents (int): Number of agents expected to connect.
-            time_per_period (float): Duration of each period.
-            periods (int): Number of total periods to simulate.
-            verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
-        """
-        super().__init__(self.NAME, server, mas_name, verify_security=verify_security)
-        self.n_agents = n_agents
-        self.periods = periods
-        self.time_per_period = time_per_period
-        self.add_behaviour(self._WaitForMembersBehaviour(1))
         
-if __name__ == '__main__':
-    SyncAgent('', '', '')

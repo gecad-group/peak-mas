@@ -1,3 +1,4 @@
+from abc import ABCMeta
 import logging
 
 from pyModbusTCP.client import ModbusClient
@@ -5,7 +6,10 @@ from pyModbusTCP.utils import get_2comp
 
 log = logging.getLogger('mas.Drivers')
 
-class DriverModBusTCP:
+class Driver(metaclass=ABCMeta):
+    pass
+
+class DriverModBusTCP(Driver):
 
     def __init__(self, host, unit_id = None) -> None:
         self.client = ModbusClient(host = host, unit_id=unit_id, auto_open=True)

@@ -1,6 +1,5 @@
 from abc import ABCMeta
 
-import aioxmpp
 import spade.behaviour
 
 import mas
@@ -24,11 +23,8 @@ class _MUCBehaviour:
         """   
         raw_msg = msg.prepare()
         try:
-            #print('ola')
             await self.agent.groups[str(msg.to)].send_message(raw_msg)
-            #print('adeus')
-        except Exception as e:
-            print(e)
+        except:
             room, future = self.agent.muc_client.join(msg.to, self.agent.name)
             await future
             await room.send_message(raw_msg)

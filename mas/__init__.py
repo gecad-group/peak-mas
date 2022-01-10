@@ -16,6 +16,7 @@ from mas.agent import Agent
 from mas.behaviour import OneShotBehaviour, CyclicBehaviour, PeriodicBehaviour, FSMBehaviour
 from mas.jid import *
 from mas.simulation import Synchronizer, SyncAgent
+from mas.properties import Property, Properties
 
 _logging.getLogger("spade.Agent").setLevel(_logging.ERROR)
 

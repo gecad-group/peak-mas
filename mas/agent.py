@@ -1,16 +1,14 @@
 import logging as _logging
-from random import shuffle
 import typing as _typing
 
 import aioxmpp as _aioxmpp
-import pandas as _pd
 import spade as _spade
 
 
 _logger = _logging.getLogger('mas.Agent')
 
 
-class XMPPAgent(_spade.agent.Agent):
+class _XMPPAgent(_spade.agent.Agent):
     '''This class integrates the XMPP Multi-User Chat (MUC) feature into the SPADE arquitecture.
     '''
     
@@ -36,8 +34,6 @@ class XMPPAgent(_spade.agent.Agent):
         Args:
             name (str): Name of the agent.
             server (str): Domain of the XMPP server to connect the agent to.
-            mas_name (str): Name of the MAS. Joins the group with this name.
-            group_names (set[str], optional): A set of group names for the agent to join. Creates if do not exists. Defaults to {}.
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
         self.groups = dict()
@@ -91,38 +87,16 @@ class XMPPAgent(_spade.agent.Agent):
 
         return self.groups[jid].members
 
-class Agent(XMPPAgent):
+class Agent(_XMPPAgent):
 
     def __init__(self, name: str, server: str, properties=None, verify_security=False):
         super().__init__(name, server, verify_security=verify_security)
         if properties:
-            self._parse(properties[name])
+            self._parse(properties)
 
     def _parse(self, properties):
         for key in properties:
             setattr(self, key, properties[key])
-
-class Property:
-
-    def __init__(self, value, random = False) -> None:
-        if random:
-            shuffle(value)
-        
-        def gen():
-            f = True
-            while f:
-                try:
-                    for i in value:
-                        yield i
-                except TypeError:
-                    f = False
-            while True:
-                yield value
-
-        self.value = gen()
-    
-    def __repr__(self) -> str:
-        return str(self.value.__next__()) 
 
 if __name__ == '__main__':
     a = Agent('', '', '')
