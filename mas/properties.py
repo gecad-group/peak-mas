@@ -1,33 +1,41 @@
 from abc import ABCMeta, abstractmethod
+import itertools
 
 from pandas.core.frame import DataFrame
 
 from mas.drivers import Driver
 
-class Property:
+class Property():
 
-    def __init__(self, value, loop=False) -> None:
-        self.value = self._gen(value, loop)
+    def __init__(self, data, loop=False) -> None:
+        self.data = data
+        self.loop = loop
+        self.iter = self._gen(data, loop)
+        self.current_value = next(self.iter)
 
     
-    def _gen(self, value, loop):
+    def _gen(self, data, loop):
         f = True
         while f:
             try:
-                for i in value:
+                for i in data:
                     yield i
                 if not loop:
                     while True: yield None
             except TypeError:
                 f = False
         while True:
-            yield value
+            yield data
     
-    def __repr__(self) -> str:
-        return str(next(self.value))
+    def next(self):
+        self.current_value = next(self.iter)
 
-    #def __getitem__(self, item):
-    #    return next(itertools.islice(self.value, item, None))
+    def __repr__(self) -> str:
+        return str(self.current_value)
+
+    def __getitem__(self, item):
+        #TODO: melhorar formula: usar modelo matematico para ser necessario menos processamento
+        return next(itertools.islice(self._gen(self.data, self.loop), item, None))
 
 class Properties(metaclass=ABCMeta):
 
@@ -60,6 +68,6 @@ if __name__ == '__main__':
     p = Property([1,2,3,4,5,6,7,8], loop=True)
     #for _ in range(10):
     #    print(p)
-    print(p[9])
     print(p)
-    print(p[9])
+    p.next()
+    print(p)
