@@ -26,6 +26,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         async def on_end(self):
             await self.agent.stop()
 
+
     def __init__(self, name: str, server: str, properties=None, verify_security=False):
         """Agent that listens to the Synchronizer.
 

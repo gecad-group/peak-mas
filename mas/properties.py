@@ -13,7 +13,6 @@ class Property():
         self.iter = self._gen(data, loop)
         self.current_value = next(self.iter)
 
-    
     def _gen(self, data, loop):
         f = True
         while f:
@@ -30,6 +29,21 @@ class Property():
     def next(self):
         self.current_value = next(self.iter)
 
+    def __add__(self, other):
+        if isinstance(other, Property):
+            return self.current_value + other.current_value
+        raise TypeError
+
+    def __sub__(self, other):
+        if isinstance(other, Property):
+            return float(self.current_value) - float(other.current_value)
+        raise TypeError
+
+    def __mul__(self, other):
+        if isinstance(other, Property):
+            return self.current_value * other.current_value
+        raise TypeError
+
     def __repr__(self) -> str:
         return str(self.current_value)
 
@@ -37,14 +51,22 @@ class Property():
         #TODO: melhorar formula: usar modelo matematico para ser necessario menos processamento
         return next(itertools.islice(self._gen(self.data, self.loop), item, None))
 
+
+
+
+
+
+
 class Properties(metaclass=ABCMeta):
 
     def __init__(self, name=None) -> None:
-        self.agent_name = name
+        self.agent_name: str = name
         self.ds = dict()
         self.build_dataset()
 
     def add_property(self, agent_name, property_name, property: Property):
+        if agent_name not in self.ds:
+            self.ds[agent_name] = dict()
         self.ds[agent_name][property_name] = property
 
     def add_dataset(self, agent_name, dataframe: DataFrame):
@@ -65,9 +87,11 @@ class Properties(metaclass=ABCMeta):
         return self.ds[name]
 
 if __name__ == '__main__':
-    p = Property([1,2,3,4,5,6,7,8], loop=True)
-    #for _ in range(10):
-    #    print(p)
+    p = Property([1,2,3,4,5,6,7,8], loop=False)
     print(p)
     p.next()
     print(p)
+    p1 = Property([2,3,4,5,6,7,8], loop=True)
+    print(str(p+p1))
+    print(str(p+p1))
+    print(str(p+p1))

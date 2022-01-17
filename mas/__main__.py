@@ -64,8 +64,8 @@ def main():
                     ns.file,
                     ns.agent_name + str(i),
                     ns.server]
-            if ns.properties:      args.append(['-p', ns.properties]) 
-            if ns.verify_security: args.append(['--verify_security', ns.verify_security])
+            if ns.properties:      args.extend(['-p', ns.properties]) 
+            if ns.verify_security: args.extend(['--verify_security', ns.verify_security])
             proc = subprocess.Popen(args)
             procs.append(proc)
         wait(procs)

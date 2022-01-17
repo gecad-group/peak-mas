@@ -87,6 +87,9 @@ class _XMPPAgent(_spade.agent.Agent):
 
         return self.groups[jid].members
 
+
+
+
 class Agent(_XMPPAgent):
 
     def __init__(self, name: str, server: str, properties=None, verify_security=False):
@@ -102,6 +105,3 @@ class Agent(_XMPPAgent):
     def _parse(self, properties):
         for key in properties:
             setattr(self, key, properties[key])
-
-if __name__ == '__main__':
-    a = Agent('', '', '')
