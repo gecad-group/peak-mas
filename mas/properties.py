@@ -32,16 +32,29 @@ class Property():
     def __add__(self, other):
         if isinstance(other, Property):
             return self.current_value + other.current_value
+        if isinstance(other, (float,int)):
+            return self.current_value + other
         raise TypeError
 
     def __sub__(self, other):
         if isinstance(other, Property):
             return float(self.current_value) - float(other.current_value)
+        if isinstance(other, (float,int)):
+            return self.current_value - other
         raise TypeError
 
     def __mul__(self, other):
         if isinstance(other, Property):
             return self.current_value * other.current_value
+        if isinstance(other, (float,int)):
+            return self.current_value * other
+        raise TypeError
+
+    def __div__(self, other):
+        if isinstance(other, Property):
+            return self.current_value / other.current_value
+        if isinstance(other, (float,int)):
+            return self.current_value / other
         raise TypeError
 
     def __repr__(self) -> str:
@@ -70,7 +83,8 @@ class Properties(metaclass=ABCMeta):
         self.ds[agent_name][property_name] = property
 
     def add_dataset(self, agent_name, dataframe: DataFrame):
-        self.ds[agent_name] = dict()
+        if agent_name not in self.ds:
+            self.ds[agent_name] = dict()
         for property in dataframe:
             self.ds[agent_name][property] = Property(dataframe[property].to_list())
 
