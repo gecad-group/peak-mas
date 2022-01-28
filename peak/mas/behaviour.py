@@ -2,12 +2,12 @@ from abc import ABCMeta
 
 import spade.behaviour
 
-import mas
+import platform
 
 
 class _MUCBehaviour:
 
-    async def send_to_group(self, msg: mas.Message):
+    async def send_to_group(self, msg: platform.Message):
         """Sends a message to a group chat.
 
         When sending a message to a group the agent joins the group first. The parameter

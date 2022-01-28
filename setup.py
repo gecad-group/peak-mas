@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="MAS", 
+    name="PEAK", 
     version='1.0.0', 
     author='Bruno Ribeiro', 
     author_email='brgri@isep.ipp.pt', 
-    description='MAS framework based on SPADE', 
+    description='Python-based Ecosystem for Agent Communities', 
     packages=find_packages())

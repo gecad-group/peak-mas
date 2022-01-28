@@ -5,7 +5,7 @@ import subprocess
 import sys
 import time
 
-import mas
+import platform
 
 
 def wait(procs):
@@ -44,7 +44,7 @@ def boot_single(agent_file, name, server, properties_file, verify_security):
         agent_instance.stop()
 
 def main():
-    parser = argparse.ArgumentParser(prog = mas.__name__)
+    parser = argparse.ArgumentParser(prog = platform.__name__)
     parser.add_argument('file', type=pathlib.Path)
     parser.add_argument('agent_name', type=str.lower)
     parser.add_argument('server', type=str)
@@ -60,7 +60,7 @@ def main():
     else:
         procs = []
         for i in range(ns.repeat):
-            args = ['python', '-m', mas.__name__, 
+            args = ['python', '-m', platform.__name__, 
                     ns.file,
                     ns.agent_name + str(i),
                     ns.server]
