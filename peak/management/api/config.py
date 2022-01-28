@@ -1,0 +1,1 @@
+database_url = 'mysql+mysqlconnector://root:root@localhost/prosody'
