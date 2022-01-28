@@ -1,0 +1,3 @@
+SQLAlchemy
+spade
+mysql-connector-python-rf
