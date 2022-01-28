@@ -131,3 +131,5 @@ dmypy.json
 examples/
 
 test/
+
+peak/management/template/
