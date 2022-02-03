@@ -1,0 +1,4 @@
+from peak.mas.__main__ import main as mas_main
+
+def main(args=None):
+    mas_main(args)
