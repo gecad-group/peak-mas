@@ -98,7 +98,7 @@ class Properties(metaclass=ABCMeta):
     def build_dataset(self):
         pass
     
-    def extract(self, name) -> Dict[Property]:
+    def extract(self, name) -> Dict[str, Property]:
         return self.ds[name]
 
 if __name__ == '__main__':

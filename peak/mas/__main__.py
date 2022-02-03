@@ -49,7 +49,7 @@ def general_parser(args = None):
         parser.add_argument('--verify_security', type=bool, default=False)
 
         ns = parser.parse_args(args)  #if args none it reads from the terminal
-
+        print(ns)
         validate_files(ns.file, ns.properties)
 
         #boot only one agent
