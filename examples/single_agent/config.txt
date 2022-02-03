@@ -1,1 +1,1 @@
-agent.py agent localhost -l debug
+agent.py agent mas.gecad.isep.ipp.pt -l debug
