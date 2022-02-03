@@ -49,13 +49,13 @@ def general_parser(args = None):
         parser.add_argument('--verify_security', type=bool, default=False)
 
         ns = parser.parse_args(args)  #if args none it reads from the terminal
-        print(ns)
+        
         validate_files(ns.file, ns.properties)
 
         #boot only one agent
         if ns.repeat == 1:
             os.makedirs(str(Path(ns.file).parent) + '/logs', exist_ok = True)
-            logging.basicConfig(filename=str(Path(ns.file).parent) + '/logs/' + ns.agent_name + '.log', encoding='utf-8', level=logging.getLevelName(ns.logging))
+            logging.basicConfig(filename=str(Path(ns.file).parent) + '/logs/' + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
             agent = get_class(ns.file)
             if ns.properties:
                 properties = get_class(ns.properties)(ns.agent_name)
