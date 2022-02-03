@@ -2,7 +2,7 @@ from abc import ABCMeta as _ABCMeta, abstractmethod
 import asyncio as _asyncio
 import logging as _logging
 
-from platform import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
+from peak.mas import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
 
 _logger = _logging.getLogger('mas.Simulation')
 

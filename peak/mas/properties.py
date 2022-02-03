@@ -3,7 +3,7 @@ import itertools
 
 from pandas.core.frame import DataFrame
 
-from mas.drivers import Driver
+from peak.mas.drivers import Driver
 
 class Property():
 
@@ -88,10 +88,10 @@ class Properties(metaclass=ABCMeta):
         for property in dataframe:
             self.ds[agent_name][property] = Property(dataframe[property].to_list())
 
-    def add_driver(self, agent_name, driver: Driver):
-        self.ds[agent_name] = dict()
-        for property in driver:
-            self.ds[agent_name][property] = driver[property]
+    def add_driver(self, agent_name, driver_name, driver: Driver):
+        if agent_name not in self.ds:
+            self.ds[agent_name] = dict()
+        self.ds[agent_name][driver_name] = driver
 
     @abstractmethod
     def build_dataset(self):

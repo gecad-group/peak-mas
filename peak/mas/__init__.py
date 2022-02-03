@@ -3,11 +3,11 @@ import logging as _logging
 from spade.message import Message
 from spade.template import Template
 
-from mas.agent import Agent
-from mas.behaviour import OneShotBehaviour, CyclicBehaviour, PeriodicBehaviour, FSMBehaviour
-from mas.jid import *
-from mas.simulation import Synchronizer, SyncAgent
-from mas.properties import Property, Properties
+from peak.mas.agent import Agent
+from peak.mas.behaviour import OneShotBehaviour, CyclicBehaviour, PeriodicBehaviour, FSMBehaviour
+from peak.mas.jid import *
+from peak.mas.simulation import Synchronizer, SyncAgent
+from peak.mas.properties import Property, Properties
 
 _logging.getLogger("spade.Agent").setLevel(_logging.ERROR)
 
