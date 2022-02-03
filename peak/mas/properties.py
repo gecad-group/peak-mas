@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Dict
 import itertools
 
 from pandas.core.frame import DataFrame
@@ -97,7 +98,7 @@ class Properties(metaclass=ABCMeta):
     def build_dataset(self):
         pass
     
-    def extract(self, name) -> dict[Property]:
+    def extract(self, name) -> Dict[Property]:
         return self.ds[name]
 
 if __name__ == '__main__':
