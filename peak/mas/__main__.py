@@ -19,7 +19,7 @@ def validate_files(*args):
 def get_class(file):
     path = str(file.parent.resolve())
     sys.path.append(path)
-    module_str = str(file).split('/')[-1].split('.')[0]
+    module_str = str(file).split(os.sep)[-1].split('.')[0]
     module = importlib.import_module(module_str)
     return getattr(module, module_str)
     
@@ -51,7 +51,7 @@ def general_parser(args = None):
         ns = parser.parse_args(args)  #if args none it reads from the terminal
         
         validate_files(ns.file, ns.properties)
-
+        
         #boot only one agent
         if ns.repeat == 1:
             os.makedirs(str(Path(ns.file).parent) + '/logs', exist_ok = True)
@@ -111,7 +111,4 @@ def config_parser(args=None):
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        print(e.args)
+    main()
