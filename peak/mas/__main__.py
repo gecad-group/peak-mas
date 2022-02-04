@@ -9,6 +9,13 @@ import time
 
 import peak
 
+_python_exe = ''
+if os.name == 'nt':
+    _python_exe = os.path.join(sys.exec_prefix, 'python.exe')
+else:
+    _python_exe = getattr(sys, '_base_executable', sys.executable)
+
+logger = logging.getLogger(peak.__name__)
 
 
 def validate_files(*args):
@@ -72,7 +79,7 @@ def general_parser(args = None):
         else:
             procs = []
             for i in range(ns.repeat):
-                args = ['python', '-m', peak.__name__, 
+                args = [_python_exe, '-m', peak.__name__, 
                         ns.file,
                         ns.agent_name + str(i),
                         ns.server]
@@ -101,7 +108,7 @@ def config_parser(args=None):
         with open(ns.config_file) as f:
             commands = f.read().splitlines()
         for command in commands:
-            args = ['python', '-m', peak.__name__]
+            args = [_python_exe, '-m', peak.__name__]
             args.extend(command.split(' '))
             proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
             procs.append(proc)
