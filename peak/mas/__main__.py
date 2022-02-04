@@ -97,13 +97,17 @@ def config_parser(args=None):
         config_parser.add_argument('config_file', type=Path)
         ns = config_parser.parse_args(args)
         procs = []
-        validate_files(ns.config_file)
+
+        shell = False
+        if os.name == 'nt':
+            shell = True
+
         with open(ns.config_file) as f:
             commands = f.read().splitlines()
         for command in commands:
             args = [peak.__name__]
             args.extend(command.split(' '))
-            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
+            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()), shell=shell)
             procs.append(proc)
 
         #wait for processes
