@@ -52,8 +52,8 @@ def general_parser(args = None):
         
         #boot only one agent
         if ns.repeat == 1:
-            os.makedirs(str(ns.file.parent) + '/logs', exist_ok = True)
-            logging.basicConfig(filename=str(ns.file.parent) + '/logs/' + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
+            os.makedirs(str(ns.file.parent) + os.sep + 'logs', exist_ok = True)
+            logging.basicConfig(filename=str(ns.file.parent) + os.sep + 'logs' + os.sep + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
             agent = get_class(ns.file)
             if ns.properties:
                 properties = get_class(ns.properties)(ns.agent_name)
