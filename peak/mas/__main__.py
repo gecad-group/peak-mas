@@ -72,7 +72,7 @@ def general_parser(args = None):
         else:
             procs = []
             for i in range(ns.repeat):
-                args = [peak.__name__, 
+                args = ['python', '-m', peak.__name__, 
                         ns.file,
                         ns.agent_name + str(i),
                         ns.server]
@@ -98,14 +98,10 @@ def config_parser(args=None):
         ns = config_parser.parse_args(args)
         procs = []
 
-        shell = False
-        if os.name == 'nt':
-            shell = True
-
         with open(ns.config_file) as f:
             commands = f.read().splitlines()
         for command in commands:
-            args = [peak.__name__]
+            args = ['python', '-m', peak.__name__]
             args.extend(command.split(' '))
             proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
             procs.append(proc)
