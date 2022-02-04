@@ -13,7 +13,7 @@ import peak
 
 def validate_files(*args):
     for arg in args:
-        if arg and not arg.is_file():
+        if arg and not Path(arg).is_file():
             raise ArgumentTypeError('\'{}\' must be an existing python file'.format(arg))
 
 def get_class(file):
