@@ -25,15 +25,13 @@ def get_class(file):
     
 
 def main(args = None):
-    parser = ArgumentParser(prog = peak.__name__)
-    parser.add_argument('general_args', nargs='*', type=Path)
-
-    ns = parser.parse_args(args)
-
-    if len(ns.general_args) == 1:
+    if not args:
+        args = sys.argv[1:]
+        
+    if len(args) == 1:
         config_parser(args)
     
-    if len(ns.general_args) > 1:
+    if len(args) > 1:
         general_parser(args)
     
 
@@ -47,15 +45,15 @@ def general_parser(args = None):
         parser.add_argument('-r', '--repeat', type=int, default=1)
         parser.add_argument('-l', '--logging', type=str.upper, default='INFO')
         parser.add_argument('--verify_security', type=bool, default=False)
-
+        
         ns = parser.parse_args(args)  #if args none it reads from the terminal
         
         validate_files(ns.file, ns.properties)
         
         #boot only one agent
         if ns.repeat == 1:
-            os.makedirs(str(Path(ns.file).parent) + '/logs', exist_ok = True)
-            logging.basicConfig(filename=str(Path(ns.file).parent) + '/logs/' + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
+            os.makedirs(str(ns.file.parent) + '/logs', exist_ok = True)
+            logging.basicConfig(filename=str(ns.file.parent) + '/logs/' + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
             agent = get_class(ns.file)
             if ns.properties:
                 properties = get_class(ns.properties)(ns.agent_name)
@@ -74,7 +72,7 @@ def general_parser(args = None):
         else:
             procs = []
             for i in range(ns.repeat):
-                args = ['python', '-m', peak.__name__, 
+                args = [peak.__name__, 
                         ns.file,
                         ns.agent_name + str(i),
                         ns.server]
@@ -98,13 +96,23 @@ def config_parser(args=None):
         config_parser = ArgumentParser(prog = peak.__name__)
         config_parser.add_argument('config_file', type=Path)
         ns = config_parser.parse_args(args)
-
+        procs = []
         validate_files(ns.config_file)
         with open(ns.config_file) as f:
-            os.chdir(ns.config_file.parent)
             commands = f.read().splitlines()
-            for command in commands:
-                general_parser(command.split(' '))
+        for command in commands:
+            args = [peak.__name__]
+            args.extend(command.split(' '))
+            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
+            procs.append(proc)
+
+        #wait for processes
+        try:
+            for proc in procs:
+                proc.wait()
+        except KeyboardInterrupt:
+            for proc in procs:
+                proc.kill()
     except ArgumentError or ArgumentTypeError as e:
         print(e)
 
