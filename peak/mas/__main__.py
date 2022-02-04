@@ -107,7 +107,7 @@ def config_parser(args=None):
         for command in commands:
             args = [peak.__name__]
             args.extend(command.split(' '))
-            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()), shell=shell)
+            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
             procs.append(proc)
 
         #wait for processes
