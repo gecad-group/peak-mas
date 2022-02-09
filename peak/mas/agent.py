@@ -5,7 +5,7 @@ import aioxmpp as _aioxmpp
 import spade as _spade
 
 
-_logger = _logging.getLogger('mas.Agent')
+_logger = _logging.getLogger('peak.agent')
 
 
 class _XMPPAgent(_spade.agent.Agent):
