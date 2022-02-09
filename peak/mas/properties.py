@@ -75,6 +75,7 @@ class Properties(metaclass=ABCMeta):
 
     def __init__(self, name=None) -> None:
         self.agent_name: str = name
+        self.id: str = name.split('_')[-1]
         self.ds = dict()
         self.build_dataset()
 
@@ -100,13 +101,3 @@ class Properties(metaclass=ABCMeta):
     
     def extract(self, name) -> Dict[str, Property]:
         return self.ds[name]
-
-if __name__ == '__main__':
-    p = Property([1,2,3,4,5,6,7,8], loop=False)
-    print(p)
-    p.next()
-    print(p)
-    p1 = Property([2,3,4,5,6,7,8], loop=True)
-    print(str(p+p1))
-    print(str(p+p1))
-    print(str(p+p1))
