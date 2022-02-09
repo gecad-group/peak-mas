@@ -9,13 +9,7 @@ import time
 
 import peak
 
-_python_exe = ''
-if os.name == 'nt':
-    _python_exe = os.path.join(sys.exec_prefix, 'python.exe')
-else:
-    _python_exe = getattr(sys, '_base_executable', sys.executable)
-
-logger = logging.getLogger(peak.__name__)
+logger = logging.getLogger('peak.mas')
 
 
 def validate_files(*args):
@@ -43,74 +37,48 @@ def main(args = None):
     
 
 def general_parser(args = None):
-    try:
-        parser = ArgumentParser(prog = peak.__name__)
-        parser.add_argument('file', type=Path)
-        parser.add_argument('agent_name', type=str.lower)
-        parser.add_argument('server', type=str)
-        parser.add_argument('-p','--properties', type=Path)
-        parser.add_argument('-r', '--repeat', type=int, default=1)
-        parser.add_argument('-l', '--logging', type=str.upper, default='INFO')
-        parser.add_argument('--verify_security', type=bool, default=False)
+    parser = ArgumentParser(prog = peak.__name__)
+    parser.add_argument('file', type=Path)
+    parser.add_argument('agent_name', type=str.lower)
+    parser.add_argument('server', type=str)
+    parser.add_argument('-p','--properties', type=Path)
+    parser.add_argument('-r', '--repeat', type=int, default=1)
+    parser.add_argument('-l', '--logging', type=str.upper, default='INFO')
+    parser.add_argument('--verify_security', type=bool, default=False)
         
-        ns = parser.parse_args(args)  #if args none it reads from the terminal
+    ns = parser.parse_args(args)  #if args none it reads from the terminal
         
-        validate_files(ns.file, ns.properties)
+    validate_files(ns.file, ns.properties)
         
-        #boot only one agent
-        if ns.repeat == 1:
-            os.makedirs(str(ns.file.parent) + os.sep + 'logs', exist_ok = True)
-            logging.basicConfig(filename=str(ns.file.parent) + os.sep + 'logs' + os.sep + ns.agent_name + '.log', level=logging.getLevelName(ns.logging))
-            agent = get_class(ns.file)
-            if ns.properties:
-                properties = get_class(ns.properties)(ns.agent_name)
-                properties = properties.extract(ns.agent_name)
-            else:
-                properties = None
-            agent_instance = agent(ns.agent_name, ns.server, properties, ns.verify_security)
-            agent_instance.start(True).result()
-            try:
-                while agent_instance.is_alive():
-                    time.sleep(10)
-            except KeyboardInterrupt:
-                agent_instance.stop()
-
-        #boot more than one agent
+    #boot only one agent
+    if ns.repeat == 1:
+        os.makedirs(str(ns.file.parent) + os.sep + 'logs', exist_ok = True)
+        logging.basicConfig(filename=str(ns.file.parent) + os.sep + 'logs' + os.sep + ns.agent_name + '.log', filemode='w', level=logging.getLevelName(ns.logging))
+        agent = get_class(ns.file)
+        if ns.properties:
+            properties = get_class(ns.properties)(ns.agent_name)
+            properties = properties.extract(ns.agent_name)
         else:
-            procs = []
-            for i in range(ns.repeat):
-                args = [_python_exe, '-m', peak.__name__, 
-                        ns.file,
-                        ns.agent_name + str(i),
-                        ns.server]
-                if ns.properties:      args.extend(['-p', ns.properties]) 
-                if ns.verify_security: args.extend(['--verify_security', ns.verify_security])
-                proc = subprocess.Popen(args)
-                procs.append(proc)
+            properties = None
+        agent_instance = agent(ns.agent_name, ns.server, properties, ns.verify_security)
+        agent_instance.start(True).result()
+        try:
+            while agent_instance.is_alive():
+                time.sleep(10)
+        except KeyboardInterrupt:
+            agent_instance.stop()
 
-            #wait for processes
-            try:
-                for proc in procs:
-                    proc.wait()
-            except KeyboardInterrupt:
-                for proc in procs:
-                    proc.kill()
-    except ArgumentError or ArgumentTypeError as e:
-        print(e)
-
-def config_parser(args=None):
-    try:
-        config_parser = ArgumentParser(prog = peak.__name__)
-        config_parser.add_argument('config_file', type=Path)
-        ns = config_parser.parse_args(args)
+    #boot more than one agent
+    else:
         procs = []
-
-        with open(ns.config_file) as f:
-            commands = f.read().splitlines()
-        for command in commands:
-            args = [_python_exe, '-m', peak.__name__]
-            args.extend(command.split(' '))
-            proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
+        for i in range(ns.repeat):
+            args = [sys.executable, '-m', peak.__name__, 
+                    ns.file,
+                    ns.agent_name + '_' + str(i),
+                    ns.server]
+            if ns.properties:      args.extend(['-p', ns.properties]) 
+            if ns.verify_security: args.extend(['--verify_security', ns.verify_security])
+            proc = subprocess.Popen(args)
             procs.append(proc)
 
         #wait for processes
@@ -119,11 +87,34 @@ def config_parser(args=None):
                 proc.wait()
         except KeyboardInterrupt:
             for proc in procs:
-                proc.kill()
-    except ArgumentError or ArgumentTypeError as e:
-        print(e)
+                proc.wait()
+
+def config_parser(args=None):
+    config_parser = ArgumentParser(prog = peak.__name__)
+    config_parser.add_argument('config_file', type=Path)
+    ns = config_parser.parse_args(args)
+    procs = []
+
+    with open(ns.config_file) as f:
+        commands = f.read().splitlines()
+    for command in commands:
+        args = [sys.executable, '-m', peak.__name__]
+        args.extend(command.split(' '))
+        proc = subprocess.Popen(args, cwd=str(ns.config_file.parent.absolute()))
+        procs.append(proc)
+
+    #wait for processes
+    try:
+        for proc in procs:
+            proc.wait()
+    except KeyboardInterrupt:
+        for proc in procs:
+            proc.wait()
 
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.exception(e)
