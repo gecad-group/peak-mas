@@ -9,7 +9,7 @@ from peak.mas.jid import *
 from peak.mas.simulation import Synchronizer, SyncAgent
 from peak.mas.properties import Property, Properties
 
-_logging.getLogger("spade.Agent").setLevel(_logging.ERROR)
+_logging.getLogger("peak").setLevel(_logging.ERROR)
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"
