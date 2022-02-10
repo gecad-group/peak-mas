@@ -7,7 +7,9 @@ from pyModbusTCP.utils import get_2comp
 log = logging.getLogger('peak.mas.drivers')
 
 class Driver(metaclass=ABCMeta):
-    pass
+    
+    def next(self):
+        pass
 
 class DriverModBusTCP(Driver):
 
