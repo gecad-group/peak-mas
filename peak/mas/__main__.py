@@ -76,6 +76,7 @@ def general_parser(args = None):
                     ns.file,
                     ns.agent_name + '_' + str(i),
                     ns.server]
+            if ns.logging:         args.extend(['-l', ns.logging])
             if ns.properties:      args.extend(['-p', ns.properties]) 
             if ns.verify_security: args.extend(['--verify_security', ns.verify_security])
             proc = subprocess.Popen(args)
