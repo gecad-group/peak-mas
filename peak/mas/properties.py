@@ -75,7 +75,6 @@ class Properties(metaclass=ABCMeta):
 
     def __init__(self, name=None) -> None:
         self.agent_name: str = name
-        self.id: str = name.split('_')[-1]
         self.ds = dict()
         self.build_dataset()
 
