@@ -22,7 +22,7 @@ class DriverModBusTCP(Driver):
         data = self.client.read_input_registers(reg_addr=register)
         if not data:
             log.warning('%s cannot read from target %s.', self.__class__, self.client.host(), exc_info=self.client.last_except_txt())
-        return get_2comp(data)
+        return get_2comp(data[0])
 
     def write(self, register, value, unit_id=None):
         if unit_id is not None:
