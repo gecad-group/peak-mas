@@ -1,34 +1,19 @@
 import logging as _logging
-import typing as _typing
+from typing import List, Union
 
 import aioxmpp as _aioxmpp
+from aioxmpp import JID
 import spade as _spade
 
 
-_logger = _logging.getLogger('peak.agent')
+_logger = _logging.getLogger(__name__)
 
 
 class _XMPPAgent(_spade.agent.Agent):
     '''This class integrates the XMPP Multi-User Chat (MUC) feature into the SPADE arquitecture.
     '''
-    
-    class _DFRegister(_spade.behaviour.OneShotBehaviour):
 
-        async def run(self):
-            msg = _spade.message.Message()
-            msg.to = 'df@' + self.agent.jid.domain
-            msg.set_metadata('register', 'agent')
-            msg.set_metadata('types', self.setToString(self.agent.group_names))
-            msg.set_metadata('mas', self.agent.mas_name)
-            await self.send(msg)
-
-        def setToString(self, value):
-            s = ''
-            for v in value:
-                s += v + ';'
-            return s[:len(s)-1]
-
-    def __init__(self, name: str, server: str, verify_security=False):
+    def __init__(self, jid: JID, verify_security=False):
         """Agent base class.
 
         Args:
@@ -38,10 +23,9 @@ class _XMPPAgent(_spade.agent.Agent):
         """
         self.groups = dict()
         self.muc_client = None
-        self.server = server
-        jid = name +  '@' + server
-        super().__init__(jid, jid, verify_security)
-        #self.add_behaviour(self._DFRegister())
+        pw = str(jid.bare())
+        jid = str(jid)
+        super().__init__(jid, pw, verify_security)
 
     async def _hook_plugin_after_connection(self):
         '''
@@ -66,16 +50,18 @@ class _XMPPAgent(_spade.agent.Agent):
         raise exc
 
     async def join_group(self, jid):
+        _logger.info('joining group: ' + jid)
         room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         room.on_failure.connect(self._on_muc_failure_handler)
         await fut
         self.groups[jid] = room
 
     async def leave_group(self, jid):
+        _logger.info('leaving group: ' + jid)
         room = self.groups.pop(jid, None)
         await room.leave()
             
-    def group_members(self, jid) -> _typing.List:
+    def group_members(self, jid) -> List:
         """Extracts list of group members from a group chat.
 
         Args:
@@ -92,8 +78,8 @@ class _XMPPAgent(_spade.agent.Agent):
 
 class Agent(_XMPPAgent):
 
-    def __init__(self, name: str, server: str, properties=None, verify_security=False):
-        super().__init__(name, server, verify_security=verify_security)
+    def __init__(self, jid: JID, properties=None, verify_security=False):
+        super().__init__(jid, verify_security=verify_security)
         if properties:
             self.properties = properties
             self._parse(properties)

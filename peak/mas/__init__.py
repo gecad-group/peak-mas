@@ -1,5 +1,3 @@
-import logging as _logging
-
 from spade.message import Message
 from spade.template import Template
 
@@ -8,8 +6,6 @@ from peak.mas.behaviour import OneShotBehaviour, CyclicBehaviour, PeriodicBehavi
 from peak.mas.jid import *
 from peak.mas.simulation import Synchronizer, SyncAgent
 from peak.mas.properties import Property, Properties
-
-_logging.getLogger("peak").setLevel(_logging.ERROR)
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"

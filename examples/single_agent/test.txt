@@ -1,0 +1,3 @@
+agent.py agent@localhost/clone1 -l info
+agent.py agent@localhost/clone2 -l info
+agent.py agent@localhost/clone3 -l info
