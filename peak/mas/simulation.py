@@ -2,6 +2,8 @@ from abc import ABCMeta as _ABCMeta, abstractmethod
 import asyncio as _asyncio
 import logging as _logging
 
+from aioxmpp import JID
+
 from peak.mas import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
 
 _logger = _logging.getLogger('mas.Simulation')
@@ -27,7 +29,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             await self.agent.stop()
 
 
-    def __init__(self, name: str, server: str, properties=None, verify_security=False):
+    def __init__(self, jid: JID, properties=None, verify_security=False):
         """Agent that listens to the Synchronizer.
 
         This is an abstract class. Step method must be overriden.
@@ -39,7 +41,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             group_names (set[str], optional): Set of group names to join to. Defaults to {}.
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
-        super().__init__(name, server, properties, verify_security)
+        super().__init__(jid, properties, verify_security)
         self.period = 0
         template_step = Template()
         template_step.set_metadata('sync', 'step')
