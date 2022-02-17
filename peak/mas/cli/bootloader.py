@@ -9,7 +9,7 @@ from aioxmpp import JID
 
 
 def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool):
-    agent_name = jid.localpart + '_' + jid.resource
+    agent_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
     logs_path = os.path.join(str(file.parent.absolute()), 'logs')
     log_file = os.path.join(logs_path, agent_name + '.log')
 
