@@ -33,6 +33,9 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
         while agent_instance.is_alive():
             time.sleep(10)
         logger.info('execution suceeded')
+    except Exception as e:
+        logger.exception(e)
+        agent_instance.stop()
     except KeyboardInterrupt:
         logger.info('stoping agent... (Keyboard Interrupt)')
         agent_instance.stop()
