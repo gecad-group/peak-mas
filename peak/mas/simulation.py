@@ -6,7 +6,7 @@ from aioxmpp import JID
 
 from peak.mas import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
 
-_logger = _logging.getLogger('mas.Simulation')
+_logger = _logging.getLogger('peak.mas.simulation')
 
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
