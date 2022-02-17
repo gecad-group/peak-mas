@@ -41,12 +41,15 @@ class _XMPPAgent(_spade.agent.Agent):
             _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
         )
 
+        self.pubsub_client = self.client.summon(
+                    _aioxmpp.PubSubClient)
+
     def _on_muc_failure_handler(self, exc):
         '''
         Handles MUC failed connections.
         '''
         
-        _logger.critical('Failed to enter MUC room: ' + str(self.agent.jid))
+        _logger.critical('Failed to enter MUC room')
         raise exc
 
     async def join_group(self, jid):
@@ -73,6 +76,9 @@ class _XMPPAgent(_spade.agent.Agent):
 
         return self.groups[jid].members
 
+
+
+    
 
 
 
