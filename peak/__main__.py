@@ -8,7 +8,7 @@ def main(args=None):
     try:
         mas_main(args)
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
     except KeyboardInterrupt:
         pass
 
