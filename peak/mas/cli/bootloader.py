@@ -29,18 +29,18 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
     logger.info('starting agent')
     agent_instance.start(True).result()
     logger.info('agent started')
-    try:
-        while agent_instance.is_alive():
+    while agent_instance.is_alive():
+        try:
             time.sleep(10)
-        logger.info('execution suceeded')
-    except Exception as e:
-        logger.error('AGENT CRACHED')
-        logger.exception(e)
-        agent_instance.stop()
-    except KeyboardInterrupt:
-        logger.info('stoping agent... (Keyboard Interrupt)')
-        agent_instance.stop()
-    logger.info('agent clean exit')
+        except Exception as e:
+            logger.error('AGENT CRACHED')
+            logger.exception(e)
+            agent_instance.stop()
+        except KeyboardInterrupt:
+            logger.info('stoping agent... (Keyboard Interrupt)')
+            agent_instance.stop()
+    else:
+        logger.info('clean exit')
 
 
 def get_class(file: Path):
