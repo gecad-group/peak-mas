@@ -26,13 +26,12 @@ def parse(args = None):
         if file and not file.is_file():
             raise ArgumentTypeError('\'{}\' must be an existing python file'.format(file))
     
-    agent_name = ns.jid.localpart
     kwargs = copy(vars(ns))
     kwargs.pop('repeat')
     procs = []
     for i in range(ns.repeat):
         if ns.repeat != 1:
-            ns.jid = ns.jid.replace(localpart=agent_name + str(i))
+            kwargs['jid'] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
         proc = Process(target=boot_agent, kwargs=kwargs)
         proc.start()
         procs.append(proc)
