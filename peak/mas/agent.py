@@ -6,7 +6,7 @@ from aioxmpp import JID
 import spade as _spade
 
 
-_logger = _logging.getLogger(__name__)
+_logger = _logging.getLogger('peak.mas.agent')
 
 
 class _XMPPAgent(_spade.agent.Agent):
@@ -21,6 +21,7 @@ class _XMPPAgent(_spade.agent.Agent):
             server (str): Domain of the XMPP server to connect the agent to.
             verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
         """
+        _logging.getLogger(jid.localpart).setLevel(_logging.ERROR)
         self.groups = dict()
         self.muc_client = None
         pw = str(jid.bare())
