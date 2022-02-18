@@ -31,10 +31,11 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
     logger.info('agent started')
     while agent_instance.is_alive():
         try:
-            time.sleep(10)
+            time.sleep(1)
         except Exception as e:
             logger.error('AGENT CRACHED')
             logger.exception(e)
+            logger.info('stoping agent... (Exception)')
             agent_instance.stop()
         except KeyboardInterrupt:
             logger.info('stoping agent... (Keyboard Interrupt)')
