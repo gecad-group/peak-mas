@@ -10,6 +10,7 @@ _logging.getLogger('StanzaStream').setLevel(_logging.ERROR)
 _logging.getLogger('XMLStream').setLevel(_logging.ERROR)
 _logging.getLogger('aioopenssl').setLevel(_logging.ERROR)
 _logging.getLogger('aioxmpp').setLevel(_logging.ERROR)
+_logging.getLogger('asyncio').setLevel(_logging.ERROR)
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"

@@ -34,6 +34,7 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
             time.sleep(10)
         logger.info('execution suceeded')
     except Exception as e:
+        logger.error('AGENT CRACHED')
         logger.exception(e)
         agent_instance.stop()
     except KeyboardInterrupt:
