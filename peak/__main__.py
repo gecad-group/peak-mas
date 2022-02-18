@@ -9,8 +9,6 @@ def main(args=None):
         mas_main(args)
     except Exception as e:
         logger.exception(e)
-    except KeyboardInterrupt:
-        pass
 
 if __name__ == '__main__':
     main()

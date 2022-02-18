@@ -37,8 +37,8 @@ def parse(args = None):
         procs.append(proc)
 
     #wait for processes
-    try:
-        for proc in procs:
+    for proc in procs:
+        try:
             proc.join()
-    except KeyboardInterrupt:
-        pass
+        except KeyboardInterrupt:
+            pass
