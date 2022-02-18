@@ -9,9 +9,9 @@ from aioxmpp import JID
 
 
 def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool):
-    agent_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
+    log_file_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
     logs_path = os.path.join(str(file.parent.absolute()), 'logs')
-    log_file = os.path.join(logs_path, agent_name + '.log')
+    log_file = os.path.join(logs_path, log_file_name + '.log')
 
     os.makedirs(logs_path, exist_ok = True)
     _logging.basicConfig(filename=log_file, filemode='w', level=logging)
@@ -20,8 +20,8 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
 
     agent_class = get_class(file)
     if properties:
-        properties = get_class(properties)(agent_name)
-        properties = properties.extract(agent_name)
+        properties = get_class(properties)(jid.localpart)
+        properties = properties.extract(jid.localpart)
     else:
         properties = None
     
