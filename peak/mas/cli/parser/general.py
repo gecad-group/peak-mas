@@ -32,8 +32,7 @@ def parse(args = None):
     procs = []
     for i in range(ns.repeat):
         if ns.repeat != 1:
-            ns.jid.replace(localpart=agent_name + '_' + str(i))
-            print(ns.jid)
+            ns.jid = ns.jid.replace(localpart=agent_name + '_' + str(i))
         proc = Process(target=boot_agent, kwargs=kwargs)
         proc.start()
         procs.append(proc)
