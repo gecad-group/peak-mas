@@ -14,10 +14,19 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
     log_file = os.path.join(logs_path, log_file_name + '.log')
 
     os.makedirs(logs_path, exist_ok = True)
-    _logging.basicConfig(filename=log_file, filemode='w', level=logging)
+    _logging.basicConfig(filename=log_file, filemode='w', level=logging, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    try:
+        _boot_agent(file, jid, properties, verify_security)
+    except Exception as e:
+        logger = _logging.getLogger('peak.mas.bootloader')
+        logger.exception(e)
+    except KeyboardInterrupt:
+        pass
+
+
+def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool):
     logger = _logging.getLogger('peak.mas.bootloader')
     logger.debug('creating agent')
-
     agent_class = get_class(file)
     if properties:
         properties = get_class(properties)(jid.localpart)
