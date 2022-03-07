@@ -1,16 +1,17 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict
 import itertools
-
+from random import uniform
 from pandas.core.frame import DataFrame
 
 from peak.mas.drivers import Driver
 
 class Property():
 
-    def __init__(self, data, loop=False) -> None:
+    def __init__(self, data, loop=False, random_range=None) -> None:
         self.data = data
         self.loop = loop
+        self.random_range = random_range
         self.iter = self._gen(data, loop)
         self.current_value = next(self.iter)
 
@@ -19,7 +20,11 @@ class Property():
         while f:
             try:
                 for i in data:
-                    yield i
+                    if self.random_range is not None:
+                        yield i * uniform(1-self.random_range, 1+self.random_range)
+                    else:
+                        yield i
+
                 if not loop:
                     while True: yield None
             except TypeError:
