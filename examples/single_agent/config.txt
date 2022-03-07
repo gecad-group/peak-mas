@@ -1,3 +1,3 @@
-agent.py agent1 mas.gecad.isep.ipp.pt
-agent.py agent2 mas.gecad.isep.ipp.pt -l debug
-agent.py agent3 mas.gecad.isep.ipp.pt -l warning
+agent.py agent1@mas.gecad.isep.ipp.pt
+agent.py agent2@mas.gecad.isep.ipp.pt -l debug
+agent.py agent3@mas.gecad.isep.ipp.pt -l warning
