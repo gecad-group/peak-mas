@@ -1,4 +1,5 @@
 import logging as _logging
+from multiprocessing import Lock
 import os
 import sys
 import time
@@ -8,7 +9,7 @@ import importlib
 from aioxmpp import JID
 
 
-def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool):
+def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool, lock):
     log_file_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
     logs_path = os.path.join(str(file.parent.absolute()), 'logs')
     log_file = os.path.join(logs_path, log_file_name + '.log')
@@ -16,7 +17,7 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
     os.makedirs(logs_path, exist_ok = True)
     _logging.basicConfig(filename=log_file, filemode='w', level=logging, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     try:
-        _boot_agent(file, jid, properties, verify_security)
+        _boot_agent(file, jid, properties, verify_security, lock)
     except Exception as e:
         logger = _logging.getLogger('peak.mas.bootloader')
         logger.exception(e)
@@ -24,7 +25,7 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
         pass
 
 
-def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool):
+def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool, lock):
     logger = _logging.getLogger('peak.mas.bootloader')
     logger.debug('creating agent')
     agent_class = get_class(file)
@@ -37,6 +38,7 @@ def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool):
     agent_instance = agent_class(jid, properties, verify_security)
     logger.info('starting agent')
     agent_instance.start(True).result()
+    lock.release()
     logger.info('agent started')
     while agent_instance.is_alive():
         try:

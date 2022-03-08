@@ -1,7 +1,7 @@
 from copy import copy
 import logging
 from argparse import ArgumentParser, ArgumentTypeError
-from multiprocessing import Process
+from multiprocessing import Lock, Process
 from pathlib import Path
 
 import peak
@@ -29,9 +29,12 @@ def parse(args = None):
     kwargs = copy(vars(ns))
     kwargs.pop('repeat')
     procs = []
+    lock = Lock()
+    kwargs['lock'] = lock
     for i in range(ns.repeat):
         if ns.repeat != 1:
             kwargs['jid'] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
+        lock.acquire()
         proc = Process(target=boot_agent, kwargs=kwargs)
         proc.start()
         procs.append(proc)
