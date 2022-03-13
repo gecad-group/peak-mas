@@ -6,7 +6,7 @@ from aioxmpp import JID
 
 from peak.mas import Agent, CyclicBehaviour, Template, PeriodicBehaviour, Message
 
-_logger = _logging.getLogger('peak.mas.simulation')
+_logger = _logging.getLogger(__name__)
 
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
@@ -15,14 +15,20 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
     class _StepBehaviour(CyclicBehaviour):
         '''Listens for the Synchronizer messages.'''
 
+        async def on_start(self):
+            _logger.info('Waiting for simulation to start...')
+
         async def run(self):
             msg = await self.receive(10)
             if msg:
                 if msg.get_metadata('sync') == 'step':
                     self.agent.period = int(msg.get_metadata('period'))
-                    self.agent.iterate_properties()
+                    if self.agent.period != 0:
+                        self.agent.iterate_properties()
                     await self.agent.step()
+                    _logger.info('Period ' + str(self.agent.period))
                 if msg.get_metadata('sync') == 'stop':
+                    _logger.info('Simulation ended')
                     self.kill()
 
         async def on_end(self):
@@ -95,7 +101,7 @@ class Synchronizer(Agent):
 
         async def on_end(self):
             _logger.info('Ending simulation...')
-            await _asyncio.sleep(5)
+            #await _asyncio.sleep(5)
             await self.agent.stop()
 
     async def sync_group(self, jid, n_agents: int, time_per_period: float, periods: int):

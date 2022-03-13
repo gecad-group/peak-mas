@@ -1,32 +1,34 @@
 import logging as _logging
-from multiprocessing import Lock
 import os
 import sys
 import time
 from pathlib import Path
 import importlib
+from spade import quit_spade
 
 from aioxmpp import JID
 
+logger = _logging.getLogger(__name__)
+
+
 
 def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool, lock):
-    log_file_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
-    logs_path = os.path.join(str(file.parent.absolute()), 'logs')
-    log_file = os.path.join(logs_path, log_file_name + '.log')
-
-    os.makedirs(logs_path, exist_ok = True)
-    _logging.basicConfig(filename=log_file, filemode='w', level=logging, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     try:
+        log_file_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
+        logs_path = os.path.join(str(file.parent.absolute()), 'logs')
+        log_file = os.path.join(logs_path, log_file_name + '.log')
+
+        os.makedirs(logs_path, exist_ok = True)
+        _logging.basicConfig(filename=log_file, filemode='w', level=logging, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
         _boot_agent(file, jid, properties, verify_security, lock)
     except Exception as e:
-        logger = _logging.getLogger('peak.mas.bootloader')
         logger.exception(e)
     except KeyboardInterrupt:
         pass
 
 
 def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool, lock):
-    logger = _logging.getLogger('peak.mas.bootloader')
     logger.debug('creating agent')
     agent_class = get_class(file)
     if properties:
@@ -37,7 +39,7 @@ def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool, l
     
     agent_instance = agent_class(jid, properties, verify_security)
     logger.info('starting agent')
-    agent_instance.start(True).result()
+    agent_instance.start().result()
     lock.release()
     logger.info('agent started')
     while agent_instance.is_alive():
@@ -51,8 +53,8 @@ def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool, l
         except KeyboardInterrupt:
             logger.info('stoping agent... (Keyboard Interrupt)')
             agent_instance.stop()
-    else:
-        logger.info('clean exit')
+    quit_spade()
+    logger.info('agent stoped')
 
 
 def get_class(file: Path):
