@@ -8,19 +8,21 @@ from peak.mas.drivers import Driver
 
 class Property():
 
-    def __init__(self, data, loop=False, random_range=None) -> None:
+    def __init__(self, data, loop=False, random_range=None, offset = 0) -> None:
         self.data = data
         self.loop = loop
+        self.offset = offset
         self.random_range = random_range
-        self.iter = self._gen(data, loop)
+        self.iter = self._gen(data, loop, offset)
         self.current_value = next(self.iter)
 
-    def _gen(self, data, loop):
+    def _gen(self, data, loop, offset):
         f = True
         while f:
             try:
+                data = data[offset:]
                 for i in data:
-                    if self.random_range is not None:
+                    if self.random_range:
                         yield i * uniform(1-self.random_range, 1+self.random_range)
                     else:
                         yield i
@@ -68,7 +70,7 @@ class Property():
 
     def __getitem__(self, item):
         #TODO: melhorar formula: usar modelo matematico para ser necessario menos processamento
-        return next(itertools.islice(self._gen(self.data, self.loop), item, None))
+        return next(itertools.islice(self._gen(self.data, self.loop, self.offset), item, None))
 
 
 
@@ -88,11 +90,11 @@ class Properties(metaclass=ABCMeta):
             self.ds[agent_name] = dict()
         self.ds[agent_name][property_name] = property
 
-    def add_dataset(self, agent_name, dataframe: DataFrame):
+    def add_dataset(self, agent_name, dataframe: DataFrame, loop=False, random_range=None, offset = 0):
         if agent_name not in self.ds:
             self.ds[agent_name] = dict()
         for property in dataframe:
-            self.ds[agent_name][property] = Property(dataframe[property].to_list())
+            self.ds[agent_name][property] = Property(dataframe[property].to_list(), loop, random_range, offset)
 
     def add_driver(self, agent_name, driver_name, driver: Driver):
         if agent_name not in self.ds:

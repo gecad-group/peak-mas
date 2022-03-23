@@ -1,7 +1,7 @@
 from copy import copy
 import logging
 from argparse import ArgumentParser, ArgumentTypeError
-from multiprocessing import Lock, Process
+from multiprocessing import Process
 from pathlib import Path
 import time
 
@@ -10,7 +10,7 @@ from aioxmpp import JID
 from peak.mas.cli.bootloader import boot_agent
 
 
-def parse(args = None, parent_lock = None):
+def parse(args = None):
     parser = ArgumentParser(prog = peak.__name__)
     parser.add_argument('file', type=Path)
     parser.add_argument('jid', type=JID.fromstr)
@@ -30,18 +30,12 @@ def parse(args = None, parent_lock = None):
     kwargs = copy(vars(ns))
     kwargs.pop('repeat')
     procs = []
-    lock = Lock()
-    kwargs['lock'] = lock
     for i in range(ns.repeat):
-        lock.acquire()
         if ns.repeat != 1:
             kwargs['jid'] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
         proc = Process(target=boot_agent, kwargs=kwargs)
         proc.start()
         procs.append(proc)
-    lock.acquire()
-    if parent_lock:
-        parent_lock.release()
         
     #wait for processes
     for proc in procs:
