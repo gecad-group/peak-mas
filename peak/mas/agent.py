@@ -5,6 +5,8 @@ import aioxmpp as _aioxmpp
 from aioxmpp import JID
 import spade as _spade
 
+import asyncio
+
 
 _logger = _logging.getLogger('peak.mas.agent')
 
@@ -57,8 +59,12 @@ class _XMPPAgent(_spade.agent.Agent):
         _logger.info('joining group: ' + jid)
         room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         room.on_failure.connect(self._on_muc_failure_handler)
-        await fut
-        self.groups[jid] = room
+        await asyncio.wait([fut], timeout=3)
+        if fut.done():
+            self.groups[jid] = room
+            _logger.debug('group JID valid')
+        else:
+            raise Exception('invalid group JID: ' + str(jid))
 
     async def leave_group(self, jid):
         _logger.info('leaving group: ' + jid)
