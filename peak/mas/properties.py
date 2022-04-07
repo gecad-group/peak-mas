@@ -69,13 +69,7 @@ class Property():
         return str(self.current_value)
 
     def __getitem__(self, item):
-        #TODO: melhorar formula: usar modelo matematico para ser necessario menos processamento
-        return next(itertools.islice(self._gen(self.data, self.loop, self.offset), item, None))
-
-
-
-
-
+        return self.data[(item % len(self.data))-1]
 
 
 class Properties(metaclass=ABCMeta):
