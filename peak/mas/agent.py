@@ -1,3 +1,4 @@
+from aioxmpp import Message
 import logging as _logging
 from typing import List, Union
 
@@ -38,13 +39,13 @@ class _XMPPAgent(_spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         '''
         self.presence.approve_all = True
-        self.muc_client = self.client.summon(
+        self.muc_client: _aioxmpp.MUCClient = self.client.summon(
                     _aioxmpp.MUCClient)
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
         )
 
-        self.pubsub_client = self.client.summon(
+        self.pubsub_client: _aioxmpp.PubSubClient = self.client.summon(
                     _aioxmpp.PubSubClient)
 
     def _on_muc_failure_handler(self, exc):
@@ -83,11 +84,11 @@ class _XMPPAgent(_spade.agent.Agent):
 
         return self.groups[jid].members
 
-
-
-    
-
-
+    async def subscribe(self, jid: str):
+        jid = JID.fromstr(jid)
+        pubsub = JID.fromstr(jid.domain)
+        node = jid.localpart
+        await self.pubsub_client.subscribe(pubsub, node)
 
 class Agent(_XMPPAgent):
 
