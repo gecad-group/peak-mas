@@ -1,0 +1,2 @@
+publisher.py pub@localhost -l debug
+subscriber.py sub@localhost -l debug
