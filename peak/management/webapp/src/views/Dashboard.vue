@@ -88,6 +88,9 @@
               lineStyle: {
                 width: 10
               }
+            },
+            force: {
+              repulsion: 100
             }
           }
         ]
