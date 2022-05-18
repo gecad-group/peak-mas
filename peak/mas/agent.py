@@ -1,13 +1,10 @@
-from aioxmpp import Message
+import asyncio
 import logging as _logging
-from typing import List, Union
+from typing import List
 
 import aioxmpp as _aioxmpp
-from aioxmpp import JID
 import spade as _spade
-
-import asyncio
-
+from aioxmpp import JID
 
 _logger = _logging.getLogger('peak.mas.agent')
 
@@ -43,6 +40,10 @@ class _XMPPAgent(_spade.agent.Agent):
                     _aioxmpp.MUCClient)
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
+        )
+
+        self.message_dispatcher.register_callback(
+            _aioxmpp.MessageType.NORMAL, None, self._message_received,
         )
 
         self.pubsub_client: _aioxmpp.PubSubClient = self.client.summon(
@@ -84,11 +85,13 @@ class _XMPPAgent(_spade.agent.Agent):
 
         return self.groups[jid].members
 
-    async def subscribe(self, jid: str):
+    async def subscribe(self, jid: str, func = None):
         jid = JID.fromstr(jid)
         pubsub = JID.fromstr(jid.domain)
         node = jid.localpart
         await self.pubsub_client.subscribe(pubsub, node)
+        if func:
+            self.pubsub_client.on_item_published.connect(func)
 
 class Agent(_XMPPAgent):
 

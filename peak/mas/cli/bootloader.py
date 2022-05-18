@@ -12,7 +12,7 @@ logger = _logging.getLogger(__name__)
 
 
 
-def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_security: bool):
+def boot_agent(file: Path, jid: JID, name:str, number:int, properties: Path, logging:int, verify_security: bool):
     try:
         log_file_name = jid.localpart + ('_' + jid.resource if jid.resource else '')
         logs_path = os.path.join(str(file.parent.absolute()), 'logs')
@@ -21,26 +21,26 @@ def boot_agent(file: Path, jid: JID, properties: Path, logging:int, verify_secur
         os.makedirs(logs_path, exist_ok = True)
         _logging.basicConfig(filename=log_file, filemode='w', level=logging, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     
-        _boot_agent(file, jid, properties, verify_security)
+        _boot_agent(file, jid, name, number, properties, verify_security)
     except Exception as e:
         logger.exception(e)
     except KeyboardInterrupt:
         pass
 
 
-def _boot_agent(file: Path, jid: JID, properties: Path, verify_security: bool):
+def _boot_agent(file: Path, jid: JID, name:str, number:int, properties: Path, verify_security: bool):
     logger.debug('creating agent')
     agent_class = get_class(file)
     if properties:
-        properties = get_class(properties)(jid.localpart)
-        properties = properties.extract(jid.localpart)
+        properties = get_class(properties)(jid.localpart, name, number)
+        properties = properties.extract()
     else:
         properties = None
     
     agent_instance = agent_class(jid, properties, verify_security)
     logger.info('starting agent')
     agent_instance.start().result()
-    logger.info('agent started')
+    logger.info('agent running')
     while agent_instance.is_alive():
         try:
             time.sleep(1)

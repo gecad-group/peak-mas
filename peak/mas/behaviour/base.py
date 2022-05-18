@@ -8,14 +8,17 @@ from peak.mas import Agent
 from aioxmpp import JID
 import aioxmpp 
 
+
+aioxmpp.pubsub.xso.as_payload_class(aioxmpp.Message)
+
 def slice_jid(jid):
     jid = JID.fromstr(jid)
     pubsub = JID.fromstr(jid.domain)
     node = jid.localpart
     return pubsub, node
 
-class _MUCBehaviour:
-
+class _Behaviour:
+    
     agent:Agent
 
     async def send_to_group(self, msg: Message):
@@ -55,11 +58,11 @@ class _MUCBehaviour:
     async def subscribe(self, jid: str):
         pubsub, node = slice_jid(jid)
         await self.agent.pubsub_client.subscribe(pubsub, node)
+        await self.agent.pubsub_client.on_item_published.connect(self.on_item_published)
 
     async def publish(self, msg: Message):
         jid = msg.to.domain
         node = msg.to.localpart
-        aioxmpp.pubsub.xso.as_payload_class(aioxmpp.Message)
         await self.agent.pubsub_client.publish(JID.fromstr(jid), node, msg.prepare())
 
     async def notify(self, jid: str):
@@ -74,10 +77,10 @@ class _MUCBehaviour:
     def on_item_published(jid, node, item, *, message=None):
         pass
 
-class OneShotBehaviour(spade.behaviour.OneShotBehaviour, _MUCBehaviour, metaclass=ABCMeta):pass
+class OneShotBehaviour(spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=ABCMeta):pass
 
-class PeriodicBehaviour(spade.behaviour.PeriodicBehaviour, _MUCBehaviour, metaclass=ABCMeta):pass
+class PeriodicBehaviour(spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=ABCMeta):pass
 
-class CyclicBehaviour(spade.behaviour.CyclicBehaviour, _MUCBehaviour, metaclass=ABCMeta):pass
+class CyclicBehaviour(spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=ABCMeta):pass
 
-class FSMBehaviour(spade.behaviour.FSMBehaviour, _MUCBehaviour, metaclass=ABCMeta):pass
+class FSMBehaviour(spade.behaviour.FSMBehaviour, _Behaviour, metaclass=ABCMeta):pass

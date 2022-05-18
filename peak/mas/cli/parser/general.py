@@ -3,7 +3,6 @@ import logging
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process
 from pathlib import Path
-import time
 
 import peak
 from aioxmpp import JID
@@ -28,11 +27,14 @@ def parse(args = None):
             raise ArgumentTypeError('\'{}\' must be an existing python file'.format(file))
     
     kwargs = copy(vars(ns))
+    kwargs['name'] = ns.jid.localpart
+    kwargs['number'] = None
     kwargs.pop('repeat')
     procs = []
     for i in range(ns.repeat):
         if ns.repeat != 1:
             kwargs['jid'] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
+            kwargs['number'] = i
         proc = Process(target=boot_agent, kwargs=kwargs)
         proc.start()
         procs.append(proc)

@@ -9,7 +9,6 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "peak=peak.__main__:main",
-            "peak-management=peak.management.__main__:main"
+            "peak=peak.__main__:main"
         ],
     })

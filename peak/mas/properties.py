@@ -74,30 +74,32 @@ class Property():
 
 class Properties(metaclass=ABCMeta):
 
-    def __init__(self, name=None) -> None:
-        self.agent_name: str = name
+    def __init__(self, full_name=None, name=None, number=None) -> None:
+        self.agent_fullname: str = full_name
+        self.agent_name:str = name
+        self.agent_number:int = number
         self.ds = dict()
         self.build_dataset()
 
-    def add_property(self, agent_name, property_name, property: Property):
-        if agent_name not in self.ds:
-            self.ds[agent_name] = dict()
-        self.ds[agent_name][property_name] = property
+    def add_property(self, property_name, property: Property):
+        if self.agent_fullname not in self.ds:
+            self.ds[self.agent_fullname] = dict()
+        self.ds[self.agent_fullname][property_name] = property
 
-    def add_dataset(self, agent_name, dataframe: DataFrame, loop=False, random_range=None, offset = 0):
-        if agent_name not in self.ds:
-            self.ds[agent_name] = dict()
+    def add_dataset(self, dataframe: DataFrame, loop=False, random_range=None, offset = 0):
+        if self.agent_fullname not in self.ds:
+            self.ds[self.agent_fullname] = dict()
         for property in dataframe:
-            self.ds[agent_name][property] = Property(dataframe[property].to_list(), loop, random_range, offset)
+            self.ds[self.agent_fullname][property] = Property(dataframe[property].to_list(), loop, random_range, offset)
 
-    def add_driver(self, agent_name, driver_name, driver: Driver):
-        if agent_name not in self.ds:
-            self.ds[agent_name] = dict()
-        self.ds[agent_name][driver_name] = driver
+    def add_driver(self, driver_name, driver: Driver):
+        if self.agent_fullname not in self.ds:
+            self.ds[self.agent_fullname] = dict()
+        self.ds[self.agent_fullname][driver_name] = driver
 
     @abstractmethod
     def build_dataset(self):
         pass
     
-    def extract(self, name) -> Dict[str, Property]:
-        return self.ds[name]
+    def extract(self) -> Dict[str, Property]:
+        return self.ds[self.agent_fullname]

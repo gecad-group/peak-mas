@@ -2,7 +2,6 @@
 PEAK - Python-based Ecosystem for Agent Communities'''
 
 import logging as _logging
-import sys
 
 _logging.getLogger('aiosasl').setLevel(_logging.ERROR)
 _logging.getLogger('spade').setLevel(_logging.ERROR)
