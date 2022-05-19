@@ -30,78 +30,92 @@
 </template>
 
 <script>
-  // @ is an alias to /src
-  import { Icon } from "@iconify/vue";
-  import VChart from "vue-echarts";
-  import { ref, defineComponent } from "vue";
+// @ is an alias to /src
+import { Icon } from "@iconify/vue";
+import VChart from "vue-echarts";
+import { ref, defineComponent } from "vue";
 
-  var graph = require('/home/happy_dori/Documentos/Git Projects/peak-mas/peak/management/webapp/src/assets/node_graph.json');
-  
-  graph.nodes.forEach(function (node) {
-    node.label = {
-      show: node.symbolSize > 30
+var graph = require("/home/happy_dori/Documentos/Git Projects/peak-mas/peak/management/webapp/src/assets/node_graph.json");
+
+//graph.nodes.forEach(function (node) {
+//  node.label = {
+//    show: node.symbolSize > 30
+//  };
+//});
+
+export default defineComponent({
+  name: "Dashboard",
+  components: {
+    VChart,
+  },
+  data() {
+    return {
+      graph: {},
     };
-  });
-
-  export default defineComponent({
-    name: "Dashboard",
-    components: {
-      VChart
-    },
-    
-    setup () {
-      const option = ref({
-        title: {
-          text: 'Les Miserables',
-          subtext: 'Default layout',
-          top: 'bottom',
-          left: 'right'
+  },
+  mounted() {
+    fetch("http://localhost:5555/posts")
+      .then((response) => {
+        this.graph = response.data;
+        console.log(this.graph);
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  },
+  setup() {
+    const option = ref({
+      title: {
+        text: "Multi-Agent Ecosystem",
+        subtext: "",
+        top: "bottom",
+        left: "right",
+      },
+      legend: [
+        {
+          data: graph.categories.map(function (a) {
+            return a.name;
+          }),
         },
-        legend: [
-          {
-            data: graph.categories.map(function (a) {
-              return a.name;
-            })
-          }
-        ],
-        animationDuration: 1500,
-        animationEasingUpdate: 'quinticInOut',
-        series: [
-          {
-            name: 'Les Miserables',
-            type: 'graph',
-            layout: 'force',
-            data: graph.nodes,
-            links: graph.links,
-            categories: graph.categories,
-            roam: true,
-            label: {
-              position: 'right',
-              formatter: '{b}'
-            },
+      ],
+      animationDuration: 1500,
+      animationEasingUpdate: "quinticInOut",
+      series: [
+        {
+          name: "Les Miserables",
+          type: "graph",
+          layout: "force",
+          data: graph.nodes,
+          links: graph.links,
+          categories: graph.categories,
+          roam: true,
+          label: {
+            position: "right",
+            formatter: "{b}",
+          },
+          lineStyle: {
+            color: "source",
+            curveness: 0.3,
+          },
+          emphasis: {
+            focus: "adjacency",
             lineStyle: {
-              color: 'source',
-              curveness: 0.3
+              width: 10,
             },
-            emphasis: {
-              focus: 'adjacency',
-              lineStyle: {
-                width: 10
-              }
-            },
-            force: {
-              repulsion: 100
-            }
-          }
-        ]
-        });
+          },
+          force: {
+            repulsion: 100,
+          },
+        },
+      ],
+    });
 
-      return { option };
-    },
-    components: {
-      Icon,
-    },
-  });
+    return { option };
+  },
+  components: {
+    Icon,
+  },
+});
 </script>
 
 <style scoped>
@@ -109,8 +123,7 @@
   height: 100%;
 }
 
-.heigth_pass{
+.heigth_pass {
   height: 98vh;
-
 }
 </style>
