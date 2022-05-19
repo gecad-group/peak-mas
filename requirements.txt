@@ -1,3 +1,9 @@
-SQLAlchemy
-spade
-mysql-connector-python-rf
+aiohttp==3.7.4.post0
+aiohttp_cors==0.7.0
+aioxmpp==0.12.2
+pandas==1.3.4
+pyModbusTCP==0.1.10
+setuptools==52.0.0.post20210125
+spade==3.2.0
+SQLAlchemy==1.4.36
+openpyxl==3.0.7
