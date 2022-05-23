@@ -52,16 +52,20 @@ class TreeHierarchy(CyclicBehaviour):
     async def run(self):
         msg = await self.receive(60)
         if msg:
+            logger = logging.getLogger(__name__)
             path = msg.get_metadata('path')
             nodes = path.split('/')
-            self.agent.graph['categories'].add({"name": nodes[0]})
-            last = nodes[0]
-            for node in nodes[1:]:
-                self.agent.graph['links'].add({"source":last, "target":node})
-                self.agent.graph['nodes'].add({"id":node, "name": node, "category":nodes[0]})
+            logger.debug('nodes: ' + str(nodes))
+
+            last = None
+            level = 'level'
+            for i, node in enumerate(nodes):
+                self.agent.graph['nodes'].add((node, level + str(i)))
+                self.agent.graph['categories'].add(level + str(i))
+                if last != None:
+                    self.agent.graph['links'].add((last, node))
                 last = node
 
-            logger = logging.getLogger(__name__)
-            logger.info('tree: ' + str(self.agent.nodes))
+            logger.info('tree: ' + str(self.agent.graph))
 
 

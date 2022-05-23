@@ -1,4 +1,4 @@
-from peak.mas import Agent, OneShotBehaviour,Message
+from peak.mas import Agent, OneShotBehaviour,Message, JoinGroup
 
 class agent(Agent):
 
@@ -10,5 +10,8 @@ class agent(Agent):
             await self.send_to_group(msg)
 
     async def setup(self):
-        await self.join_group('peak@conference.'+self.jid.domain)
+        self.add_behaviour(JoinGroup('mas/retina2', 'conference.localhost'))
+        self.add_behaviour(JoinGroup('mas/retina', 'conference.localhost'))
+        self.add_behaviour(JoinGroup('mas/test/test2/peak', 'conference.localhost'))
+        self.add_behaviour(JoinGroup('mas/retina/community/consumers', 'conference.localhost'))
         self.add_behaviour(self.HelloWorld())

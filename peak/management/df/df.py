@@ -5,7 +5,9 @@ from aioxmpp import JID
 from peak.mas import Agent
 from peak.management.df.functionalities import TreeHierarchy, PubSubCreateNode
 
-import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def df_name(domain):
     return 'df@' + domain + '/admin'
@@ -16,6 +18,8 @@ class DF(Agent):
         super().__init__(JID.fromstr('df@' + domain + '/admin'), verify_security=verify_security)
 
     async def setup(self):
+        self.graph = dict()
+
         self.add_behaviour(TreeHierarchy())
         self.add_behaviour(PubSubCreateNode())
 
@@ -38,7 +42,32 @@ class DF(Agent):
         self.web.start(port=10000)
 
     async def tree(self, request):
-        return self.graph
+        graph = {
+            'nodes': [],
+            'links': [],
+            'categories': []
+        }
+        label = None
+        for node, category in self.graph['nodes']:
+            graph['nodes'].append({
+                "id": node,
+                "name": node,
+                "category": category,
+                "label": node
+            })
+        for source, target in self.graph['links']:
+            graph['links'].append({
+                "source": source,
+                "target": target
+            })
+        categories = list(self.graph['categories'])
+        categories.sort()
+        for category in categories:
+            graph['categories'].append({
+                'name': category
+            })
+        logger.debug('tree request: ' + str(graph))
+        return graph
 
 
 

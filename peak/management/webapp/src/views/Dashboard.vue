@@ -24,7 +24,7 @@
     </nav>
     <!-- end nav -->
     <div class="chart">
-      <v-chart class="chart" :option="option" />
+      <v-chart class="chart" :option="option" autoresize :loading="loading" />
     </div>
   </div>
 </template>
@@ -33,89 +33,83 @@
 // @ is an alias to /src
 import { Icon } from "@iconify/vue";
 import VChart from "vue-echarts";
-import { ref, defineComponent } from "vue";
+import axios from "axios";
 
-var graph = require("/home/happy_dori/Documentos/Git Projects/peak-mas/peak/management/webapp/src/assets/node_graph.json");
-
-//graph.nodes.forEach(function (node) {
-//  node.label = {
-//    show: node.symbolSize > 30
-//  };
-//});
-
-export default defineComponent({
+export default {
   name: "Dashboard",
   components: {
     VChart,
   },
   data() {
-    return {
-      graph: {},
-    };
+    return { option: null, loading: true };
   },
   mounted() {
-    fetch("http://localhost:5555/posts")
+    axios
+      .get("http://localhost:10000/tree")
       .then((response) => {
+        this.loading = false;
         this.graph = response.data;
-        console.log(this.graph);
-      })
-      .catch((error) => {
-        alert(error);
-      });
-  },
-  setup() {
-    const option = ref({
-      title: {
-        text: "Multi-Agent Ecosystem",
-        subtext: "",
-        top: "bottom",
-        left: "right",
-      },
-      legend: [
-        {
-          data: graph.categories.map(function (a) {
-            return a.name;
-          }),
-        },
-      ],
-      animationDuration: 1500,
-      animationEasingUpdate: "quinticInOut",
-      series: [
-        {
-          name: "Les Miserables",
-          type: "graph",
-          layout: "force",
-          data: graph.nodes,
-          links: graph.links,
-          categories: graph.categories,
-          roam: true,
-          label: {
-            position: "right",
-            formatter: "{b}",
+        this.graph.nodes.forEach(function (node) {
+          node.label = {
+            show: node.category == "level0",
+          };
+        });
+        console.log(response.data);
+        this.option = {
+          title: {
+            text: "Multi-Agent Ecosystem",
+            subtext: "",
+            top: "bottom",
+            left: "right",
           },
-          lineStyle: {
-            color: "source",
-            curveness: 0.3,
-          },
-          emphasis: {
-            focus: "adjacency",
-            lineStyle: {
-              width: 10,
+          tooltip: {},
+          legend: [
+            {
+              data: this.graph.categories.map(function (a) {
+                return a.name;
+              }),
             },
-          },
-          force: {
-            repulsion: 100,
-          },
-        },
-      ],
-    });
-
-    return { option };
+          ],
+          animationDuration: 1500,
+          animationEasingUpdate: "quinticInOut",
+          series: [
+            {
+              name: "Info",
+              type: "graph",
+              layout: "force",
+              data: this.graph.nodes,
+              links: this.graph.links,
+              categories: this.graph.categories,
+              roam: true,
+              label: {
+                position: "right",
+                formatter: "{b}",
+              },
+              lineStyle: {
+                color: "source",
+                curveness: 0.3,
+              },
+              emphasis: {
+                focus: "adjacency",
+                lineStyle: {
+                  width: 10,
+                },
+              },
+              force: {
+                repulsion: 100,
+              },
+            },
+          ],
+        };
+      })
+      .catch((e) => {
+        alert(e);
+      });
   },
   components: {
     Icon,
   },
-});
+};
 </script>
 
 <style scoped>
