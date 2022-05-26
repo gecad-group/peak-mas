@@ -47,13 +47,15 @@ class DF(Agent):
             'links': [],
             'categories': []
         }
-        label = None
-        for node, category in self.graph['nodes']:
+        for node, category, domain in self.graph['nodes']:
+            symbolSize = len(await self.group_members(node + '@' + domain))
+            logger.info(symbolSize)
             graph['nodes'].append({
                 "id": node,
                 "name": node,
                 "category": category,
-                "label": node
+                "label": node,
+                "symbolSize": symbolSize * 10
             })
         for source, target in self.graph['links']:
             graph['links'].append({

@@ -36,18 +36,21 @@ class _XMPPAgent(_spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         '''
         self.presence.approve_all = True
+
         self.muc_client: _aioxmpp.MUCClient = self.client.summon(
                     _aioxmpp.MUCClient)
+        self.pubsub_client: _aioxmpp.PubSubClient = self.client.summon(
+                    _aioxmpp.PubSubClient)
+        self.disco: _aioxmpp.DiscoClient = self.client.summon(
+                    _aioxmpp.DiscoClient)
+
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.GROUPCHAT, None, self._message_received,
         )
-
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.NORMAL, None, self._message_received,
         )
 
-        self.pubsub_client: _aioxmpp.PubSubClient = self.client.summon(
-                    _aioxmpp.PubSubClient)
 
     def _on_muc_failure_handler(self, exc):
         '''
@@ -72,8 +75,12 @@ class _XMPPAgent(_spade.agent.Agent):
         _logger.info('leaving group: ' + jid)
         room = self.groups.pop(jid, None)
         await room.leave()
-            
-    def group_members(self, jid) -> List:
+    
+    async def list_groups(self, node_jid):
+        info = await self.disco.query_items(_aioxmpp.JID.fromstr(node_jid), require_fresh=True)
+        return info.items
+
+    async def group_members(self, jid) -> List:
         """Extracts list of group members from a group chat.
 
         Args:
@@ -82,8 +89,14 @@ class _XMPPAgent(_spade.agent.Agent):
         Returns:
             List: A copy of the list of occupants. The local user is always the first item in the list. 
         """
-
-        return self.groups[jid].members
+        if jid in self.groups:
+            return self.groups[jid].members
+        else:
+            await self.join_group(jid)
+            members = self.groups[jid].members
+            await self.leave_group(jid)
+            return members
+            
 
     async def subscribe(self, jid: str, func = None):
         jid = JID.fromstr(jid)

@@ -1,3 +1,0 @@
-agent.py agent@localhost/clone1 -l debug
-agent.py agent@localhost/clone2 -l debug
-agent.py agent@localhost/clone3 -l debug

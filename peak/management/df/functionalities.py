@@ -54,18 +54,19 @@ class TreeHierarchy(CyclicBehaviour):
         if msg:
             logger = logging.getLogger(__name__)
             path = msg.get_metadata('path')
+            domain = msg.get_metadata('domain')
             nodes = path.split('/')
             logger.debug('nodes: ' + str(nodes))
 
             last = None
             level = 'level'
             for i, node in enumerate(nodes):
-                self.agent.graph['nodes'].add((node, level + str(i)))
+                self.agent.graph['nodes'].add((node, level + str(i), domain))
                 self.agent.graph['categories'].add(level + str(i))
                 if last != None:
                     self.agent.graph['links'].add((last, node))
                 last = node
 
-            logger.info('tree: ' + str(self.agent.graph))
+            logger.debug('tree: ' + str(self.agent.graph))
 
 

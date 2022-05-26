@@ -1,4 +1,6 @@
 from peak.mas import Agent, OneShotBehaviour, Message, CreateNode
+import logging
+logger = logging.getLogger(__name__)
 
 class publisher(Agent):
 
@@ -13,6 +15,7 @@ class publisher(Agent):
             msg.to = node
             msg.body = 'Ikie maluco'
             await self.publish(msg)
+            logger.info('published')
 
     async def setup(self):
         self.add_behaviour(self.PublishItem())

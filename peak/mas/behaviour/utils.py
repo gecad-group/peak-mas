@@ -38,6 +38,7 @@ class JoinGroup(OneShotBehaviour):
         msg.to = df_name(self.agent.jid.domain)
         msg.set_metadata('resource', 'treehierarchy')
         msg.set_metadata('path', self.path)
+        msg.set_metadata('domain', self.domain)
         await self.send(msg)
         nodes = self.path.split('/')
         for node in nodes[:-1]:

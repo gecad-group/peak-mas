@@ -1,0 +1,1 @@
+agent.py agent@localhost/clone1 -l debug
