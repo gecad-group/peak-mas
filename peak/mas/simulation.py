@@ -1,6 +1,7 @@
 from abc import ABCMeta as _ABCMeta, abstractmethod
 import asyncio as _asyncio
 import logging as _logging
+from datetime import datetime, timedelta
 
 from aioxmpp import JID
 
@@ -23,10 +24,11 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             if msg:
                 if msg.get_metadata('sync') == 'step':
                     self.agent.period = int(msg.get_metadata('period'))
+                    self.agent.time = datetime.strptime(msg.get_metadata('time'), '%Y-%m-%d %H:%M:%S')
                     if self.agent.period != 0:
                         self.agent.iterate_properties()
                     await self.agent.step()
-                    _logger.info('Period ' + str(self.agent.period))
+                    _logger.info('Period ' + str(self.agent.period) + ' (' + str(self.agent.time) + ')')
                 if msg.get_metadata('sync') == 'stop':
                     _logger.info('Simulation ended')
                     self.kill()
@@ -49,6 +51,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         """
         super().__init__(jid, properties, verify_security)
         self.period = 0
+        self.time = None
         template_step = Template()
         template_step.set_metadata('sync', 'step')
         template_stop = Template()
@@ -70,7 +73,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
 
 class Synchronizer(Agent):
 
-    class _StepBehaviour(PeriodicBehaviour):
+    class _StepBehaviour_old(PeriodicBehaviour):
         '''Sends a message to MAS group for each step.'''
 
         def __init__(self, group_jid, n_agents: int, periods: int, time_per_period:float, start_at=None):
@@ -101,11 +104,52 @@ class Synchronizer(Agent):
 
         async def on_end(self):
             _logger.info('Ending simulation...')
-            #await _asyncio.sleep(5)
+            await self.agent.stop()
+    
+    class _StepBehaviour(PeriodicBehaviour):
+        '''Sends a message to MAS group for each step.'''
+
+        def __init__(self, jid, n_agents: int, initial_time: datetime, end_time: datetime, period_time_simulated: timedelta, period_time_real: float, start_at: datetime = None):
+            super().__init__(period_time_real, start_at=start_at)
+            self.group_jid = jid
+            self.n_agents = n_agents
+            self.time = initial_time
+            self.end_time = end_time
+            self.period_time = period_time_simulated
+
+        async def on_start(self):
+            _logger.info('Waiting for all agents to enter the group...')
+            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
+                await _asyncio.sleep(1)
+            self.current_period = 0
+            _logger.info('Starting simulation...')
+
+        async def run(self):
+            msg = Message()
+            msg.to = self.group_jid
+            if self.time >= self.end_time:
+                msg.set_metadata('sync', 'stop')
+                self.kill()
+            else:
+                _logger.info('Period ' + str(self.current_period) + ' (' + str(self.time) + ')')
+                msg.body = 'Period ' + str(self.current_period) + ' (' + str(self.time) + ')'
+                msg.set_metadata('sync', 'step')
+                msg.set_metadata('period', str(self.current_period))
+                msg.set_metadata('time', datetime.strftime(self.time, '%Y-%m-%d %H:%M:%S'))
+            await self.send_to_group(msg)
+            self.current_period += 1
+            self.time += self.period_time
+
+        async def on_end(self):
+            _logger.info('Ending simulation...')
             await self.agent.stop()
 
     async def sync_group(self, jid, n_agents: int, time_per_period: float, periods: int):
         await self.join_group(jid)
-        self.add_behaviour(self._StepBehaviour(jid, n_agents, periods, time_per_period))
+        self.add_behaviour(self._StepBehaviour_old(jid, n_agents, periods, time_per_period))
+
+    async def sync_group(self, jid, n_agents: int, initial_time: datetime, end_time: datetime, period_time_simulated: timedelta, period_time_real: float, start_at: datetime = None):
+        await self.join_group(jid)
+        self.add_behaviour(self._StepBehaviour(jid, n_agents, initial_time, end_time, period_time_simulated, period_time_real, start_at))
 
         

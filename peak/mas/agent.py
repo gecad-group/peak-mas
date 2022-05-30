@@ -115,10 +115,11 @@ class Agent(_XMPPAgent):
             self._parse(properties)
 
     def iterate_properties(self):
-        for key in self.properties:
-            attr = getattr(self, key)
-            if attr:
-                getattr(self, key).next()
+        if hasattr(self, 'properties'):
+            for key in self.properties:
+                attr = getattr(self, key)
+                if attr:
+                    getattr(self, key).next()
 
     def _parse(self, properties):
         for key in properties:
