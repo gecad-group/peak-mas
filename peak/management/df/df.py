@@ -14,8 +14,9 @@ def df_name(domain):
 
 class DF(Agent):
 
-    def __init__(self, domain, verify_security):
+    def __init__(self, domain, verify_security, port):
         super().__init__(JID.fromstr('df@' + domain + '/admin'), verify_security=verify_security)
+        self.port = port
 
     async def setup(self):
         self.graph = dict()
@@ -39,7 +40,8 @@ class DF(Agent):
             cors.add(route)
 
         # Start web API
-        self.web.start(port=10000)
+        self.web.start(port=self.port)
+        logger.info('running on port ' + self.port)
 
     async def tree(self, request):
         graph = {

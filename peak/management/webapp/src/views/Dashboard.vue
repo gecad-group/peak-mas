@@ -45,7 +45,7 @@ export default {
   },
   mounted() {
     axios
-      .get("http://localhost:10000/tree")
+      .get('http://' + process.env.VUE_APP_DF + '/tree')
       .then((response) => {
         var raw_graph = response.data;
         console.log(raw_graph);
