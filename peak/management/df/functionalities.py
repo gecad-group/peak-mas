@@ -46,7 +46,8 @@ class TreeHierarchy(CyclicBehaviour):
         self.agent.graph = {
             'nodes': set(),
             'links': set(),
-            'categories': set()
+            'categories': set(),
+            'node_members': {}
         }
 
     async def run(self):
@@ -61,11 +62,14 @@ class TreeHierarchy(CyclicBehaviour):
             last = None
             level = 'level'
             for i, node in enumerate(nodes):
+                if node not in self.agent.graph['node_members']:
+                    self.agent.graph['node_members'][node] = 0
                 self.agent.graph['nodes'].add((node, level + str(i), domain))
                 self.agent.graph['categories'].add(level + str(i))
                 if last != None:
                     self.agent.graph['links'].add((last, node))
                 last = node
+            self.agent.graph['node_members'][last] += 1
 
             logger.debug('tree: ' + str(self.agent.graph))
 

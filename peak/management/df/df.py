@@ -43,35 +43,18 @@ class DF(Agent):
 
     async def tree(self, request):
         graph = {
-            'nodes': [],
-            'links': [],
-            'categories': []
+            'nodes': list(self.graph['nodes']),
+            'links': list(self.graph['links']),
+            'categories': list(self.graph['categories']),
+            'node_members': self.graph['node_members']
         }
-        for node, category, domain in self.graph['nodes']:
-            symbolSize = len(await self.group_members(node + '@' + domain))
-            logger.info(symbolSize)
-            graph['nodes'].append({
-                "id": node,
-                "name": node,
-                "category": category,
-                "label": node,
-                "symbolSize": symbolSize * 10
-            })
-        for source, target in self.graph['links']:
-            graph['links'].append({
-                "source": source,
-                "target": target
-            })
-        categories = list(self.graph['categories'])
-        categories.sort()
-        for category in categories:
-            graph['categories'].append({
-                'name': category
-            })
-        logger.debug('tree request: ' + str(graph))
         return graph
 
-
+    async def tree_refresh(self, request):
+        for node, _, domain in self.graph['nodes']:
+            group_size = len(await self.group_members(node + '@' + domain))-1
+            self.graph['node_members'][node] = group_size
+        return self.graph
 
 
 

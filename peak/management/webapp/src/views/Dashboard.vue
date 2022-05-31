@@ -47,14 +47,39 @@ export default {
     axios
       .get("http://localhost:10000/tree")
       .then((response) => {
-        this.loading = false;
-        this.graph = response.data;
-        this.graph.nodes.forEach(function (node) {
-          node.label = {
-            show: node.category == "level0",
-          };
-        });
-        console.log(response.data);
+        var raw_graph = response.data;
+        console.log(raw_graph);
+        var graph = {
+          'nodes': [],
+          'links': [],
+          'categories': []
+        }
+        raw_graph.nodes.forEach(function (node) {
+          var group_size = raw_graph.node_members[node[0]]
+          graph.nodes.push({
+            "id": node[0],
+            "name": node[0],
+            "category": node[1],
+            "label": {
+              show: node[1] == "level0",
+            },
+            "symbolSize": (group_size + 1) * 10,
+            "value": group_size
+          })
+        })
+        raw_graph.links.forEach(function (link) {
+          graph.links.push({
+            "source": link[0],
+            "target": link[1]
+          })
+        })
+        raw_graph.categories.sort()
+        raw_graph.categories.forEach(function (category) {
+          graph.categories.push({
+            'name': category
+          })
+        })
+        
         this.option = {
           title: {
             text: "Multi-Agent Ecosystem",
@@ -65,7 +90,7 @@ export default {
           tooltip: {},
           legend: [
             {
-              data: this.graph.categories.map(function (a) {
+              data: graph.categories.map(function (a) {
                 return a.name;
               }),
             },
@@ -77,9 +102,9 @@ export default {
               name: "Info",
               type: "graph",
               layout: "force",
-              data: this.graph.nodes,
-              links: this.graph.links,
-              categories: this.graph.categories,
+              data: graph.nodes,
+              links: graph.links,
+              categories: graph.categories,
               roam: true,
               label: {
                 position: "right",
@@ -101,9 +126,8 @@ export default {
             },
           ],
         };
-      })
-      .catch((e) => {
-        alert(e);
+
+        this.loading = false;
       });
   },
   components: {
