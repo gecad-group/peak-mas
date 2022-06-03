@@ -24,7 +24,13 @@
     </nav>
     <!-- end nav -->
     <div class="chart">
-      <v-chart class="chart" :option="option" autoresize :loading="loading" />
+      <v-chart 
+        class="chart" 
+        :option="option" 
+        autoresize 
+        :loading="loading" 
+        :loadingOptions="loadingOptions" 
+      />
     </div>
   </div>
 </template>
@@ -39,99 +45,129 @@ export default {
   name: "Dashboard",
   components: {
     VChart,
+    Icon,
   },
   data() {
-    return { option: null, loading: true };
+    return { 
+      loadingOptions: {
+        text: "Loading…",
+        color: "#4ea397",
+        maskColor: "rgba(255, 255, 255, 0.4)"
+      },
+      option: null,
+      loading: true, 
+      timer: "", 
+      graph: null,
+      res:null,
+      previous_graph: {
+        nodes: [],
+        links: [],
+        categories: [],
+        node_members: []
+      }
+    };
+  },
+  methods: {
+    getOptions(){
+      return {
+        title: {
+          text: "Multi-Agent Ecosystem",
+          subtext: "",
+          top: "bottom",
+          left: "right",
+        },
+        tooltip: {},
+        legend: {
+          data: this.graph.categories.map(function(a)  {
+            return a.name
+          })
+        },
+        animationDuration: 1500,
+        animationEasingUpdate: "quinticInOut",
+        series: [
+          {
+            name: "Info",
+            type: "graph",
+            layout: "force",
+            data: this.graph.nodes,
+            links: this.graph.links,
+            categories: this.graph.categories,
+            roam: true,
+            label: {
+              position: "right",
+              formatter: "{b}",
+            },
+            lineStyle: {
+              color: "source",
+              curveness: 0.3,
+            },
+            emphasis: {
+              focus: "adjacency",
+              lineStyle: {
+                width: 10,
+              },
+            },
+            force: {
+              repulsion: 100,
+            },
+          },
+        ],
+      }
+    },
+    compare(graph1, graph2){
+      return true;
+    },
+    fetchGraph() {
+      axios.get("http://" + process.env.VUE_APP_DF + "/tree").then((response) => {
+        if (JSON.stringify(response.data) != this.previous_graph){
+          this.previous_graph = JSON.stringify(response.data)
+          this.renderGraph(response.data)
+          this.option = this.getOptions()
+        }
+      })
+    },
+    renderGraph(raw_graph) {
+      this.graph = {
+        nodes: [],
+        links: [],
+        categories: [],
+      }
+      raw_graph.nodes.forEach(function (node) {
+        var group_size = raw_graph.node_members[node[0]];
+        this.graph.nodes.push({
+          id: node[0],
+          name: node[0],
+          category: node[1],
+          label: {
+            show: node[1] == "level0",
+          },
+          symbolSize: (group_size + 1) * 10,
+          value: group_size,
+        });
+      }, this);
+      
+      raw_graph.links.forEach(function (link) {
+        this.graph.links.push({
+          source: link[0],
+          target: link[1],
+        });
+      }, this);
+      
+      raw_graph.categories.sort();
+      raw_graph.categories.forEach(function (category) {
+        this.graph.categories.push({
+          name: category,
+        });
+      }, this);
+    },
   },
   mounted() {
-    axios
-      .get('http://' + process.env.VUE_APP_DF + '/tree')
-      .then((response) => {
-        var raw_graph = response.data;
-        console.log(raw_graph);
-        var graph = {
-          'nodes': [],
-          'links': [],
-          'categories': []
-        }
-        raw_graph.nodes.forEach(function (node) {
-          var group_size = raw_graph.node_members[node[0]]
-          graph.nodes.push({
-            "id": node[0],
-            "name": node[0],
-            "category": node[1],
-            "label": {
-              show: node[1] == "level0",
-            },
-            "symbolSize": (group_size + 1) * 10,
-            "value": group_size
-          })
-        })
-        raw_graph.links.forEach(function (link) {
-          graph.links.push({
-            "source": link[0],
-            "target": link[1]
-          })
-        })
-        raw_graph.categories.sort()
-        raw_graph.categories.forEach(function (category) {
-          graph.categories.push({
-            'name': category
-          })
-        })
-        
-        this.option = {
-          title: {
-            text: "Multi-Agent Ecosystem",
-            subtext: "",
-            top: "bottom",
-            left: "right",
-          },
-          tooltip: {},
-          legend: [
-            {
-              data: graph.categories.map(function (a) {
-                return a.name;
-              }),
-            },
-          ],
-          animationDuration: 1500,
-          animationEasingUpdate: "quinticInOut",
-          series: [
-            {
-              name: "Info",
-              type: "graph",
-              layout: "force",
-              data: graph.nodes,
-              links: graph.links,
-              categories: graph.categories,
-              roam: true,
-              label: {
-                position: "right",
-                formatter: "{b}",
-              },
-              lineStyle: {
-                color: "source",
-                curveness: 0.3,
-              },
-              emphasis: {
-                focus: "adjacency",
-                lineStyle: {
-                  width: 10,
-                },
-              },
-              force: {
-                repulsion: 100,
-              },
-            },
-          ],
-        };
-
-        this.loading = false;
-      });
+    this.fetchGraph();
+    this.loading = false;
+    this.timer = setInterval(this.fetchGraph, 5000);
   },
-  components: {
-    Icon,
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
 };
 </script>
