@@ -23,18 +23,23 @@
       </ol>
     </nav>
     <!-- end nav -->
-    <div id="divAgentList" class="text-left rounded-md box-border p-3">
-      <p>Move</p>
-      <p>this</p>
-      <p>DIV</p>
+    <div id="divAgentList" class="text-center absolute z-10 rounded-md box-border shadow-lg" v-show="showAgentList">
+      <div class="flex rounded-md bg-primary text-gray-200">
+        <div class="p-3">mas members:</div>
+        <button class="rounded-tr-md rounded-br-md w-10 hover:bg-blue-200" @click="showAgentList = !showAgentList">X</button>
+      </div>
+      <div class="font-medium p-3">
+        <p>agent1@localhost</p>
+        <p>agent2@localhost</p>
+      </div>
     </div>
-    <div class="chart">
+    <div class="h-full">
       <v-chart
-        class="chart"
         :option="option"
         autoresize
         :loading="loading"
         :loadingOptions="loadingOptions"
+        @click="handleClick"
       />
     </div>
   </div>
@@ -63,13 +68,13 @@ export default {
       loading: true,
       timer: "",
       graph: null,
-      res: null,
       previous_graph: {
         nodes: [],
         links: [],
         categories: [],
         node_members: [],
       },
+      showAgentList: false
     };
   },
   methods: {
@@ -118,9 +123,6 @@ export default {
           },
         ],
       };
-    },
-    compare(graph1, graph2) {
-      return true;
     },
     fetchGraph() {
       axios
@@ -211,6 +213,10 @@ export default {
         document.onmousemove = null;
       }
     },
+    handleClick(...args) {
+      console.log("click from echarts", ...args);
+      this.showAgentList = true;
+    },
   },
   mounted() {
     this.dragElement(document.getElementById("divAgentList"));
@@ -225,26 +231,30 @@ export default {
 </script>
 
 <style scoped>
-.chart {
-  height: 100%;
-}
 
 .heigth_pass {
   height: 98vh;
 }
-#divAgentList {
-  position: absolute;
-  z-index: 9;
-  background-color: rgb(237 246 254);
-  box-shadow: 1px 1px 5px #9ca3af;
-  text-align: center;
-}
 
 #divAgentListHeader {
-  padding: 10px;
+  padding: 0%;
   cursor: move;
   z-index: 10;
-  background-color: #2196f3;
+  background-color: #4f47e5;
   color: #fff;
+  width: 100%;
 }
+
+#divAgentListHeaderButton {
+  padding: 0%;
+  cursor: pointer;
+  z-index: 11;
+  background-color: #4f47e5;
+  color: #fff;
+  float: right;
+}
+#divAgentListHeaderButton:hover {
+  background-color: rgb(133 126 255);
+}
+
 </style>
