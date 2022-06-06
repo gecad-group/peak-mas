@@ -61,20 +61,21 @@ class _XMPPAgent(_spade.agent.Agent):
         raise exc
 
     async def join_group(self, jid):
-        _logger.info('joining group: ' + jid)
         room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         room.on_failure.connect(self._on_muc_failure_handler)
         await asyncio.wait([fut], timeout=3)
         if fut.done():
-            self.groups[jid] = room
-            _logger.debug('group JID valid')
+            if jid not in self.groups:
+                self.groups[jid] = room
+                _logger.info('joined group: ' + jid)
         else:
             raise Exception('invalid group JID: ' + str(jid))
 
     async def leave_group(self, jid):
-        _logger.info('leaving group: ' + jid)
         room = self.groups.pop(jid, None)
-        await room.leave()
+        if room:
+            _logger.info('leaving group: ' + jid)
+            await room.leave()
     
     async def list_groups(self, node_jid):
         info = await self.disco.query_items(_aioxmpp.JID.fromstr(node_jid), require_fresh=True)

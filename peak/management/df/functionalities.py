@@ -5,6 +5,7 @@ from aioxmpp.errors import XMPPCancelError
 
 from peak.mas import CyclicBehaviour, Message, Template
 
+logger = logging.getLogger(__name__)
 
 class PubSubCreateNode(CyclicBehaviour):  
 
@@ -53,24 +54,44 @@ class TreeHierarchy(CyclicBehaviour):
     async def run(self):
         msg = await self.receive(60)
         if msg:
-            logger = logging.getLogger(__name__)
             path = msg.get_metadata('path')
             domain = msg.get_metadata('domain')
             nodes = path.split('/')
             logger.debug('nodes: ' + str(nodes))
-
-            last = None
             level = 'level'
-            for i, node in enumerate(nodes):
-                if node not in self.agent.graph['node_members']:
-                    self.agent.graph['node_members'][node] = 0
-                self.agent.graph['nodes'].add((node, level + str(i), domain))
-                self.agent.graph['categories'].add(level + str(i))
-                if last != None:
-                    self.agent.graph['links'].add((last, node))
-                last = node
-            self.agent.graph['node_members'][last] += 1
 
-            logger.debug('tree: ' + str(self.agent.graph))
+            if msg.get_metadata('leave') and msg.sender in self.agent.graph['node_members'][nodes[-1]]:
+                logger.debug('leave: true')
+                self.agent.graph['node_members'][nodes[-1]].remove(msg.sender)
+                nodes = nodes[::-1]
+                #remove empty nodes and links
+                for i, node in enumerate(nodes):
+                    if len(self.agent.graph['node_members'][node]) == 0 and not any(node == source for source,_ in self.agent.graph['links']):
+                        self.agent.graph['node_members'].pop(node)
+                        self.agent.graph['nodes'].remove((node, level + str(len(nodes)-1-i), domain))
+                        if i+1 < len(nodes):
+                            self.agent.graph['links'].remove((nodes[i+1], node))
+                existing_categories = set()
+
+                #remove categories if empty
+                for _, level, _ in self.agent.graph['nodes']:
+                    existing_categories.add(level)
+                difference = self.agent.graph['categories'].difference(existing_categories)
+                if any(difference):
+                    self.agent.graph['categories'] -= difference
+
+            else:
+                last = None
+                for i, node in enumerate(nodes):
+                    if node not in self.agent.graph['node_members']:
+                        self.agent.graph['node_members'][node] = []
+                    self.agent.graph['nodes'].add((node, level + str(i), domain))
+                    self.agent.graph['categories'].add(level + str(i))
+                    if last != None:
+                        self.agent.graph['links'].add((last, node))
+                    last = node
+                self.agent.graph['node_members'][last].append(msg.sender)
+
+                logger.debug('tree: ' + str(self.agent.graph))
 
 

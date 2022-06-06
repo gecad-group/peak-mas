@@ -23,13 +23,18 @@
       </ol>
     </nav>
     <!-- end nav -->
+    <div id="divAgentList" class="text-left rounded-md box-border p-3">
+      <p>Move</p>
+      <p>this</p>
+      <p>DIV</p>
+    </div>
     <div class="chart">
-      <v-chart 
-        class="chart" 
-        :option="option" 
-        autoresize 
-        :loading="loading" 
-        :loadingOptions="loadingOptions" 
+      <v-chart
+        class="chart"
+        :option="option"
+        autoresize
+        :loading="loading"
+        :loadingOptions="loadingOptions"
       />
     </div>
   </div>
@@ -48,27 +53,27 @@ export default {
     Icon,
   },
   data() {
-    return { 
+    return {
       loadingOptions: {
         text: "Loading…",
         color: "#4ea397",
-        maskColor: "rgba(255, 255, 255, 0.4)"
+        maskColor: "rgba(255, 255, 255, 0.4)",
       },
       option: null,
-      loading: true, 
-      timer: "", 
+      loading: true,
+      timer: "",
       graph: null,
-      res:null,
+      res: null,
       previous_graph: {
         nodes: [],
         links: [],
         categories: [],
-        node_members: []
-      }
+        node_members: [],
+      },
     };
   },
   methods: {
-    getOptions(){
+    getOptions() {
       return {
         title: {
           text: "Multi-Agent Ecosystem",
@@ -78,9 +83,9 @@ export default {
         },
         tooltip: {},
         legend: {
-          data: this.graph.categories.map(function(a)  {
-            return a.name
-          })
+          data: this.graph.categories.map(function (a) {
+            return a.name;
+          }),
         },
         animationDuration: 1500,
         animationEasingUpdate: "quinticInOut",
@@ -112,28 +117,30 @@ export default {
             },
           },
         ],
-      }
+      };
     },
-    compare(graph1, graph2){
+    compare(graph1, graph2) {
       return true;
     },
     fetchGraph() {
-      axios.get("http://" + process.env.VUE_APP_DF + "/tree").then((response) => {
-        if (JSON.stringify(response.data) != this.previous_graph){
-          this.previous_graph = JSON.stringify(response.data)
-          this.renderGraph(response.data)
-          this.option = this.getOptions()
-        }
-      })
+      axios
+        .get("http://" + process.env.VUE_APP_DF + "/tree")
+        .then((response) => {
+          if (JSON.stringify(response.data) != this.previous_graph) {
+            this.previous_graph = JSON.stringify(response.data);
+            this.renderGraph(response.data);
+            this.option = this.getOptions();
+          }
+        });
     },
     renderGraph(raw_graph) {
       this.graph = {
         nodes: [],
         links: [],
         categories: [],
-      }
+      };
       raw_graph.nodes.forEach(function (node) {
-        var group_size = raw_graph.node_members[node[0]];
+        var group_size = raw_graph.node_members[node[0]].length;
         this.graph.nodes.push({
           id: node[0],
           name: node[0],
@@ -145,14 +152,14 @@ export default {
           value: group_size,
         });
       }, this);
-      
+
       raw_graph.links.forEach(function (link) {
         this.graph.links.push({
           source: link[0],
           target: link[1],
         });
       }, this);
-      
+
       raw_graph.categories.sort();
       raw_graph.categories.forEach(function (category) {
         this.graph.categories.push({
@@ -160,8 +167,53 @@ export default {
         });
       }, this);
     },
+    dragElement(elmnt) {
+      var pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0;
+      if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown =
+          dragMouseDown;
+      } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+      }
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+      }
+
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = elmnt.offsetTop - pos2 + "px";
+        elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+      }
+
+      function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
+    },
   },
   mounted() {
+    this.dragElement(document.getElementById("divAgentList"));
     this.fetchGraph();
     this.loading = false;
     this.timer = setInterval(this.fetchGraph, 5000);
@@ -179,5 +231,20 @@ export default {
 
 .heigth_pass {
   height: 98vh;
+}
+#divAgentList {
+  position: absolute;
+  z-index: 9;
+  background-color: rgb(237 246 254);
+  box-shadow: 1px 1px 5px #9ca3af;
+  text-align: center;
+}
+
+#divAgentListHeader {
+  padding: 10px;
+  cursor: move;
+  z-index: 10;
+  background-color: #2196f3;
+  color: #fff;
 }
 </style>

@@ -41,7 +41,7 @@ class DF(Agent):
 
         # Start web API
         self.web.start(port=self.port)
-        logger.info('running on port ' + self.port)
+        logger.info('REST API running on port ' + self.port)
 
     async def tree(self, request):
         graph = {
