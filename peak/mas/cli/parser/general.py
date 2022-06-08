@@ -1,7 +1,7 @@
 from aioxmpp import JID
 from argparse import ArgumentParser, ArgumentTypeError
 from copy import copy
-from logging import getLevelName
+from logging import getLevelName, getLogger
 from multiprocessing import Process
 from pathlib import Path
 
@@ -30,13 +30,25 @@ def parse(args = None):
     kwargs['name'] = ns.jid.localpart
     kwargs['number'] = None
     kwargs.pop('repeat')
-   
-    for i in range(ns.repeat):
-        if ns.repeat != 1:
+
+    if ns.repeat == 1:
+        boot_agent(**kwargs)
+    else:
+        procs = []
+        for i in range(ns.repeat):
             kwargs['jid'] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
             kwargs['number'] = i
-            proc = Process(target=boot_agent, kwargs=kwargs)
-            proc.daemon = False
+            proc = Process(target=boot_agent, kwargs=kwargs, daemon=False)
             proc.start()
-        else:
-            boot_agent(**kwargs)
+            procs.append(proc)
+        try:
+            logger = getLogger(__name__)
+            [proc.join() for proc in procs]
+        except Exception as e:
+            logger.exception(e)
+        except KeyboardInterrupt:
+            pass
+
+        
+                
+        

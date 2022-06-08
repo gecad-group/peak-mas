@@ -1,10 +1,11 @@
 from argparse import ArgumentParser
 from multiprocessing import Process
+from logging import getLogger
 from os import chdir
 from pathlib import Path
 
 from peak import __name__ as peak_name
-from peak.mas.cli.parser import general
+from peak.mas.cli.parser.general import parse as general_parse
 
 
 def parse(args=None):
@@ -17,10 +18,18 @@ def parse(args=None):
     chdir(ns.config_file.parent)
 
     if len(commands) == 1:
-        general.parse(commands[0].strip().split(' '))
+        general_parse(commands[0].strip().split(' '))
     else:
+        procs = []
         for command in commands:
             command = command.strip().split(' ')
-            proc = Process(target=general.parse, args=(command,))
-            proc.daemon = False
+            proc = Process(target=general_parse(), args=[command], daemon=False)
             proc.start()
+            procs.append(proc)
+        try:
+            logger = getLogger(__name__)
+            [proc.join() for proc in procs]
+        except Exception as e:
+            logger.exception(e)
+        except KeyboardInterrupt:
+            pass
