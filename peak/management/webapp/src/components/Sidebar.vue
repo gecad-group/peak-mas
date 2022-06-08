@@ -5,7 +5,7 @@
     <div class="sidebar-head p-4">
       <router-link to="/" exact>
         <h2 class="text-2xl font-normal text-gray-800" translate="no">
-          Windzo<span class="text-primary">.</span>
+          PEAK<span class="text-primary">.</span>
         </h2>
       </router-link>
       <button class="lg:hidden block float-right -mt-7" @click="sidebarToggle">

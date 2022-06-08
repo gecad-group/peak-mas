@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard p-4 heigth_pass">
+  <div class="dashboard p-4 h-screen">
     <nav class="flex" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
@@ -23,13 +23,30 @@
       </ol>
     </nav>
     <!-- end nav -->
-    <div class="chart">
-      <v-chart 
-        class="chart" 
-        :option="option" 
-        autoresize 
-        :loading="loading" 
-        :loadingOptions="loadingOptions" 
+    <div
+      id="divAgentList"
+      class="text-center absolute z-10 rounded-md box-border shadow-xl"
+      v-show="showAgentList"
+    >
+      <div id="divAgentListheader" class="rounded-tl-md rounded-tr-md text-white cursor-move flex" :style="{'background-color': selectedNode.color}">
+        <div class="p-3 m-auto">{{selectedNode.name.toUpperCase()}} members:</div>
+        <div class="rounded-tr-md hover:bg-blue-200 cursor-pointer transition-colors duration-150">
+          <button class="h-full p-3" @click="showAgentList = !showAgentList">
+            <Icon icon="akar-icons:cross" />
+          </button>
+        </div>
+      </div>
+      <div class="font-medium p-3 bg-white rounded-bl-md rounded-br-md">
+        <p v-for="member in selectedNode.members">{{member[0] + '@' + member[1] + '/' + member[2]}}</p>
+      </div>
+    </div>
+    <div class="h-full">
+      <v-chart
+        :option="option"
+        autoresize
+        :loading="loading"
+        :loadingOptions="loadingOptions"
+        @click="handleClick"
       />
     </div>
   </div>
@@ -48,27 +65,27 @@ export default {
     Icon,
   },
   data() {
-    return { 
+    return {
       loadingOptions: {
         text: "Loading…",
         color: "#4ea397",
-        maskColor: "rgba(255, 255, 255, 0.4)"
+        maskColor: "rgba(255, 255, 255, 0.4)",
       },
       option: null,
-      loading: true, 
-      timer: "", 
+      loading: true,
+      timer: "",
       graph: null,
-      res:null,
-      previous_graph: {
-        nodes: [],
-        links: [],
-        categories: [],
-        node_members: []
-      }
+      previous_graph: null,
+      showAgentList: false,
+      selectedNode: {
+        members: [],
+        name: '',
+        color: ''
+      },
     };
   },
   methods: {
-    getOptions(){
+    getOptions() {
       return {
         title: {
           text: "Multi-Agent Ecosystem",
@@ -78,9 +95,9 @@ export default {
         },
         tooltip: {},
         legend: {
-          data: this.graph.categories.map(function(a)  {
-            return a.name
-          })
+          data: this.graph.categories.map(function (a) {
+            return a.name;
+          }),
         },
         animationDuration: 1500,
         animationEasingUpdate: "quinticInOut",
@@ -112,28 +129,28 @@ export default {
             },
           },
         ],
-      }
-    },
-    compare(graph1, graph2){
-      return true;
+      };
     },
     fetchGraph() {
-      axios.get("http://" + process.env.VUE_APP_DF + "/tree").then((response) => {
-        if (JSON.stringify(response.data) != this.previous_graph){
-          this.previous_graph = JSON.stringify(response.data)
-          this.renderGraph(response.data)
-          this.option = this.getOptions()
-        }
-      })
+      axios
+        .get("http://" + process.env.VUE_APP_DF + "/tree")
+        .then((response) => {
+          if (JSON.stringify(response.data) != this.previous_graph) {
+            this.previous_graph = JSON.stringify(response.data);
+            this.renderGraph(response.data);
+            this.option = this.getOptions();
+          }
+        });
     },
     renderGraph(raw_graph) {
       this.graph = {
         nodes: [],
         links: [],
         categories: [],
-      }
+        node_members: {}
+      };
       raw_graph.nodes.forEach(function (node) {
-        var group_size = raw_graph.node_members[node[0]];
+        var group_size = raw_graph.node_members[node[0]].length;
         this.graph.nodes.push({
           id: node[0],
           name: node[0],
@@ -145,23 +162,80 @@ export default {
           value: group_size,
         });
       }, this);
-      
+
       raw_graph.links.forEach(function (link) {
         this.graph.links.push({
           source: link[0],
           target: link[1],
         });
       }, this);
-      
+
       raw_graph.categories.sort();
       raw_graph.categories.forEach(function (category) {
         this.graph.categories.push({
           name: category,
         });
       }, this);
+
+      this.graph.node_members = raw_graph.node_members;
+    },
+    dragElement(elmnt) {
+      var pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0;
+      if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown =
+          dragMouseDown;
+      } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+      }
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+      }
+
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = elmnt.offsetTop - pos2 + "px";
+        elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+      }
+
+      function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
+    },
+    handleClick(...args) {
+      console.log("click from echarts", args[0]);
+
+      if (args[0].dataType == 'node'){
+        this.showAgentList = true;
+        this.selectedNode.name = args[0].data.name;
+        this.selectedNode.color = args[0].color;
+        this.selectedNode.members = this.graph.node_members[args[0].data.name]
+      }
     },
   },
   mounted() {
+    this.dragElement(document.getElementById("divAgentList"));
     this.fetchGraph();
     this.loading = false;
     this.timer = setInterval(this.fetchGraph, 5000);
@@ -172,12 +246,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.chart {
-  height: 100%;
-}
-
-.heigth_pass {
-  height: 98vh;
-}
-</style>
+<style scoped></style>
