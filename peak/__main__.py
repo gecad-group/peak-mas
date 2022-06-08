@@ -1,14 +1,14 @@
-import logging
-import sys
+from logging import getLogger
+from sys import argv
 
 from peak.mas.cli.main import main as mas_main
 from peak.management.cli.main import main as management_main
 
 def main(args=None):
-    logger = logging.getLogger('peak')
+    logger = getLogger('peak')
     try:
         if not args:
-            args = sys.argv[1:]
+            args = argv[1:]
 
         if args[0].lower() == 'management':
             management_main(args[1:])
