@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard p-4 heigth_pass">
+  <div class="dashboard p-4 h-screen">
     <nav class="flex" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
@@ -23,14 +23,21 @@
       </ol>
     </nav>
     <!-- end nav -->
-    <div id="divAgentList" class="text-center absolute z-10 rounded-md box-border shadow-lg" v-show="showAgentList">
-      <div class="flex rounded-md bg-primary text-gray-200">
-        <div class="p-3">mas members:</div>
-        <button class="rounded-tr-md rounded-br-md w-10 hover:bg-blue-200" @click="showAgentList = !showAgentList">X</button>
+    <div
+      id="divAgentList"
+      class="text-center absolute z-10 rounded-md box-border shadow-xl"
+      v-show="showAgentList"
+    >
+      <div id="divAgentListheader" class="rounded-tl-md rounded-tr-md text-white cursor-move flex" :style="{'background-color': selectedNode.color}">
+        <div class="p-3 m-auto">{{selectedNode.name.toUpperCase()}} members:</div>
+        <div class="rounded-tr-md hover:bg-blue-200 cursor-pointer transition-colors duration-150">
+          <button class="h-full p-3" @click="showAgentList = !showAgentList">
+            <Icon icon="akar-icons:cross" />
+          </button>
+        </div>
       </div>
-      <div class="font-medium p-3">
-        <p>agent1@localhost</p>
-        <p>agent2@localhost</p>
+      <div class="font-medium p-3 bg-white rounded-bl-md rounded-br-md">
+        <p v-for="member in selectedNode.members">{{member[0] + '@' + member[1] + '/' + member[2]}}</p>
       </div>
     </div>
     <div class="h-full">
@@ -68,13 +75,13 @@ export default {
       loading: true,
       timer: "",
       graph: null,
-      previous_graph: {
-        nodes: [],
-        links: [],
-        categories: [],
-        node_members: [],
+      previous_graph: null,
+      showAgentList: false,
+      selectedNode: {
+        members: [],
+        name: '',
+        color: ''
       },
-      showAgentList: false
     };
   },
   methods: {
@@ -140,6 +147,7 @@ export default {
         nodes: [],
         links: [],
         categories: [],
+        node_members: {}
       };
       raw_graph.nodes.forEach(function (node) {
         var group_size = raw_graph.node_members[node[0]].length;
@@ -168,6 +176,8 @@ export default {
           name: category,
         });
       }, this);
+
+      this.graph.node_members = raw_graph.node_members;
     },
     dragElement(elmnt) {
       var pos1 = 0,
@@ -214,8 +224,14 @@ export default {
       }
     },
     handleClick(...args) {
-      console.log("click from echarts", ...args);
-      this.showAgentList = true;
+      console.log("click from echarts", args[0]);
+
+      if (args[0].dataType == 'node'){
+        this.showAgentList = true;
+        this.selectedNode.name = args[0].data.name;
+        this.selectedNode.color = args[0].color;
+        this.selectedNode.members = this.graph.node_members[args[0].data.name]
+      }
     },
   },
   mounted() {
@@ -230,31 +246,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-.heigth_pass {
-  height: 98vh;
-}
-
-#divAgentListHeader {
-  padding: 0%;
-  cursor: move;
-  z-index: 10;
-  background-color: #4f47e5;
-  color: #fff;
-  width: 100%;
-}
-
-#divAgentListHeaderButton {
-  padding: 0%;
-  cursor: pointer;
-  z-index: 11;
-  background-color: #4f47e5;
-  color: #fff;
-  float: right;
-}
-#divAgentListHeaderButton:hover {
-  background-color: rgb(133 126 255);
-}
-
-</style>
+<style scoped></style>
