@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import asyncio
 import logging as _logging
 from typing import List
@@ -6,7 +7,7 @@ import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
 
-_logger = _logging.getLogger('peak.mas.agent')
+_logger = _logging.getLogger(__name__)
 
 
 class _XMPPAgent(_spade.agent.Agent):
@@ -97,8 +98,7 @@ class _XMPPAgent(_spade.agent.Agent):
             members = self.groups[jid].members
             await self.leave_group(jid)
             return members
-            
-
+        
     async def subscribe(self, jid: str, func = None):
         jid = JID.fromstr(jid)
         pubsub = JID.fromstr(jid.domain)
@@ -106,6 +106,8 @@ class _XMPPAgent(_spade.agent.Agent):
         await self.pubsub_client.subscribe(pubsub, node)
         if func:
             self.pubsub_client.on_item_published.connect(func)
+
+
 
 class Agent(_XMPPAgent):
 
