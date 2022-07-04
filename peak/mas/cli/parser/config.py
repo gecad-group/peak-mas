@@ -13,7 +13,7 @@ def parse(args=None):
     config_parser.add_argument('config_file', type=Path)
     ns = config_parser.parse_args(args)
 
-    with open(ns.config_file) as f:
+    with open(ns.config_file.absolute()) as f:
         commands = f.read().splitlines()
     chdir(ns.config_file.parent)
 
@@ -23,7 +23,7 @@ def parse(args=None):
         procs = []
         for command in commands:
             command = command.strip().split(' ')
-            proc = Process(target=general_parse(), args=[command], daemon=False)
+            proc = Process(target=general_parse, args=[command], daemon=False)
             proc.start()
             procs.append(proc)
         try:
