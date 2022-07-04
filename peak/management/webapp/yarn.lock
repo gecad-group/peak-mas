@@ -1202,6 +1202,11 @@
   dependencies:
     "@types/node" "*"
 
+"@videsk/tailwind-random-color@^0.2.0-beta":
+  "integrity" "sha512-RSwT59cb4qihrTRXiLTxCYNXfv+q1BXphaZKPTetXtCIR9nCKaPreENxUASgzgr+LFgS0efT4aw2iStUT12EWQ=="
+  "resolved" "https://registry.npmjs.org/@videsk/tailwind-random-color/-/tailwind-random-color-0.2.0-beta.tgz"
+  "version" "0.2.0-beta"
+
 "@vue/babel-helper-vue-jsx-merge-props@^1.2.1":
   "integrity" "sha512-QOi5OW45e2R20VygMSNhyQHvpdUwQZqGPc748JLGCYEy+yp8fNFNdbNIGAgZmi9e+2JHPd6i6idRuqivyicIkA=="
   "resolved" "https://registry.npmjs.org/@vue/babel-helper-vue-jsx-merge-props/-/babel-helper-vue-jsx-merge-props-1.2.1.tgz"

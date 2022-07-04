@@ -25,6 +25,7 @@
         </svg>
       </button>
     </div>
+
     <!-- sidebar list -->
     <div class="sidebar-list p-4 mt-4">
       <p class="font-medium text-gray-400">Menu</p>
@@ -39,7 +40,28 @@
             <span class="w-full"> Ecosystem </span>
           </router-link>
         </div>
-        
+        <div class="item mt-3">
+          <menu-accordion>
+            <template v-slot:icon>
+              <Icon icon="gg:chart" />
+            </template>
+            <template v-slot:title> Data Analysis </template>
+            <template v-slot:content>
+              <router-link
+                to="/data/visualization"
+                class="w-full text-left block rounded-md p-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Data Visualization
+              </router-link>
+              <router-link
+                to="/data/customization"
+                class="w-full text-left block rounded-md p-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Chart Customization
+              </router-link>
+            </template>
+          </menu-accordion>
+        </div>
         
       </div>
       
