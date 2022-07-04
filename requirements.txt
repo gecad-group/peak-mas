@@ -1,8 +1,8 @@
-spade
-pyModbusTCP
-pandas
-numpy
-SQLAlchemy
-openpyxl
-aiohttp_cors
-pynpm
+aiohttp_cors==0.7.0
+aioxmpp==0.13.2
+pandas==1.4.2
+pyModbusTCP==0.2.0
+pynpm==0.1.2
+setuptools==61.2.0
+spade==3.2.2
+SQLAlchemy==1.4.36

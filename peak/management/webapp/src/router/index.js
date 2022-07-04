@@ -3,48 +3,32 @@ import { createRouter, createWebHistory } from "vue-router";
 // Default Pages
 import Dashboard from "../views/Dashboard.vue";
 // Component Pages
-import Valert from "../views/components/alert.vue";
-import Vaccrodion from "../views/components/accordion.vue";
-import Vbadges from "../views/components/badges.vue";
-var appname = " - Windzo Dashboard Admin Template";
+import DataVisualization from "../views/components/DataVisualization.vue";
+import ChartCustomization from "../views/components/ChartCustomization.vue"
+var appname = "PEAK - ";
 
 const routes = [
   // Routes
   {
     path: "/",
-    name: "Dashboard",
+    name: "Ecosystem",
     component: Dashboard,
-    meta: { title: "Dashboard " + appname },
-  },
-  {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    meta: { title: appname + 'Ecosystem' },
   },
 
   // Components Routes
   {
-    path: "/component/alert",
-    name: "Valert",
-    component: Valert,
-    meta: { title: "Alert" + appname },
+    path: "/data/visualization",
+    name: "Data Visualization",
+    component: DataVisualization,
+    meta: { title: appname + "Data Visualization" },
   },
   {
-    path: "/component/accordion",
-    name: "Vaccordion",
-    component: Vaccrodion,
-    meta: { title: "Accordion" + appname },
-  },
-  {
-    path: "/component/badge",
-    name: "Vbadge",
-    component: Vbadges,
-    meta: { title: "Badge" + appname },
-  },
+    path: "/data/customization",
+    name: "Chart Customization",
+    component: ChartCustomization,
+    meta: { title: appname + "Chart Customization" },
+  }
 ];
 
 const router = createRouter({

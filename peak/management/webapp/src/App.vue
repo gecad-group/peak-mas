@@ -21,7 +21,6 @@
   import Sidebar from "@/components/Sidebar";
   // npm-js
   import Scrollbar from "smooth-scrollbar";
-  import PerfectScrollbar from "perfect-scrollbar";
   export default {
     name: "App",
     components: {

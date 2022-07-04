@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "vue-lodash": "^2.1.2"
-  }
-}
