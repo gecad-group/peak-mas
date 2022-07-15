@@ -67,7 +67,7 @@ class TreeHierarchy(CyclicBehaviour):
             level = 'level'
 
             if msg.get_metadata('leave') and msg.sender in self.agent.treehierarchy_data['node_members'][nodes[-1]]:
-                self.logger.debug(msg.sender + ' leaving ' + path)
+                self.logger.debug(str(msg.sender) + ' leaving ' + path)
                 self.agent.treehierarchy_data['node_members'][nodes[-1]].remove(msg.sender)
                 nodes = nodes[::-1]
                 #remove empty nodes and links
@@ -87,7 +87,7 @@ class TreeHierarchy(CyclicBehaviour):
                     self.agent.treehierarchy_data['categories'] -= difference
 
             else:
-                self.logger.debug(msg.sender + ' entering ' + path)
+                self.logger.debug(str(msg.sender) + ' entering ' + path)
                 last = None
                 for i, node in enumerate(nodes):
                     if node not in self.agent.treehierarchy_data['node_members']:
@@ -95,7 +95,7 @@ class TreeHierarchy(CyclicBehaviour):
                     self.agent.treehierarchy_data['nodes'].add((node, level + str(i), domain))
                     self.agent.treehierarchy_data['categories'].add(level + str(i))
                     if last != None:
-                        self.agent.treehierarchy_data['links'].add((last, node))
+                        self.agent.treehierarchy_data['links'].add((last, node, max(len(self.agent.treehierarchy_data['node_members'][last])+1, len(self.agent.treehierarchy_data['node_members'][node]))))
                     last = node
                 self.agent.treehierarchy_data['node_members'][last].append(msg.sender)
 

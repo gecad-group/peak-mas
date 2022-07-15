@@ -134,7 +134,8 @@ export default {
               },
             },
             force: {
-              repulsion: 100,
+              repulsion: [100, 300],
+              edgeLength: 50,
             },
           },
         ],
@@ -250,6 +251,7 @@ export default {
         this.graph.links.push({
           source: link[0],
           target: link[1],
+          value: link[2]
         });
       }, this);
 
