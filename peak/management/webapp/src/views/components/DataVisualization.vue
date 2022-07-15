@@ -66,24 +66,46 @@
     </nav>
     <!-- end nav -->
     <!-- grid wrapper card -->
-    <div
-      v-for="i in (length(this.charts) + (length(this.charts) % 4)) / 4"
-      class="wrapper-card grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-2 mt-5"
-    >
+    <div class="wrapper-card grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-2 mt-5 h-96">
       <!-- card  -->
-      <div
-        v-for="j in length(this.charts) % 4"
-        class="card bg-white dark:bg-gray-800 w-full rounded-md p-5 shadow flex"
-      >
-        <v-chart
-          :option="charts[(i - 1) * length(this.charts) + j - 1]"
-          autoresize
-        />
-      </div>
+        <div class="card bg-white dark:bg-gray-800 w-full rounded-md p-5 shadow flex">
+          <v-chart
+            :option="chartsOptions[0]"
+            autoresize
+          />
+        </div>
       <!-- end card -->
     </div>
     <!-- end wrapper card -->
   </div>
+<!-- end wrapper card
+  <div
+    v-for="i in Math.floor(nCharts/4)+((nCharts % 4 > 0) ? 1 : 0)"
+    class="wrapper-card grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-2 mt-5"
+  >
+    <template v-if="i < Math.floor(nCharts/4)+((nCharts % 4 > 0) ? 1 : 0)">
+      <div
+        v-for="j in 4"
+        class="card bg-white dark:bg-gray-800 w-full rounded-md p-5 shadow flex h-full"
+      >
+        <v-chart
+          :option="chartsOptions[(i - 1) * nCharts + j - 1]"
+          autoresize
+        />
+      </div>
+    </template>
+    <template v-else>
+      <div
+        v-for="j in nCharts % 4"
+        class="card bg-white dark:bg-gray-800 w-full rounded-md p-5 shadow flex"
+      >
+        <v-chart
+          :option="chartsOptions[(i - 1) * nCharts + j - 1]"
+          autoresize
+        />
+      </div>
+    </template>
+  </div>-->
 </template>
 
 <script>
@@ -99,10 +121,10 @@ export default {
   },
   data() {
     return {
-      charts: {},
+      chartsOptions: [],
+      nCharts: 0,
       previous_data: null,
       timer: "",
-      defaultOptions: {},
     };
   },
   methods: {
@@ -110,101 +132,56 @@ export default {
       axios
         .get("http://" + process.env.VUE_APP_DF + "/dataanalysis")
         .then((response) => {
-          if (JSON.stringify(response.data) != this.previous_data) {
-            this.previous_data = JSON.stringify(response.data);
+          var data = JSON.stringify(response.data)
+          if (data != this.previous_data) {
+            this.previous_data = data;
             this.renderCharts(response.data);
           }
         });
     },
     renderCharts(raw_charts) {
-      this.charts = {};
-      raw_charts.keys().forEach((chart_name) => {
+      this.chartsOptions = [];
+      var options = {};
+      Object.keys(raw_charts).forEach((chart_name) => {
         if (
-          raw_charts[chart_name].graph_options != null &&
+          raw_charts[chart_name].graph_options != null ||
           raw_charts[chart_name].graph_options != ""
         ) {
-          raw_charts[chart_name].data.keys().forEach((data_key) => {
-            raw_charts[chart_name].graph_options.replace(
-              "#" + data_key,
-              raw_charts[chart_name].data[data_key]
-            );
-          }, this);
+          options = {
+            title: {
+              text: chart_name
+            },
+            tooltip: {
+              trigger: 'axis'
+            },
+            xAxis: {
+              type: 'value'
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: []
+          }
+          Object.keys(raw_charts[chart_name]['data']).forEach((data_array)=>{
+            options.series.push({
+                data: raw_charts[chart_name]['data'][data_array],
+                type: 'line',
+                smooth: true
+              })
+            options.xAxis['data'] = [...Array(raw_charts[chart_name]['data'][data_array].length).keys()]
+            console.log(raw_charts[chart_name]['data'][data_array].length)
+          },this)
         } else {
-          this.getOptions(raw_charts[chart_name], chart_name);
+          options = raw_charts[chart_name]['graph_options']
         }
+        console.log(options)
+        this.chartsOptions.push(options)
       }, this);
-    },
-    getOptions(chart, chart_name) {
-      option = {
-        title: {
-          text: chart_name,
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: [],
-        },
-        grid: {
-          left: "3%",
-          right: "4%",
-          bottom: "3%",
-          containLabel: true,
-        },
-        toolbox: {
-          feature: {
-            saveAsImage: {},
-          },
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        },
-        yAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            name: "Email",
-            type: "line",
-            stack: "Total",
-            data: [120, 132, 101, 134, 90, 230, 210],
-          },
-          {
-            name: "Union Ads",
-            type: "line",
-            stack: "Total",
-            data: [220, 182, 191, 234, 290, 330, 310],
-          },
-          {
-            name: "Video Ads",
-            type: "line",
-            stack: "Total",
-            data: [150, 232, 201, 154, 190, 330, 410],
-          },
-          {
-            name: "Direct",
-            type: "line",
-            stack: "Total",
-            data: [320, 332, 301, 334, 390, 330, 320],
-          },
-          {
-            name: "Search Engine",
-            type: "line",
-            stack: "Total",
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-          },
-        ],
-      };
-      chart.data.keys().forEach((data_key) => {
-        option.legend.data.appen
-      }, this);
+      this.nCharts = this.chartsOptions.length
     },
   },
   mounted() {
     this.fetchGraph();
-    this.loading = false;
     this.timer = setInterval(this.fetchGraph, 5000);
   },
   beforeUnmount() {
