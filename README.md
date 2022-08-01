@@ -8,7 +8,8 @@ This framework is an extension of the [SPADE](https://spade-mas.readthedocs.io/e
 PEAK framework focus on two things: help build multi-agent system with ease, eleminating the use of many boilerplates and adding usefull functionalities, and help the users to manage, analyse and monitor interactivly every single aspect of each multi-agent system inside the ecosystem.
 Because of these PEAK was devided in two main components: the PEAK MAS, where are the tools to build the agents, and the PEAK Management, where it is the management, analysis and monitorization tools for the multi-agent ecosystem.
 With PEAK is possible to:
-- 
+- Feature 1
+- Feature 2
 
 ## How to Install
 ### XMPP Server
