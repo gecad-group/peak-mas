@@ -10,18 +10,3 @@ Because of these PEAK was devided in two main components: the PEAK MAS, where ar
 With PEAK is possible to:
 - Feature 1
 - Feature 2
-
-## How to Install
-### XMPP Server
-### Conda Environment
-### Setup.py
-
-## Examples
-
-### Simple Example
-
-### Group Chat
-
-### Properties
-
-### Synchronization
