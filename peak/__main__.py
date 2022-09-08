@@ -1,16 +1,17 @@
 from logging import getLogger
 from sys import argv
 
-from peak.mas.cli.main import main as mas_main
 from peak.management.cli.main import main as management_main
+from peak.mas.cli.main import main as mas_main
+
 
 def main(args=None):
-    logger = getLogger('peak')
+    logger = getLogger("peak")
     try:
         if not args:
             args = argv[1:]
 
-        if args[0].lower() == 'management':
+        if args[0].lower() == "management":
             management_main(args[1:])
         else:
             mas_main(args)
@@ -20,5 +21,6 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

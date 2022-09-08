@@ -1,1 +1,1 @@
-sync_group = 'sync@conference.localhost'
+sync_group = "sync@conference.localhost"
