@@ -5,17 +5,11 @@ import logging as _logging
 from spade.message import Message
 from spade.template import Template
 
-from peak.agent import Agent
-from peak.behaviour.base import (
-    CyclicBehaviour,
-    FSMBehaviour,
-    OneShotBehaviour,
-    PeriodicBehaviour,
-)
-from peak.behaviour.utils import *
+from peak.agent import *
+from peak.behaviours import *
 from peak.jid import *
-from peak.properties import Properties, Property
-from peak.simulation import SyncAgent, Synchronizer
+from peak.properties import *
+from peak.simulation import *
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"
