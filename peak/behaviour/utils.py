@@ -2,8 +2,8 @@ import logging
 from json import dumps as json_dumps
 from typing import Callable
 
-import peak.mas as peak
-from peak.management.df.df import df_name
+import peak
+from peak.df import jid as df_jid
 
 
 class CreateNode(peak.OneShotBehaviour):
@@ -18,7 +18,7 @@ class CreateNode(peak.OneShotBehaviour):
 
     async def run(self):
         msg = peak.Message()
-        msg.to = df_name(self.agent.jid.domain)
+        msg.to = df_jid(self.agent.jid.domain)
         msg.set_metadata("resource", "pubsub_create_node")
         msg.set_metadata("affiliation", self.affiliation if self.affiliation else "")
         msg.set_metadata("node_jid", self.node)
@@ -38,7 +38,7 @@ class JoinGroup(peak.OneShotBehaviour):
 
     async def run(self):
         msg = peak.Message()
-        msg.to = df_name(self.agent.jid.domain)
+        msg.to = df_jid(self.agent.jid.domain)
         msg.set_metadata("resource", "treehierarchy")
         msg.set_metadata("path", self.path)
         msg.set_metadata("domain", self.domain)
@@ -59,7 +59,7 @@ class LeaveGroup(peak.OneShotBehaviour):
 
     async def run(self):
         msg = peak.Message()
-        msg.to = df_name(self.agent.jid.domain)
+        msg.to = df_jid(self.agent.jid.domain)
         msg.set_metadata("resource", "treehierarchy")
         msg.set_metadata("path", self.path)
         msg.set_metadata("domain", self.domain)
@@ -83,7 +83,7 @@ class SearchGroup(peak.OneShotBehaviour):
 
     async def run(self):
         msg = peak.Message()
-        msg.to = df_name(self.agent.jid.domain)
+        msg.to = df_jid(self.agent.jid.domain)
         msg.set_metadata("resource", "searchgroup")
         msg.set_metadata("tags", str(self.tags))
         await self.send(msg)
@@ -174,7 +174,7 @@ class _ExportDataSync(peak.CyclicBehaviour):
         for property in self.properties:
             self.file_data[property] = []
         if self.to_graph:
-            msg = peak.Message(to=df_name(self.agent.jid.domain))
+            msg = peak.Message(to=df_jid(self.agent.jid.domain))
             msg.body = "Create graph " + self.graph_name
             msg.metadata = {
                 "resource": "graph",
@@ -200,7 +200,7 @@ class _ExportDataSync(peak.CyclicBehaviour):
                         self.file_data[property].append(attribute)
                         current_data[property] = attribute
                 if self.to_graph:
-                    msg = peak.Message(to=df_name(self.agent.jid.domain))
+                    msg = peak.Message(to=df_jid(self.agent.jid.domain))
                     msg.body = "Update graph " + self.file_name
                     msg.metadata = {
                         "resource": "graph",
@@ -239,7 +239,7 @@ class _ExportData(peak.PeriodicBehaviour):
         for property in self.properties:
             self.file_data[property] = []
         if self.to_graph:
-            msg = peak.Message(to=df_name(self.agent.jid.domain))
+            msg = peak.Message(to=df_jid(self.agent.jid.domain))
             msg.body = "Create graph " + self.graph_name
             msg.metadata = {
                 "resource": "graph",
@@ -265,7 +265,7 @@ class _ExportData(peak.PeriodicBehaviour):
                 'exporting property "' + property + '": ' + str(current_data[property])
             )
         if self.to_graph:
-            msg = peak.Message(to=df_name(self.agent.jid.domain))
+            msg = peak.Message(to=df_jid(self.agent.jid.domain))
             msg.body = "Update graph " + self.graph_name
             msg.metadata = {
                 "resource": "graph",

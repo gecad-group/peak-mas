@@ -2,15 +2,25 @@ from argparse import ArgumentParser, ArgumentTypeError
 from copy import copy
 from logging import getLevelName, getLogger
 from multiprocessing import Process
+from os import chdir
 from pathlib import Path
 
 from aioxmpp import JID
 
 from peak import __name__ as peak_name
-from peak.mas.cli.bootloader import boot_agent
+from peak.bootloader import boot_agent
 
 
-def parse(args=None):
+def exec(args: list[str]):
+    if len(args) == 0 or args[0].lower() == "-h":
+        print("Help message - in development")
+    elif len(args) == 1:
+        multi_agent_exec(args)
+    elif len(args) > 1:
+        agent_exec(args)
+
+
+def agent_exec(args=None):
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("file", type=Path)
     parser.add_argument("jid", type=JID.fromstr)
@@ -40,6 +50,33 @@ def parse(args=None):
             kwargs["jid"] = ns.jid.replace(localpart=ns.jid.localpart + str(i))
             kwargs["number"] = i
             proc = Process(target=boot_agent, kwargs=kwargs, daemon=False)
+            proc.start()
+            procs.append(proc)
+        try:
+            logger = getLogger(__name__)
+            [proc.join() for proc in procs]
+        except Exception as e:
+            logger.exception(e)
+        except KeyboardInterrupt:
+            pass
+
+
+def multi_agent_exec(args=None):
+    config_parser = ArgumentParser(prog=peak_name)
+    config_parser.add_argument("config_file", type=Path)
+    ns = config_parser.parse_args(args)
+
+    with open(ns.config_file.absolute()) as f:
+        commands = f.read().splitlines()
+    chdir(ns.config_file.parent)
+
+    if len(commands) == 1:
+        general_parse(commands[0].strip().split(" "))
+    else:
+        procs = []
+        for command in commands:
+            command = command.strip().split(" ")
+            proc = Process(target=general_parse, args=[command], daemon=False)
             proc.start()
             procs.append(proc)
         try:

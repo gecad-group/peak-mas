@@ -1,11 +1,10 @@
-import itertools
 from abc import ABCMeta, abstractmethod
 from random import uniform
 from typing import Dict
 
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 
-from peak.mas.drivers import Driver
+from peak.drivers import Driver
 
 
 class Property:

@@ -1,13 +1,12 @@
 import logging
 from argparse import ArgumentParser
-from copy import copy
 from time import sleep
 
 import peak
-from peak.management.df.df import DF
+from peak.df import DF
 
 
-def parse(args):
+def exec(args):
     parser = ArgumentParser(prog=peak.__name__ + " management df")
     parser.add_argument("-d", "--domain", type=str, default="localhost")
     parser.add_argument("--verify_security", type=bool, default=False)

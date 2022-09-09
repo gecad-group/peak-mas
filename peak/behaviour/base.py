@@ -5,7 +5,7 @@ import spade.behaviour
 from aioxmpp import JID
 from spade.message import Message
 
-from peak.mas import Agent
+from peak import Agent
 
 aioxmpp.pubsub.xso.as_payload_class(aioxmpp.Message)
 

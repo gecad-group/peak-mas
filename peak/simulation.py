@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 
 from aioxmpp import JID
 
-from peak.mas import (Agent, CyclicBehaviour, Message, PeriodicBehaviour,
-                      Template)
+from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 
 _logger = _logging.getLogger(__name__)
 

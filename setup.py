@@ -11,7 +11,7 @@ if os.path.isfile(requirementPath):
 
 setup(
     name="PEAK",
-    version="1.0.0",
+    version="2.0.0",
     author="Bruno Ribeiro",
     author_email="brgri@isep.ipp.pt",
     description="Python-based framework for hEterogeneous Agent Communities",
