@@ -10,7 +10,6 @@ from spade.message import Message
 
 import peak
 from peak import Agent
-from peak.df import jid as df_jid
 
 aioxmpp.pubsub.xso.as_payload_class(aioxmpp.Message)
 
@@ -21,6 +20,8 @@ def slice_jid(jid):
     node = jid.localpart
     return pubsub, node
 
+def df_jid(domain):
+    return 'df@'+domain+'/admin'
 
 class _Behaviour:
 
