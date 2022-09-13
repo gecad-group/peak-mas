@@ -71,12 +71,12 @@ def multi_agent_exec(args=None):
     chdir(ns.config_file.parent)
 
     if len(commands) == 1:
-        general_parse(commands[0].strip().split(" "))
+        agent_exec(commands[0].strip().split(" "))
     else:
         procs = []
         for command in commands:
             command = command.strip().split(" ")
-            proc = Process(target=general_parse, args=[command], daemon=False)
+            proc = Process(target=agent_exec, args=[command], daemon=False)
             proc.start()
             procs.append(proc)
         try:

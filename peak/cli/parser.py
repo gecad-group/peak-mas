@@ -8,3 +8,5 @@ def parse(args: list[str]):
         df.exec(args[1:])
     elif args[0].lower() == "run":
         mas.exec(args[1:])
+    else:
+        print("Help message - in development")
