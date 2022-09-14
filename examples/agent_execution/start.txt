@@ -1,3 +1,3 @@
-agent.py agent0@mas.gecad.isep.ipp.pt -r 2 -l debug
-agent.py agent1@mas.gecad.isep.ipp.pt
-agent.py agent2@mas.gecad.isep.ipp.pt
+agent.py agent0@localhost -r 2 -l debug
+agent.py agent1@localhost
+agent.py agent2@localhost

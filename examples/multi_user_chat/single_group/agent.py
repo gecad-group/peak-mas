@@ -1,6 +1,4 @@
-import logging
-
-from peak.mas import Agent, JoinGroup
+from peak import Agent, JoinGroup
 
 
 class agent(Agent):

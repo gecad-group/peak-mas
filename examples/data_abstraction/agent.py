@@ -1,5 +1,4 @@
-from peak.mas import Agent, Message
-from peak.mas.behaviour import PeriodicBehaviour
+from peak import Agent, Message, PeriodicBehaviour
 
 
 class agent(Agent):

@@ -1,6 +1,6 @@
 import settings
 
-from peak.mas import Message, OneShotBehaviour, SyncAgent
+from peak import Message, OneShotBehaviour, SyncAgent
 
 
 class agent(SyncAgent):

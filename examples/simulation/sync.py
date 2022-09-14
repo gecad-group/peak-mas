@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import settings
 
-from peak.mas import Synchronizer
+from peak import Synchronizer
 
 
 class sync(Synchronizer):

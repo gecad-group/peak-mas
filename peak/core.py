@@ -1,6 +1,6 @@
-import asyncio
+import asyncio as _asyncio
 import logging as _logging
-from abc import abstractmethod
+from abc import ABCMeta as _ABCMeta
 from typing import List
 
 import aioxmpp as _aioxmpp
@@ -38,9 +38,6 @@ class _XMPPAgent(_spade.agent.Agent):
         self.presence.approve_all = True
 
         self.muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
-        self.pubsub_client: _aioxmpp.PubSubClient = self.client.summon(
-            _aioxmpp.PubSubClient
-        )
         self.disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
 
         self.message_dispatcher.register_callback(
@@ -65,7 +62,7 @@ class _XMPPAgent(_spade.agent.Agent):
     async def join_group(self, jid):
         room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         room.on_failure.connect(self._on_muc_failure_handler)
-        await asyncio.wait([fut], timeout=3)
+        await _asyncio.wait([fut], timeout=3)
         if fut.done():
             if jid not in self.groups:
                 self.groups[jid] = room
@@ -102,14 +99,6 @@ class _XMPPAgent(_spade.agent.Agent):
             await self.leave_group(jid)
             return members
 
-    async def subscribe(self, jid: str, func=None):
-        jid = JID.fromstr(jid)
-        pubsub = JID.fromstr(jid.domain)
-        node = jid.localpart
-        await self.pubsub_client.subscribe(pubsub, node)
-        if func:
-            self.pubsub_client.on_item_published.connect(func)
-
 
 class Agent(_XMPPAgent):
     def __init__(self, jid: JID, properties=None, verify_security=False):
@@ -128,3 +117,51 @@ class Agent(_XMPPAgent):
     def _parse(self, properties):
         for key in properties:
             setattr(self, key, properties[key])
+
+
+class _Behaviour:
+
+    agent: Agent
+
+    async def send_to_group(self, msg: _spade.message.Message):
+        """Sends a message to a group chat.
+
+        When sending a message to a group the agent joins the group first. The parameter
+        'leave' tells the method if the agent leaves, or not, the group after sending the
+        message. (If the intention is to send a single request to a new group the best
+        option would be to leave the group chat, if the intention is to send a message
+        to a group wich the agent already belongs to, it's better to not leave)
+        Args:
+            msg (mas.Message): The Message.
+            group (str, optional): Name of the group to send the message to. If None is given the
+                                   the message is sent to the MAS group. Defaults to None.
+            leave (bool, optional): If true, agent leaves the group after sending the message. Defaults to False.
+        """
+        raw_msg = msg.prepare()
+        try:
+            await self.agent.groups[str(msg.to)].send_message(raw_msg)
+        except:
+            room, future = self.agent.muc_client.join(msg.to, self.agent.name)
+            await future
+            await room.send_message(raw_msg)
+            await room.leave()
+
+
+class OneShotBehaviour(
+    _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
+):
+    pass
+
+
+class PeriodicBehaviour(
+    _spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=_ABCMeta
+):
+    pass
+
+
+class CyclicBehaviour(_spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=_ABCMeta):
+    pass
+
+
+class FSMBehaviour(_spade.behaviour.FSMBehaviour, _Behaviour, metaclass=_ABCMeta):
+    pass

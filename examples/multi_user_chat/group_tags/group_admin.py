@@ -1,6 +1,6 @@
 from asyncio import sleep
 
-from peak.mas import Agent, JoinGroup, LeaveGroup
+from peak import Agent, JoinGroup, LeaveGroup
 
 
 class group_admin(Agent):

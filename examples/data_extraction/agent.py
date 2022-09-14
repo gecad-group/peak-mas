@@ -1,6 +1,6 @@
 from random import random
 
-from peak.mas import Agent, ExportData, PeriodicBehaviour
+from peak import Agent, ExportData, PeriodicBehaviour
 
 
 class agent(Agent):

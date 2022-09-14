@@ -1,6 +1,6 @@
 from asyncio import sleep
 
-from peak.mas import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
+from peak import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
 
 
 class agent(Agent):

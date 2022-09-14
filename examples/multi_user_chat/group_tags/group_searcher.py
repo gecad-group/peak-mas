@@ -1,6 +1,6 @@
 import logging
 
-from peak.mas import Agent, JoinGroup, SearchGroup
+from peak import Agent, JoinGroup, SearchGroup
 
 
 class group_searcher(Agent):

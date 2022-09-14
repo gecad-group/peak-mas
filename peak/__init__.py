@@ -5,11 +5,11 @@ import logging as _logging
 from spade.message import Message
 from spade.template import Template
 
-from peak.agent import *
+from peak.core import *
+from peak.agents import *
 from peak.behaviours import *
 from peak.jid import *
 from peak.properties import *
-from peak.simulation import *
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"

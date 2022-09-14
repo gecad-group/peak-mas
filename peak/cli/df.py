@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from time import sleep
 
 import peak
-from peak.df import DF
+from peak import DF
 
 
 def exec(args):

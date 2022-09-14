@@ -1,4 +1,4 @@
-from peak.mas import Properties, Property
+from peak import Properties, Property
 
 
 class dataset(Properties):
