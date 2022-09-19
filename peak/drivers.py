@@ -8,15 +8,38 @@ log = logging.getLogger("peak.mas.drivers")
 
 
 class Driver(metaclass=ABCMeta):
-    def next(self):
-        pass
+    """Base interface for the Drivers.
+    """
+    pass
 
 
 class DriverModBusTCP(Driver):
-    def __init__(self, host, unit_id=None) -> None:
+    """Protocol ModBus/TCP.
+
+    Attributes:
+        client: handles the ModBus/TCP comunication.
+    """
+    def __init__(self, host: str, unit_id: int=None):
+        """Inits Driver ModBus/TCP.
+
+        Args:
+            host: Hostname or IPv4/IPv6 address of the device.
+            unit_id: Unit ID.
+        """
         self.client = ModbusClient(host=host, unit_id=unit_id, auto_open=True)
 
-    def read(self, register, unit_id=None):
+    def read(self, register: int, unit_id: int=None) -> int:
+        """Reads a given register of the device.
+
+        Args:
+            register: Register address (0 to 65535).
+            unit_id: Unit ID.
+
+        Returns:
+            An integer that was read at the given register.
+            Returns None if the value could not read from the
+            target.
+        """
         if unit_id is not None:
             self.client.unit_id(unit_id)
         data = self.client.read_input_registers(reg_addr=register)
@@ -27,11 +50,18 @@ class DriverModBusTCP(Driver):
                 self.client.host(),
                 exc_info=self.client.last_except_txt(),
             )
-            return 0
+            return None
         else:
             return get_2comp(data[0])
 
-    def write(self, register, value, unit_id=None):
+    def write(self, register: int, value: int, unit_id: int=None):
+        """Writes a value in a given register.
+
+        Args:
+            register: Register address (0 to 65535).
+            value: Value to be written.
+            unit_id: Unit ID.
+        """
         if unit_id is not None:
             self.client.unit_id(unit_id)
         if not self.client.write_single_register(register, get_2comp(value)):
