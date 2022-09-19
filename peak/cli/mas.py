@@ -26,12 +26,14 @@ def agent_exec(args=None):
     parser.add_argument("jid", type=JID.fromstr)
     parser.add_argument("-p", "--properties", type=Path)
     parser.add_argument("-r", "--repeat", type=int, default=1)
-    parser.add_argument("-l", "--logging", type=str.upper, default=getLevelName("INFO"))
+    parser.add_argument(
+        "-l", "--log_level", type=str.upper, default=getLevelName("INFO")
+    )
     parser.add_argument("--verify_security", type=bool, default=False)
 
     ns = parser.parse_args(args)  # if args none it reads from the terminal
 
-    ns.logging = getLevelName(ns.logging)
+    ns.log_level = getLevelName(ns.log_level)
 
     for file in [ns.file, ns.properties]:
         if file and not file.is_file():
