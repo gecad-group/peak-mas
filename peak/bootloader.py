@@ -1,43 +1,52 @@
 import importlib
-import logging as _logging
+import logging
 import os
 import sys
 import time
 from pathlib import Path
+from typing import Type
 
 from aioxmpp import JID
 from spade import quit_spade
 
-logger = _logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def boot_agent(
     file: Path,
     jid: JID,
-    name: str,
+    root_name: str,
     number: int,
     properties: Path,
-    logging: int,
+    log_level: int,
     verify_security: bool,
 ):
-    try:
-        log_file_name = jid.localpart + ("_" + jid.resource if jid.resource else "")
-        logs_path = os.path.join(str(file.parent.absolute()), "logs")
-        log_file = os.path.join(logs_path, log_file_name + ".log")
+    """Configures logging system and boots the agent.
 
-        os.makedirs(logs_path, exist_ok=True)
-        _logging.basicConfig(
-            filename=log_file,
-            filemode="w",
-            level=logging,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
+    Args:
+        file: File path where the agent's class is.
+        jid: JID of the agent.
+        root_name: The root name of the agents that were
+            cloned.
+        number: If the agent its a clone is the number of present in
+            the name of the agent, else its None.
+        properties: Properties to be injected in the agent.
+        log_level: Logging level to be used in the agents logging file.
+        verify_security: If true it validates the SSL certificates.
+    """
+    log_file_name: str = jid.localpart + ("_" + jid.resource if jid.resource else "")
+    logs_folder = file.parent.absolute().joinpath("logs")
+    log_file = logs_folder.joinpath(f"{log_file_name}.log")
 
-        _boot_agent(file, jid, name, number, properties, verify_security)
-    except Exception as e:
-        logger.exception(e)
-    except KeyboardInterrupt:
-        pass
+    os.makedirs(logs_folder, exist_ok=True)
+    logging.basicConfig(
+        filename=log_file,
+        filemode="w",
+        level=log_level,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    _boot_agent(file, jid, root_name, number, properties, verify_security)
 
 
 def _boot_agent(
@@ -48,10 +57,23 @@ def _boot_agent(
     properties: Path,
     verify_security: bool,
 ):
+    """Boots the agent.
+
+    Args:
+        file (Path): _description_
+        jid (JID): _description_
+        name (str): _description_
+        number (int): _description_
+        properties (Path): _description_
+        verify_security (bool): _description_
+    """
+    # Gets the agent and properties classes. Creates the agent with the 
+    # properties and the attributes already provided. Runs the agent and 
+    # creates a loop that waits until the agent dies.
     logger.debug("creating agent")
-    agent_class = get_class(file)
+    agent_class = _get_class(file)
     if properties:
-        properties = get_class(properties)(jid.localpart, name, number)
+        properties = _get_class(properties)(jid.localpart, name, number)
         properties = properties.extract()
     else:
         properties = None
@@ -66,16 +88,27 @@ def _boot_agent(
         except Exception as e:
             logger.error("AGENT CRACHED")
             logger.exception(e)
-            logger.info("stoping agent... (Exception)")
             agent_instance.stop()
         except KeyboardInterrupt:
-            logger.info("stoping agent... (Keyboard Interrupt)")
+            logger.info("Keyboard Interrupt")
             agent_instance.stop()
     quit_spade()
     logger.info("agent stoped")
 
 
-def get_class(file: Path):
+def _get_class(file: Path) -> Type:
+    """Gets class from a file.
+
+    Reads a python module and retrieves the class with the name of the file.
+
+
+    Args:
+        file: Python module. Must have a class with the same name as the file.
+            Example: agent.py --> class agent(...)
+
+    Returns:
+        A class object with the same name as the file.
+    """
     module_path, module_file = os.path.split(file.absolute())
     module_name = module_file.split(".")[0]
     sys.path.append(module_path)
