@@ -8,6 +8,8 @@ from peak.properties import Property
 
 
 class JoinGroup(OneShotBehaviour):
+    """Joins a group using a JID."""
+
     def __init__(self, path: str, domain: str, tags: list = []):
         super().__init__()
         self.path = path
@@ -30,6 +32,8 @@ class JoinGroup(OneShotBehaviour):
 
 
 class LeaveGroup(OneShotBehaviour):
+    """Leaves a group."""
+
     def __init__(self, path: str, domain: str):
         super().__init__()
         self.path = path
@@ -51,6 +55,8 @@ class LeaveGroup(OneShotBehaviour):
 
 
 class SearchGroup(OneShotBehaviour):
+    """Searches for a group."""
+
     def __init__(
         self, tags: list[str], callback: Callable[[list[str]], None], *args, **kargs
     ):
@@ -76,6 +82,13 @@ class SearchGroup(OneShotBehaviour):
 
 
 class ExportData(OneShotBehaviour):
+    """Exports data to a file and optionaly to the DF.
+
+    The data exports works diferently when using the Synchronizer and
+    when its not used. When the Synchronizer its being used the data
+    is exported at the same rate as the Synchronizers clock. If its not
+    used the user must define a interval in which the data is exported."""
+
     def __init__(
         self,
         file_name: str,
@@ -91,7 +104,7 @@ class ExportData(OneShotBehaviour):
         self.properties = properties
         self.to_graph = to_graph
         if graph_name == "" and self.to_graph:
-            raise Exception("if graph is set to true, it must have a name")
+            raise Exception("when graph is set to true, a name for it must be defined")
         self.graph_name = graph_name
         self.graph_options = graph_options
 
@@ -123,6 +136,8 @@ class ExportData(OneShotBehaviour):
 
 
 class _ExportDataSync(CyclicBehaviour):
+    """Exports the data at the same rate as the synchronization."""
+
     def __init__(
         self,
         file_name: str,
@@ -194,6 +209,8 @@ class _ExportDataSync(CyclicBehaviour):
 
 
 class _ExportData(PeriodicBehaviour):
+    """Exports the data at a rate defined by the user."""
+
     def __init__(
         self,
         file_name: str,
