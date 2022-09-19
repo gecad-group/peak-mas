@@ -9,13 +9,24 @@ import aiohttp_cors
 from aioxmpp import JID
 
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
+from peak.properties import Properties
 
 _logger = _logging.getLogger(__name__)
 
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
+    """Agent that is synchronized by the Synchronizer.
+
+    Every agent that needs to be synchronized needs
+    to extend this class.
+
+    Attributes:
+        period: An integer representing the number of the period inside the simulation.
+        time: A datetime of the current moment in the simmulation.
+    """
+
     class _StepBehaviour(CyclicBehaviour):
-        """Listens for the Synchronizer messages."""
+        """Listens for the Synchronizer's clock's ticks."""
 
         async def on_start(self):
             _logger.info("Waiting for simulation to start...")
@@ -45,17 +56,15 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         async def on_end(self):
             await self.agent.stop()
 
-    def __init__(self, jid: JID, properties=None, verify_security=False):
+    def __init__(
+        self, jid: JID, properties: Properties = None, verify_security: bool = False
+    ):
         """Agent that listens to the Synchronizer.
 
-        This is an abstract class. Step method must be overriden.
-
         Args:
-            name (str): Name of the agent.
-            server (str): Domain of the XMPP server to connect to.
-            mas_name (str): Name of the MAS to be used to join a group chat between the agents.
-            group_names (set[str], optional): Set of group names to join to. Defaults to {}.
-            verify_security (bool, optional): Wether to verify or not the SSL certificates. Defaults to False.
+            jid: XMPP identifier of the agent.
+            properties: Atributes of the agent to be injected.
+            verify_security: If True verifies SSL certificates.
         """
         super().__init__(jid, properties, verify_security)
         self.period = 0
@@ -69,23 +78,30 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
 
     @abstractmethod
     async def step(self):
-        """This method is executed at each step.
+        """Executed at each tick of the Synchronizer clock.
 
-        It must be overriden.
-
-        Raises:
-            NotImplementedError: The step method must be overriden.
-        """
-        raise NotImplementedError("The step method must be overriden.")
+        To be implemented by the user."""
+        raise NotImplementedError()
 
 
 class Synchronizer(Agent):
-    class _StepBehaviour_old(PeriodicBehaviour):
-        """Sends a message to MAS group for each step."""
+    """Agent that synchronizes the other agents.
+
+    The Synchronizer creates a group of agents, awaits for
+    the agents to join the group and starts the clock of the
+    simulation.
+    """
+
+    class _PeriodicClock(PeriodicBehaviour):
+        """Handles the clock of the simulation.
+
+        This clock tracks the number of the current period
+        throughout the simulation.
+        """
 
         def __init__(
             self,
-            group_jid,
+            group_jid: str,
             n_agents: int,
             periods: int,
             time_per_period: float,
@@ -120,8 +136,12 @@ class Synchronizer(Agent):
             _logger.info("Ending simulation...")
             await self.agent.stop()
 
-    class _StepBehaviour(PeriodicBehaviour):
-        """Sends a message to MAS group for each step."""
+    class _DateTimeClock(PeriodicBehaviour):
+        """Handles the clock of the simulation.
+
+        This clock tracks the current date and time of the
+        simulation throughout its execution.
+        """
 
         def __init__(
             self,
@@ -175,40 +195,78 @@ class Synchronizer(Agent):
             _logger.info("Ending simulation...")
             await self.agent.stop()
 
-    async def sync_group(
-        self, jid, n_agents: int, time_per_period: float, periods: int
+    async def sync_group_period(
+        self, group_jid: str, n_agents: int, time_per_period: float, periods: int
     ):
-        await self.join_group(jid)
+        """Synchronizes a group of agents.
+
+        The clock is based on the number of the current period.
+
+        Args:
+            group_jid: Identifier of the XMPP group to be synchronized.
+            n_agents: Number of agents to be synchronized. Synchronizer
+                awaits for this number of agents to join the group before
+                it starts the simulation.
+            time_per_period: time in seconds between each period.
+            periods: number of periods to simulate.
+        """
+        await self.join_group(group_jid)
         self.add_behaviour(
-            self._StepBehaviour_old(jid, n_agents, periods, time_per_period)
+            self._PeriodicClock(group_jid, n_agents, periods, time_per_period)
         )
 
-    async def sync_group(
+    async def sync_group_time(
         self,
-        jid,
+        group_jid: str,
         n_agents: int,
         initial_time: datetime,
         end_time: datetime,
-        period_time_simulated: timedelta,
-        period_time_real: float,
+        internal_period_time: timedelta,
+        external_period_time: float,
         start_at: datetime = None,
     ):
-        await self.join_group(jid)
+        """Synchronizes a group of agents.
+
+        The clock is based on the date and time inside of the simulation.
+
+        Args:
+            group_jid: Identifier of the XMPP group to be synchronized.
+            n_agents: Number of agents to be synchronized. Synchronizer
+                awaits for this number of agents to join the group before
+                it starts the simulation.
+            initial_time: defines the internal date and time at the start of the
+                simulation.
+            end_time: defines the internal date and time at which the simulation ends.
+            internal_period_time: time between each period inside the simulation.
+            period_time_real: time between each tick of the clock.
+            start_at: schedules the simulation start at a given time. If None the
+                simulation starts right away.
+        """
+        await self.join_group(group_jid)
         self.add_behaviour(
-            self._StepBehaviour(
-                jid,
+            self._DateTimeClock(
+                group_jid,
                 n_agents,
                 initial_time,
                 end_time,
-                period_time_simulated,
-                period_time_real,
+                internal_period_time,
+                external_period_time,
                 start_at,
             )
         )
 
 
 class DF(Agent):
-    class GroupHierarchy(CyclicBehaviour):
+    """Directory Facilitator.
+
+    This agent makes available the data that it gathers from multi-agent systems
+    publicly through a REST API. It also provides a Yellow Page Service to the
+    agents.
+    """
+
+    class _GroupHierarchy(CyclicBehaviour):
+        """Manages the group structure of all the multi-agent systems."""
+
         async def on_start(self):
             self.logger = _logging.getLogger(self.__class__.__name__)
             self.logger.debug("starting behaviour")
@@ -310,7 +368,9 @@ class DF(Agent):
                             self.agent.grouphierarchy_data["tags"][tag] = set()
                         self.agent.grouphierarchy_data["tags"][tag].add(last)
 
-    class SearchGroup(CyclicBehaviour):
+    class _SearchGroup(CyclicBehaviour):
+        """Handles all the requests to search for groups."""
+
         async def on_start(self) -> None:
             self.logger = _logging.getLogger(self.__class__.__name__)
             self.logger.debug("starting behaviour")
@@ -329,7 +389,9 @@ class DF(Agent):
                 res.set_metadata("groups", groups)
                 await self.send(res)
 
-    class CreateGraph(CyclicBehaviour):
+    class _CreateGraph(CyclicBehaviour):
+        """Handles the requests to create graphs"""
+
         async def on_start(self):
             self.logger = _logging.getLogger(self.__class__.__name__)
             self.logger.debug("starting behaviour")
@@ -352,7 +414,9 @@ class DF(Agent):
                 for property in properties:
                     self.agent.dataanalysis_data[graph_name]["data"][property] = []
 
-    class UpdateGraph(CyclicBehaviour):
+    class _UpdateGraph(CyclicBehaviour):
+        """Handles the requests to update the data of a given graph."""
+
         async def on_start(self) -> None:
             self.logger = _logging.getLogger(self.__class__.__name__)
             self.logger.debug("starting behaviour")
@@ -383,6 +447,14 @@ class DF(Agent):
 
     @classmethod
     def name(domain: str) -> str:
+        """Retrieves the JID of the DF based on the agent domain.
+
+        Args:
+            domain: server's name
+
+        Returns:
+            The string of the complete JID of the DF.
+        """
         return "df@" + domain + "/admin"
 
     async def setup(self):
@@ -390,11 +462,12 @@ class DF(Agent):
         self.dataanalysis_data = dict()
         self.group_tags = dict()
 
-        self.add_behaviour(self.GroupHierarchy())
-        self.add_behaviour(self.SearchGroup())
-        self.add_behaviour(self.CreateGraph())
-        self.add_behaviour(self.UpdateGraph())
+        self.add_behaviour(self._GroupHierarchy())
+        self.add_behaviour(self._SearchGroup())
+        self.add_behaviour(self._CreateGraph())
+        self.add_behaviour(self._UpdateGraph())
 
+        # Creates routes.
         self.web.add_get("/groups", self.groups, template=None)
         self.web.add_get("/groups/refresh", self.refresh_groups, template=None)
         self.web.add_get("/dataanalysis", self.dataanalysis, template=None)
