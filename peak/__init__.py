@@ -1,4 +1,9 @@
-"""PEAK - Python-based framework for hEterogeneous Agent Communities"""
+"""PEAK - Python-based framework for hEterogeneous Agent Communities.
+
+PEAK is a framework for developing communities of heterogeneous agents. 
+This communities are multi-agent systems that can coexist and exchange 
+resources and information with each other easly. 
+"""
 
 import logging as _logging
 
@@ -8,13 +13,12 @@ from spade.template import Template
 from peak.core import *
 from peak.agents import *
 from peak.behaviours import *
-from peak.jid import *
 from peak.properties import *
 
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"
 
-
+# this loggers populate to much the logger files created by peak
 _logging.getLogger("aiosasl").setLevel(_logging.ERROR)
 _logging.getLogger("spade").setLevel(_logging.ERROR)
 _logging.getLogger("muc").setLevel(_logging.ERROR)
