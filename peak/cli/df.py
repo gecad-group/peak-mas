@@ -7,12 +7,12 @@ from peak import DF
 
 
 def exec(args):
-    parser = ArgumentParser(prog=peak.__name__ + " management df")
+    parser = ArgumentParser(prog=peak.__name__ + "df")
     parser.add_argument("-d", "--domain", type=str, default="localhost")
     parser.add_argument("--verify_security", type=bool, default=False)
     parser.add_argument(
         "-l",
-        "--logging",
+        "--log",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
     )
@@ -21,14 +21,14 @@ def exec(args):
     ns = parser.parse_args(args)
 
     logging.basicConfig(
-        level=ns.logging,
+        level=ns.log,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.StreamHandler()],
     )
 
     logger = logging.getLogger(__name__)
 
-    logger.info("starting DF")
+    logger.info("Starting DF")
     df = DF(ns.domain, ns.verify_security, ns.port)
     df.start().result()
     logger.info("DF running")
@@ -37,4 +37,4 @@ def exec(args):
             sleep(10)
     except KeyboardInterrupt:
         df.stop()
-    logger.info("stoped DF")
+    logger.info("Stoped DF")
