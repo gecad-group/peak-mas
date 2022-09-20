@@ -12,6 +12,11 @@ from peak.bootloader import boot_agent
 
 
 def exec(args: list[str]):
+    """Parses the arguments for agent execution.
+
+    Args:
+        args: List of arguments needed for executing agents.
+    """
     if len(args) == 0 or args[0].lower() == "-h":
         print("Help message - in development")
     elif len(args) == 1:
@@ -21,6 +26,14 @@ def exec(args: list[str]):
 
 
 def agent_exec(args=None):
+    """Executes and configures a single agent.
+
+    Args:
+        args: List of arguments for the agent configuration.
+
+    Raises:
+        ArgumentTypeError if the file provided is not a python file.
+    """
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("file", type=Path)
     parser.add_argument("jid", type=JID.fromstr)
@@ -64,6 +77,14 @@ def agent_exec(args=None):
 
 
 def multi_agent_exec(args=None):
+    """Executes multiple agents using a configuration file.
+
+    For now it uses a txt file to configure the multi-agent system,
+    but will be updated to a YAML file.
+
+    Args:
+        args: List with the path to the configuration file.
+    """
     config_parser = ArgumentParser(prog=peak_name)
     config_parser.add_argument("config_file", type=Path)
     ns = config_parser.parse_args(args)
