@@ -18,7 +18,7 @@ from peak.properties import *
 __author__ = """Bruno Ribeiro"""
 __email__ = "brgri@isep.ipp.pt"
 
-# this loggers populate to much the logger files created by peak
+# filtering noisy loggers
 _logging.getLogger("aiosasl").setLevel(_logging.ERROR)
 _logging.getLogger("spade").setLevel(_logging.ERROR)
 _logging.getLogger("muc").setLevel(_logging.ERROR)
