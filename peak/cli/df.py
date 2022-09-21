@@ -1,25 +1,23 @@
 import logging
-from argparse import ArgumentParser
 from time import sleep
 
-import peak
 from peak import DF
 
 
-def exec(args: list[str]):
+def exec(log_level: int, domain: str, verify_security: bool, port: int):
     """Executes the Directory Facilitator agent.
 
     Args:
         args: List of arguments to be used by the DF.
     """
     logging.basicConfig(
-        level=ns.log,
+        level=log_level,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.StreamHandler()],
     )
     logger = logging.getLogger(__name__)
     logger.info("Starting DF")
-    df = DF(ns.domain, ns.verify_security, ns.port)
+    df = DF(domain, verify_security, port)
     df.start().result()
     logger.info("DF running")
     
