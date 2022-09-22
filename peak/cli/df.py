@@ -8,7 +8,10 @@ def exec(log_level: int, domain: str, verify_security: bool, port: int):
     """Executes the Directory Facilitator agent.
 
     Args:
-        args: List of arguments to be used by the DF.
+        log_level: Logging level to be used in the DF's logs.
+        domain: Domain to which connect the DF.
+        verify_security: Verifies the SSL certificates.
+        port: Port to be used by the DF REST API.
     """
     logging.basicConfig(
         level=log_level,
@@ -20,7 +23,7 @@ def exec(log_level: int, domain: str, verify_security: bool, port: int):
     df = DF(domain, verify_security, port)
     df.start().result()
     logger.info("DF running")
-    
+
     try:
         while df.is_alive():
             sleep(10)
