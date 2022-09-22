@@ -12,13 +12,13 @@ _logger = _logging.getLogger(__name__)
 
 class _XMPPAgent(_spade.agent.Agent):
     """Agent that integrates XMPP functionalities.
-    
+
     Attributes:
         jid: XMPP identifier.
         verify_security: If true verifies the SSL certificates.
     """
 
-    def __init__(self, jid: JID, verify_security: bool=False):
+    def __init__(self, jid: JID, verify_security: bool = False):
         _logging.getLogger(jid.localpart).setLevel(_logging.ERROR)
         self.groups = dict()
         self.muc_client = None
@@ -49,8 +49,7 @@ class _XMPPAgent(_spade.agent.Agent):
         )
 
     def _on_muc_failure_handler(self, exc):
-        """Handles MUC failed connections.
-        """
+        """Handles MUC failed connections."""
 
         _logger.critical("Failed to enter MUC room")
         raise exc
@@ -119,13 +118,14 @@ class _XMPPAgent(_spade.agent.Agent):
 
 class Agent(_XMPPAgent):
     """PEAK's base agent.
-    
+
     Attributes:
         jid: XMPP identifier.
         properties: Properties to be injected in the agent.
         verify_security: If True, it verifies the SSL certificates.
     """
-    def __init__(self, jid: JID, properties: Any=None, verify_security: bool=False):
+
+    def __init__(self, jid: JID, properties: Any = None, verify_security: bool = False):
         """Inits Agent and fills it with properties."""
         super().__init__(jid, verify_security=verify_security)
         if properties:
@@ -134,25 +134,23 @@ class Agent(_XMPPAgent):
                 setattr(self, key, properties[key])
 
     def iterate_properties(self):
-        """Iterates one index over the properties.
-        """
+        """Iterates one index over the properties."""
         if hasattr(self, "properties"):
             for key in self.properties:
                 attr = getattr(self, key)
                 if attr:
                     getattr(self, key).next()
-      
+
 
 class _Behaviour:
-    """Adds functinality to the SPADE base behaviours.
-    """
+    """Adds functinality to the SPADE base behaviours."""
 
     agent: Agent
 
     async def send_to_group(self, msg: _spade.message.Message):
         """Sends a message to a group.
 
-        If the agent is not in the group, the agent enters the room first, 
+        If the agent is not in the group, the agent enters the room first,
         sends the message and then leaves the group.
 
         Args:

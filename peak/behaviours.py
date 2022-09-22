@@ -2,7 +2,7 @@ import logging
 from json import dumps as json_dumps
 from typing import Callable
 
-from peak import Message, SyncAgent, Template, DF
+from peak import DF, Message, SyncAgent, Template
 from peak.core import CyclicBehaviour, OneShotBehaviour, PeriodicBehaviour
 from peak.properties import Property
 

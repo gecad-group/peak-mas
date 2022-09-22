@@ -19,7 +19,13 @@ class Property:
         current_value: Current value of the property.
     """
 
-    def __init__(self, data: Iterable, loop:bool=False, random_range: float=None, offset: int=0):
+    def __init__(
+        self,
+        data: Iterable,
+        loop: bool = False,
+        random_range: float = None,
+        offset: int = 0,
+    ):
         self.data = data
         self.loop = loop
         self.offset = offset
@@ -27,7 +33,7 @@ class Property:
         self.iter = self._gen(data, loop, offset)
         self.current_value = next(self.iter)
 
-    def _gen(self, data: Iterable, loop:bool, offset: int):
+    def _gen(self, data: Iterable, loop: bool, offset: int):
         """Retrieves values from the data iteratively.
 
         Args:
@@ -58,8 +64,7 @@ class Property:
             yield data
 
     def next(self):
-        """Iterates the data array.
-        """
+        """Iterates the data array."""
         self.current_value = next(self.iter)
 
     def __add__(self, other):
@@ -101,13 +106,16 @@ class Properties(metaclass=ABCMeta):
     """Used to filtrate and process the data to be injected in the agent.
 
     Attributes:
-        agent_fullname: If the agent is a clone the full name will have 
+        agent_fullname: If the agent is a clone the full name will have
             its original name the the clone number. If its not, the full
             name will be equal to the name.
         agent_name: Just the name without the clone number.
         agent_number: The clone number if its a clone.
     """
-    def __init__(self, full_name: str=None, name: str=None, number: int=None) -> None:
+
+    def __init__(
+        self, full_name: str = None, name: str = None, number: int = None
+    ) -> None:
         self.agent_fullname: str = full_name
         self.agent_name: str = name
         self.agent_number: int = number
@@ -115,7 +123,7 @@ class Properties(metaclass=ABCMeta):
         self.build_dataset()
 
     def add_property(self, property_name: str, property: Property):
-        """Adds a single Property to the agent's properties. 
+        """Adds a single Property to the agent's properties.
 
         Args:
             property_name: Name of the property.
@@ -126,7 +134,11 @@ class Properties(metaclass=ABCMeta):
         self.ds[self.agent_fullname][property_name] = property
 
     def add_dataset(
-        self, dataframe: DataFrame, loop: bool=False, random_range: float=None, offset: int=0
+        self,
+        dataframe: DataFrame,
+        loop: bool = False,
+        random_range: float = None,
+        offset: int = 0,
     ):
         """Adds a dataframe to the agent's properties.
 
@@ -157,8 +169,7 @@ class Properties(metaclass=ABCMeta):
 
     @abstractmethod
     def build_dataset(self):
-        """Contains the process of filtering and adding the data to the agent.
-        """
+        """Contains the process of filtering and adding the data to the agent."""
         pass
 
     def extract(self) -> Dict[str, Property]:

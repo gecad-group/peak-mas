@@ -8,8 +8,8 @@ log = logging.getLogger("peak.mas.drivers")
 
 
 class Driver(metaclass=ABCMeta):
-    """Base interface for the Drivers.
-    """
+    """Base interface for the Drivers."""
+
     pass
 
 
@@ -19,7 +19,8 @@ class DriverModBusTCP(Driver):
     Attributes:
         client: handles the ModBus/TCP comunication.
     """
-    def __init__(self, host: str, unit_id: int=None):
+
+    def __init__(self, host: str, unit_id: int = None):
         """Inits Driver ModBus/TCP.
 
         Args:
@@ -28,7 +29,7 @@ class DriverModBusTCP(Driver):
         """
         self.client = ModbusClient(host=host, unit_id=unit_id, auto_open=True)
 
-    def read(self, register: int, unit_id: int=None) -> int:
+    def read(self, register: int, unit_id: int = None) -> int:
         """Reads a given register of the device.
 
         Args:
@@ -54,7 +55,7 @@ class DriverModBusTCP(Driver):
         else:
             return get_2comp(data[0])
 
-    def write(self, register: int, value: int, unit_id: int=None):
+    def write(self, register: int, value: int, unit_id: int = None):
         """Writes a value in a given register.
 
         Args:

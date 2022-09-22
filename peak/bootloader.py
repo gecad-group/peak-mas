@@ -56,8 +56,7 @@ def _boot_agent(
     properties: Path,
     verify_security: bool,
 ):
-    """Boots the agent.
-    """
+    """Boots the agent."""
     # Gets the agent and properties classes. Creates the agent with the
     # properties and the attributes already provided. Runs the agent and
     # creates a loop that waits until the agent dies.

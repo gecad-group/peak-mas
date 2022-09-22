@@ -48,10 +48,7 @@ def main(args=None):
         help="This file must be a python file. The Python file must contain a class of a single agent to be executed. The name of the class must be the same of the name of the file. ",
     )
     run_parser.add_argument(
-        "-jid",
-        type=JID.fromstr,
-        help="JID of the agent to be executed.",
-        required=True
+        "-jid", type=JID.fromstr, help="JID of the agent to be executed.", required=True
     )
     run_parser.add_argument(
         "-properties",

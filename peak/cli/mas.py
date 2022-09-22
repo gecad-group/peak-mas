@@ -4,11 +4,18 @@ from multiprocessing import Process
 from os import chdir
 from pathlib import Path
 
-from peak.bootloader import boot_agent
 from peak import JID
+from peak.bootloader import boot_agent
 
 
-def agent_exec(file: Path, properties: Path, jid: JID, repeat: int, log_level: int, verify_security: bool):
+def agent_exec(
+    file: Path,
+    properties: Path,
+    jid: JID,
+    repeat: int,
+    log_level: int,
+    verify_security: bool,
+):
     """Executes and configures a single agent.
 
     Args:
@@ -30,13 +37,13 @@ def agent_exec(file: Path, properties: Path, jid: JID, repeat: int, log_level: i
             raise ArgumentTypeError("'{}' must be an existing python file".format(file))
 
     kwargs = {
-        'file': file,
-        'jid': jid,
-        'name': jid.localpart,
-        'number': None,
-        'properties': properties,
-        'log_level': log_level,
-        'verify_security': verify_security,
+        "file": file,
+        "jid": jid,
+        "name": jid.localpart,
+        "number": None,
+        "properties": properties,
+        "log_level": log_level,
+        "verify_security": verify_security,
     }
 
     if repeat == 1:
