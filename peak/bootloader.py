@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def boot_agent(
     file: Path,
     jid: JID,
-    root_name: str,
+    name: str,
     number: int,
     properties: Path,
     log_level: int,
@@ -26,8 +26,7 @@ def boot_agent(
     Args:
         file: File path where the agent's class is.
         jid: JID of the agent.
-        root_name: The root name of the agents that were
-            cloned.
+        name: The name of the agent.
         number: If the agent its a clone is the number of present in
             the name of the agent, else its None.
         properties: Properties to be injected in the agent.
@@ -46,7 +45,7 @@ def boot_agent(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    _boot_agent(file, jid, root_name, number, properties, verify_security)
+    _boot_agent(file, jid, name, number, properties, verify_security)
 
 
 def _boot_agent(
@@ -58,17 +57,9 @@ def _boot_agent(
     verify_security: bool,
 ):
     """Boots the agent.
-
-    Args:
-        file (Path): _description_
-        jid (JID): _description_
-        name (str): _description_
-        number (int): _description_
-        properties (Path): _description_
-        verify_security (bool): _description_
     """
-    # Gets the agent and properties classes. Creates the agent with the 
-    # properties and the attributes already provided. Runs the agent and 
+    # Gets the agent and properties classes. Creates the agent with the
+    # properties and the attributes already provided. Runs the agent and
     # creates a loop that waits until the agent dies.
     logger.debug("creating agent")
     agent_class = _get_class(file)
