@@ -68,10 +68,7 @@ def main(args=None):
         help="Selects the logging level of the agent.",
     )
     run_parser.add_argument(
-        "--verify_security",
-        type=bool,
-        default=False,
-        help="Verifies the SLL certificates.",
+        "--verify_security", action="store_true", help="Verifies the SLL certificates."
     )
     run_parser.set_defaults(func=mas.agent_exec)
 
