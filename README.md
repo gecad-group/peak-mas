@@ -1,27 +1,51 @@
-# PEAK - Python-based Ecosystem for Agent Communities
+# PEAK - Python-based framework for hEterogenous Agent Communities
 
-## What is it?
-PEAK is a Python framework which aims to help the users build, manage, analyse and maintain multi-agent systems which become part of a unique ecosystem. This ecosystem is a system where various multi-agent systems can coexist at the same time allowing for an easy management and analysis. 
-This framework is an extension of the [SPADE](https://spade-mas.readthedocs.io/en/latest/) framework which was built using the [XMPP](https://xmpp.org/) protocol. 
+![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/gecad-group/peak-mas/main)
 
-## Main Features
-PEAK framework focus on two things: help build multi-agent system with ease, eleminating the use of many boilerplates and adding usefull functionalities, and help the users to manage, analyse and monitor interactivly every single aspect of each multi-agent system inside the ecosystem.
-Because of these PEAK was devided in two main components: the PEAK MAS, where are the tools to build the agents, and the PEAK Management, where it is the management, analysis and monitorization tools for the multi-agent ecosystem.
-With PEAK is possible to:
-- Feature 1
-- Feature 2
+PEAK is a multi-agent system framework which helps the users develop, monitor, analyse and maintain ecosystem of heterogeneous agent communities. This ecosystem is  where various multi-agent systems can coexist, interact and share resources between them. 
+This framework is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/). 
 
-## How to Install
-### XMPP Server
-### Conda Environment
-### Setup.py
+## Prerequisites
 
-## Examples
+- Python >= 3.9.6
+- XMPP Server (configurations, more on that later)
 
-### Simple Example
 
-### Group Chat
+## Installing PEAK
 
-### Properties
+- Conda
+To install using conda, download the environment.yml file from the repository and then use the following commands:
+conda env create --file environment.yml
+This will create a environment called peak with all the necessary tools to use peak.
+- Pip
+pip install peak
 
-### Synchronization
+
+## Using PEAK
+
+- Notes on SPADE
+- PEAK CLI
+- Single Agent
+
+## Support
+
+Use the Discussion tab in the repository if you have any question.
+To alert a issue or a bug please post in the Issues tab.
+
+## Roadmap
+
+- Docker for XMPP server and peak environment
+- Change config file from txt to yml
+- Add dynamic speed option to the internal clock
+
+## Contributing to PEAK
+- Use black and isort
+- Follow the conventional commits guideline
+- Create a branch of the develop branch and make a pull request to it
+
+## Contact
+
+## License
+
+This project is under the license GPLv3
