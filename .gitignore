@@ -314,4 +314,6 @@ test/
 # Ignore code-workspaces
 *.code-workspace
 
+# Ignore Obsidian
+.obsidian/ 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
