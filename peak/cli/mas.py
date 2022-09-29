@@ -10,11 +10,13 @@ from peak.bootloader import boot_agent
 
 def agent_exec(
     file: Path,
-    properties: Path,
     jid: JID,
-    repeat: int,
-    log_level: int,
-    verify_security: bool,
+    properties: Path = None,
+    repeat: int = 1,
+    log_level: int = getLevelName("INFO"),
+    verify_security: bool = False,
+    *args,
+    **kargs
 ):
     """Executes and configures a single agent.
 
@@ -32,9 +34,9 @@ def agent_exec(
 
     log_level = getLevelName(log_level)
 
-    for file in [file, properties]:
-        if file and not file.is_file():
-            raise ArgumentTypeError("'{}' must be an existing python file".format(file))
+    for f in [file, properties]:
+        if f and not f.is_file():
+            raise ArgumentTypeError("'{}' must be an existing python file".format(f))
 
     kwargs = {
         "file": file,
@@ -65,7 +67,7 @@ def agent_exec(
             pass
 
 
-def multi_agent_exec(file: Path):
+def multi_agent_exec(file: Path, *args, **kargs):
     """Executes multiple agents using a configuration file.
 
     For now it uses a txt file to configure the multi-agent system,

@@ -4,7 +4,7 @@ from time import sleep
 from peak import DF
 
 
-def exec(log_level: int, domain: str, verify_security: bool, port: int):
+def exec(log_level: int, domain: str, verify_security: bool, port: int, *args, **kargs):
     """Executes the Directory Facilitator agent.
 
     Args:

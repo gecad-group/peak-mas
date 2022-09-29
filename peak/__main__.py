@@ -1,7 +1,7 @@
 import logging
-from argparse import SUPPRESS, ArgumentParser, FileType
+from argparse import ArgumentParser
 from pathlib import Path
-from sys import argv
+import sys
 
 from peak import JID
 from peak import __name__ as peak_name
@@ -15,7 +15,7 @@ def main(args=None):
 
     # parser for "df" command
     df_parser = subparsers.add_parser(
-        name="df", help="Executes Directory Facilitator agent."
+        name="df", help="Execute Directory Facilitator agent."
     )
     df_parser.add_argument(
         "-domain",
@@ -27,7 +27,7 @@ def main(args=None):
         "--verify_security", action="store_true", help="Verifies the SLL certificates."
     )
     df_parser.add_argument(
-        "-log",
+        "-log_level",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
         help="Selects the logging level of the DF.",
@@ -40,7 +40,7 @@ def main(args=None):
     # parser for the "run" command
     run_parser = subparsers.add_parser(
         name="run",
-        help="Executes PEAK agents.",
+        help="Execute PEAK's agents.",
     )
     run_parser.add_argument(
         "file",
@@ -62,7 +62,7 @@ def main(args=None):
         help="The number of times to replicate the agent. The name of each agent will be the same as the JID but with the number of the corresponding clone to it (e.g. john_0@localhost, john_1@localhost). The sequence starts in zero.",
     )
     run_parser.add_argument(
-        "-log",
+        "-log_level",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
         help="Selects the logging level of the agent.",
@@ -75,7 +75,7 @@ def main(args=None):
     # parser for the "run" command
     start_parser = subparsers.add_parser(
         name="start",
-        help="Executes PEAK MAS using a configuration file.",
+        help="Execute PEAK MAS using a configuration file.",
     )
     start_parser.add_argument(
         "file",
@@ -83,14 +83,13 @@ def main(args=None):
         help="This must be a path to the PEAK MAS configuration file. The file must be txt.",
     )
     start_parser.set_defaults(func=mas.multi_agent_exec)
+    
+    if len(sys.argv)==1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     args = parser.parse_args(args)
     args.func(**vars(args))
-
-    if args[0].lower() == "run":
-        mas.exec(args[1:])
-    else:
-        print("Help message - in development")
 
 
 if __name__ == "__main__":
