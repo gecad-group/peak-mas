@@ -15,14 +15,16 @@ This framework is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/).
 
 ## Installing PEAK
 
-- Conda
+### Conda
+
 To install using conda, download the environment.yml file from the repository and then use the following command:
 ```bash
 conda env create --file environment.yml	
 ```
 This will create a conda environment called _peak_.
 
-- Pip
+### Pip
+
 To install using pip, just type the following command:
 ```bash
 pip install peak
@@ -31,13 +33,16 @@ pip install peak
 
 ## Using PEAK
 
-- Notes on SPADE
-As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see SPADE examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
+### Notes on SPADE
 
-- Notes on XMPP
+As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see [SPADE](spade-mas.readthedocs.io) examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
+
+### Notes on XMPP
+
 To run any PEAK's agent you will need a XMPP server. You can either configure one on your machine, remotely or use a public server. The only issue with the public servers is that they don't usually have all the configurations required to run some PEAK's functionalities. To configure the server you can read the "Configure XMPP server" section in the [documentation](http://www.gecad.isep.ipp.pt/peak).
 
-- Single Agent
+### Single Agent
+
 One thing that was added in PEAK was the way the user executes the agents. PEAK added a CLI, inspired in JADE, to help the user execute end configure each agent in a easy and intuitive manner.
 In this example we will show you how to execute a single agent. Save the following code in a file called `agent.py`.
 
@@ -70,8 +75,13 @@ It is necessary that the name of the file is the same as the name of the agent's
 peak path/to/agent.py -j agent@localhost
 ```
 Change the `localhost` to the domain of the XMPP server you want to connect.
-> [!note] 
-> If you want to know more about each command we recommend reading the [documentation](http://www.gecad.isep.ipp.pt/peak) or using the `-h` option to see the help message. 
+<details><summary>Note</summary>
+<p>
+
+If you want to know more about each command we recommend reading the [documentation](http://www.gecad.isep.ipp.pt/peak) or using the `-h` option to see the help message.
+
+</p>
+</details>
 
 For more advanced functionalities and examples we recommend you to head forward to the [documentation website](http://www.gecad.isep.ipp.pt/peak).
 
@@ -102,4 +112,4 @@ For the commits please follow the [Conventional Commits Guideline](www.conventio
 
 ## License
 
-`PEAK` is free and open-source software licensed under the [### GNU General Public License v3.0](https://github.com/gecad-group/peak-mas/blob/develop/LICENSE).
+`PEAK` is free and open-source software licensed under the [GNU General Public License v3.0](https://github.com/gecad-group/peak-mas/blob/develop/LICENSE).
