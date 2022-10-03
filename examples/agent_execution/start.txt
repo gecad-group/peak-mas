@@ -1,3 +1,0 @@
-agent.py agent0@localhost -r 2 -l debug
-agent.py agent1@localhost
-agent.py agent2@localhost

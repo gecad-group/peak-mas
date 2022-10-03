@@ -8,9 +8,16 @@ from peak import __name__ as peak_name
 from peak.cli import df, mas
 
 
+logger = logging.getLogger()
+
 def main(args=None):
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("-version", action="version", version="PEAK 1.0")
+    parser.add_argument(
+        "-v",
+        action="store_true",
+        help="Verbose. Turns on the debug info.",
+    )
     subparsers = parser.add_subparsers(required=True)
 
     # parser for "df" command
@@ -56,10 +63,10 @@ def main(args=None):
         help="Python file where the agent properties are located.",
     )
     run_parser.add_argument(
-        "-repeat",
+        "-clone",
         type=int,
         default=1,
-        help="The number of times to replicate the agent. The name of each agent will be the same as the JID but with the number of the corresponding clone to it (e.g. john_0@localhost, john_1@localhost). The sequence starts in zero.",
+        help="The number of clones of the agent. The name of each agent will be the same as the JID but with the number of the corresponding clone to it (e.g. john_0@localhost, john_1@localhost). The sequence starts in zero.",
     )
     run_parser.add_argument(
         "-log_level",
@@ -75,12 +82,12 @@ def main(args=None):
     # parser for the "run" command
     start_parser = subparsers.add_parser(
         name="start",
-        help="Execute PEAK MAS using a configuration file.",
+        help="Executes multiple agents using a YAML configuration file.",
     )
     start_parser.add_argument(
         "file",
         type=Path,
-        help="This must be a path to the PEAK MAS configuration file. The file must be txt.",
+        help="Path to the YAML configuration file.",
     )
     start_parser.set_defaults(func=mas.multi_agent_exec)
     
@@ -89,11 +96,12 @@ def main(args=None):
         sys.exit(1)
 
     args = parser.parse_args(args)
+    if args.v:
+        logger.setLevel("DEBUG")
     args.func(**vars(args))
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger(peak_name)
     try:
         main()
     except Exception as e:

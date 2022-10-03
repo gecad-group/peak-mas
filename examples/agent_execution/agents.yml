@@ -1,0 +1,12 @@
+defaults:
+  domain: localhost
+  log_level: debug
+
+agents:
+  agent1:
+    resource: test
+    file: agent.py
+    clones: 2
+
+  agent2:
+    file: agent.py

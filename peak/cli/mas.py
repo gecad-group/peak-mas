@@ -1,18 +1,21 @@
-from argparse import ArgumentTypeError
+from argparse import ArgumentError, ArgumentTypeError
 from logging import getLevelName, getLogger
 from multiprocessing import Process
 from os import chdir
 from pathlib import Path
+import yaml
 
 from peak import JID
 from peak.bootloader import boot_agent
 
 
+_logger = getLogger()
+
 def agent_exec(
     file: Path,
     jid: JID,
     properties: Path = None,
-    repeat: int = 1,
+    clones: int = 1,
     log_level: int = getLevelName("INFO"),
     verify_security: bool = False,
     *args,
@@ -24,7 +27,7 @@ def agent_exec(
         file: Path to the agent's python file.
         properties: Path to the agent's properties python file.
         jid: JID of the agent.
-        repeat: Number of clones to be made.
+        clones: Number of clones to be made.
         log_leve: Logging level.
         verify_security: Verifies the SSL certificates.
 
@@ -48,52 +51,78 @@ def agent_exec(
         "verify_security": verify_security,
     }
 
-    if repeat == 1:
+    if clones == 1:
         boot_agent(**kwargs)
     else:
         procs = []
-        for i in range(repeat):
+        for i in range(clones):
             kwargs["jid"] = jid.replace(localpart=jid.localpart + str(i))
             kwargs["number"] = i
             proc = Process(target=boot_agent, kwargs=kwargs, daemon=False)
             proc.start()
             procs.append(proc)
-        try:
-            logger = getLogger(__name__)
-            [proc.join() for proc in procs]
-        except Exception as e:
-            logger.exception(e)
-        except KeyboardInterrupt:
-            pass
+        for proc in procs:
+            try:
+                proc.join()
+            except Exception as e:
+                _logger.exception(e)
+            except KeyboardInterrupt:
+                break
 
 
 def multi_agent_exec(file: Path, *args, **kargs):
-    """Executes multiple agents using a configuration file.
-
-    For now it uses a txt file to configure the multi-agent system,
-    but will be updated to a YAML file.
+    """Executes multiple agents using a YAML configuration file.
 
     Args:
         file: Path to the agent's python file.
     """
-
-    with open(file.absolute()) as f:
-        commands = f.read().splitlines()
-    chdir(file.parent)
-
-    if len(commands) == 1:
-        agent_exec(commands[0].strip().split(" "))
+    defaults = {
+        "file": None,
+        "domain": None,
+        "resource": None,
+        "ssl": False,
+        "log_level": "info",
+        "properties": None,
+        "clones": 1,
+    }
+    _logger.debug("parsing yaml file")
+    with file.open() as f:
+        yml = yaml.full_load(f)
+    if "defaults" in yml:
+        defaults = defaults | yml["defaults"]
     else:
+        _logger.debug('no defaults in yaml file')
+    if "agents" not in yml:
+        raise Exception("agents argument required")
+    if len(yml["agents"]) == 1:
+        agent, args = yml["agents"].popitem()
+        args = defaults | args
+        if args["file"] is None:
+            raise Exception(f"{agent}: file argument required")
+        if args["domain"] is None:
+            raise Exception(f"{agent}: domain argument required")
+        args["jid"] = JID(agent, args["domain"], args["resource"])
+        agent_exec(**args)
+    else:
+        _logger.debug("initialize processes")
         procs = []
-        for command in commands:
-            command = command.strip().split(" ")
-            proc = Process(target=agent_exec, args=[command], daemon=False)
+        for agent, args in yml["agents"].items():
+            args = defaults | args
+            if args["file"] is None:
+                raise Exception(f"{agent}: file argument required")
+            if args["domain"] is None:
+                raise Exception(f"{agent}: domain argument required")
+            args["jid"] = JID(agent, args["domain"], args["resource"])
+            proc = Process(target=agent_exec, kwargs=args, daemon=False)
             proc.start()
             procs.append(proc)
-        try:
-            logger = getLogger(__name__)
-            [proc.join() for proc in procs]
-        except Exception as e:
-            logger.exception(e)
-        except KeyboardInterrupt:
-            pass
+        _logger.debug("wait for processes to finish")
+        for proc in procs:
+            try:
+                proc.join()
+            except Exception as e:
+                _logger.exception(e)
+            except KeyboardInterrupt:
+                break
+    
+
