@@ -23,6 +23,8 @@ def agent_exec(
 ):
     """Executes and configures a single agent.
 
+    The arguments args and kargs are used to ignore extra parameters given be the parser.
+
     Args:
         file: Path to the agent's python file.
         properties: Path to the agent's properties python file.
@@ -36,10 +38,9 @@ def agent_exec(
     """
 
     log_level = getLevelName(log_level)
-
     for f in [file, properties]:
         if f and not f.is_file():
-            raise ArgumentTypeError("'{}' must be an existing python file".format(f))
+            raise ArgumentTypeError("'{}' must be a python file".format(f))
 
     kwargs = {
         "file": file,
@@ -73,6 +74,8 @@ def agent_exec(
 def multi_agent_exec(file: Path, *args, **kargs):
     """Executes multiple agents using a YAML configuration file.
 
+    The arguments args and kargs are used to ignore extra parameters given be the parser.
+
     Args:
         file: Path to the agent's python file.
     """
@@ -88,41 +91,38 @@ def multi_agent_exec(file: Path, *args, **kargs):
     _logger.debug("parsing yaml file")
     with file.open() as f:
         yml = yaml.full_load(f)
+    chdir(file.parent)
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
     else:
         _logger.debug('no defaults in yaml file')
     if "agents" not in yml:
         raise Exception("agents argument required")
-    if len(yml["agents"]) == 1:
-        agent, args = yml["agents"].popitem()
-        args = defaults | args
-        if args["file"] is None:
+    _logger.debug("initialize processes")
+    procs = []
+    for agent, agent_args in yml["agents"].items():
+        agent_args = defaults | agent_args
+
+        if agent_args["file"] is None:
             raise Exception(f"{agent}: file argument required")
-        if args["domain"] is None:
+        if agent_args["domain"] is None:
             raise Exception(f"{agent}: domain argument required")
-        args["jid"] = JID(agent, args["domain"], args["resource"])
-        agent_exec(**args)
-    else:
-        _logger.debug("initialize processes")
-        procs = []
-        for agent, args in yml["agents"].items():
-            args = defaults | args
-            if args["file"] is None:
-                raise Exception(f"{agent}: file argument required")
-            if args["domain"] is None:
-                raise Exception(f"{agent}: domain argument required")
-            args["jid"] = JID(agent, args["domain"], args["resource"])
-            proc = Process(target=agent_exec, kwargs=args, daemon=False)
-            proc.start()
-            procs.append(proc)
-        _logger.debug("wait for processes to finish")
-        for proc in procs:
-            try:
-                proc.join()
-            except Exception as e:
-                _logger.exception(e)
-            except KeyboardInterrupt:
-                break
+        agent_args["file"] = Path(agent_args["file"])
+        if agent_args["properties"]:
+            agent_args["properties"] = Path(agent_args["properties"])
+        agent_args["jid"] = JID(agent, agent_args["domain"], agent_args["resource"])
+        agent_args["log_level"] = agent_args["log_level"].upper()
+
+        proc = Process(target=agent_exec, kwargs=agent_args, daemon=False)
+        proc.start()
+        procs.append(proc)
+    _logger.debug("wait for processes to finish")
+    for proc in procs:
+        try:
+            proc.join()
+        except Exception as e:
+            _logger.exception(e)
+        except KeyboardInterrupt:
+            break
     
 

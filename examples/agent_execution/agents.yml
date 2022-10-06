@@ -10,3 +10,4 @@ agents:
 
   agent2:
     file: agent.py
+    log_level: info

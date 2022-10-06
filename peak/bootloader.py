@@ -70,8 +70,11 @@ def _boot_agent(
 
     agent_instance = agent_class(jid, properties, verify_security)
     logger.info("starting agent")
-    agent_instance.start().result()
-    logger.info("agent running")
+    try:
+        agent_instance.start().result()
+        logger.info("agent running")
+    except Exception as err:
+        logger.error("could not start the agent: {}".format(err))
     while agent_instance.is_alive():
         try:
             time.sleep(1)
