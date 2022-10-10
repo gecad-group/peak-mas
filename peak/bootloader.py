@@ -72,7 +72,6 @@ def _boot_agent(
     logger.info("starting agent")
     try:
         agent_instance.start().result()
-        logger.info("agent running")
     except Exception as err:
         logger.error("could not start the agent: {}".format(err))
     while agent_instance.is_alive():
