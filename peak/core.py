@@ -157,14 +157,25 @@ class _Behaviour:
             msg: The XMPP message.
         """
         raw_msg = msg.prepare()
+        _logger.debug(f"sending message '{msg.body}' to {msg.to}")
         try:
             await self.agent.groups[str(msg.to)].send_message(raw_msg)
         except:
+            _logger.debug(f"agent not member of {msg.to}")
             room, future = self.agent.muc_client.join(msg.to, self.agent.name)
             await future
             await room.send_message(raw_msg)
             await room.leave()
+            _logger.debug(f"leaving {msg.to}")
+    
+    async def execute(self, behaviour):
+        """Executes and awaits for a behaviour.
 
+        Args:
+            behaviour: SPADE's behaviour.
+        """
+        self.agent.add_behaviour(behaviour)
+        await behaviour.join()
 
 class OneShotBehaviour(
     _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
