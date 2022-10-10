@@ -446,7 +446,7 @@ class DF(Agent):
         self.port = port
 
     @classmethod
-    def name(domain: str) -> str:
+    def name(cls, domain: str) -> str:
         """Retrieves the JID of the DF based on the agent domain.
 
         Args:
