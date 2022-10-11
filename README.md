@@ -18,7 +18,7 @@ This framework is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/).
 
 To install using conda, download the environment.yml file from the repository and then use the following command:
 ```bash
-conda env create --file environment.yml	
+$ conda env create --file environment.yml	
 ```
 This will create a conda environment called _peak_.
 
@@ -26,7 +26,7 @@ This will create a conda environment called _peak_.
 
 To install using pip, just type the following command:
 ```bash
-pip install peak
+$ pip install peak
 ```
 
 
@@ -71,7 +71,7 @@ class agent(Agent):
 ```
 It is necessary that the name of the file is the same as the name of the agent's class so PEAK can do the proper parsing. This agent only has a behavior that prints to the terminal the "Hello World" message. To execute the agent just type the following command:
 ```bash 
-peak path/to/agent.py -j agent@localhost
+$ peak path/to/agent.py -j agent@localhost
 ```
 Change the `localhost` to the domain of the XMPP server you want to connect.
 <details><summary>Note</summary>
