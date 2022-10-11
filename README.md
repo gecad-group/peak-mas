@@ -1,7 +1,6 @@
 # PEAK - Python-based framework for hEterogenous Agent Communities
 
-![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas)
-![GitHub branch checks state](https://img.shields.io/github/checks-status/gecad-group/peak-mas/main)
+![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas) ![GitHub branch checks state](https://img.shields.io/github/checks-status/gecad-group/peak-mas/main)
 
 PEAK is a multi-agent system framework which helps the users develop, monitor, analyze and maintain ecosystem of heterogeneous agent communities. This ecosystem is  where various multi-agent systems can coexist, interact and share resources between them. 
 This framework is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/). 
