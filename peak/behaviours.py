@@ -87,7 +87,9 @@ class ExportData(OneShotBehaviour):
     The data exports works diferently when using the Synchronizer and
     when its not used. When the Synchronizer its being used the data
     is exported at the same rate as the Synchronizers clock. If its not
-    used the user must define a interval in which the data is exported."""
+    used the user must define a interval in which the data is exported.
+    
+    Warning: the file will be overwriten."""
 
     def __init__(
         self,
