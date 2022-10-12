@@ -317,3 +317,4 @@ test/
 # Ignore Obsidian
 .obsidian/ 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
+output.json
