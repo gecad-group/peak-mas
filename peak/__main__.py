@@ -28,7 +28,7 @@ def main(args=None):
         "-domain",
         type=str,
         default="localhost",
-        help="XMPP domain to which the DF must register and login.",
+        help="XMPP domain to which the DF must register and login. Default is localhost.",
     )
     df_parser.add_argument(
         "--verify_security", action="store_true", help="Verifies the SLL certificates."
@@ -37,10 +37,10 @@ def main(args=None):
         "-log_level",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
-        help="Selects the logging level of the DF.",
+        help="Selects the logging level of the DF. Default is INFO.",
     )
     df_parser.add_argument(
-        "-port", type=str, default="10000", help="Port to be opened for the REST API."
+        "-port", type=str, default="10000", help="Port to be opened for the REST API. Default is 10000"
     )
     df_parser.set_defaults(func=df.exec)
 
