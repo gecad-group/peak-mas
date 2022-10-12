@@ -1,0 +1,4 @@
+agents:
+  agent:
+    file: agent.py
+    domain: localhost
