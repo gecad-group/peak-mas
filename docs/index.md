@@ -27,29 +27,19 @@ You create an agent file like this one and then execute it using the following c
 $ peak agent.py -j agent@localhost
 ```
 
-Thats easier than it can ever be!
+That's easier than it can ever be!
 
 ## Table of Contents
 
-- [Foreword]()
-	- [SPADE and XMPP]()
-- [Prerequisites]()
-	- [Configuring a XMPP server]()
-- [Installation](installation.md)
-	- [Installing PEAK]()
+- [Foreword](foreword.md)
+- [Prerequisites](prerequistites.md)
+- [Installing PEAK](installation.md)
 - [How-to Guide](how-to.md)
-	- [How to run and configure a MAS?]()
-		- [Command Line Interface]()
-		- [Thread vs. Process]()
-	- [How to create a Simulation Environment?]()
-		- [Clock]()
-		- [Dynamic Clock]()
-	- [How to integrate real smart devices into the MAS?]()
-		- [Modbus/TCP]()
-		- [HTTP]()
-		- [Extending]()
-	- [How to use data from data providers?]()
-	- [How to use the PEAK Dashboard?]()
+	- [Run and configure a MAS](how-to.md#run-and-configure-a-mas)
+	- [Create a simulation environment](how-to.md#create-simulation-environment)
+	- [Integrate real smart devices](how-to.md#integrate-real-smart-devices)
+	- [Integrate data providers](how-to.md#integrate-data-providers)
+	- [PEAK Dashboard](how-to.md#peak-dashboard)
 - [API Documentation](api-doc.md)
 - [Contributing](contributing.md)
 - [Contacts](contacts.md)

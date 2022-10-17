@@ -169,7 +169,9 @@ class _Behaviour:
             _logger.debug(f"leaving {msg.to}")
     
     async def execute(self, behaviour):
-        """Executes and awaits for a behaviour.
+        """Executes and awaits synchronozly for a behaviour.
+
+        It is used to chain behviour that are dependent on each other.
 
         Args:
             behaviour: SPADE's behaviour.
