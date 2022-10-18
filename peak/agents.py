@@ -287,7 +287,8 @@ class DF(Agent):
                 self.logger.debug("message received")
                 path = msg.get_metadata("path")
                 domain = msg.get_metadata("domain")
-                tags = json_loads(msg.get_metadata("tags"))
+                if meta_tags := msg.get_metadata("tags"):
+                    tags = json_loads(meta_tags)
                 nodes = path.split("/")
                 self.logger.debug("nodes: " + str(nodes))
                 level = "level"
