@@ -6,7 +6,7 @@ PEAK is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/) framework,
 
 ## PEAK made easy
 
-```python 
+```python
 # agent.py
 from peak import Agent, OneShotBehaviour
   
