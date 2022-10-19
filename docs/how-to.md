@@ -2,9 +2,6 @@
 
 This section will give you some guidance regarding PEAK's functionalities.
 
-- Table of Contents
-{:toc}
-
 ## Run and configure a MAS
 - Command Line Interface
 - Thread vs. Process

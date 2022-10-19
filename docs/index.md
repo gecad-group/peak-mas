@@ -42,7 +42,6 @@ That's easier than it can ever be!
 	- [PEAK Dashboard](how-to.md#peak-dashboard)
 - [API Documentation](api-doc.md)
 - [Contributing](contributing.md)
-- [Contacts](contacts.md)
 
 ## Copyright Notice
 
