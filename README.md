@@ -74,6 +74,7 @@ It is necessary that the name of the file is the same as the name of the agent's
 $ peak path/to/agent.py -j agent@localhost
 ```
 Change the `localhost` to the domain of the XMPP server you want to connect.
+
 <details><summary>Note</summary>
 <p>
 
