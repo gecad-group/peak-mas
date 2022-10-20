@@ -1,5 +1,5 @@
 from peak import Agent
-from peak.behaviours import OneShotBehaviour
+from peak.behaviours import OneShotBehaviour, Message
 
 
 class agent(Agent):

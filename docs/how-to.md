@@ -1,6 +1,6 @@
 # How-to Guides
 
-This section will give you some guidance regarding PEAK's functionalities.
+This section you will going through PEAK's functionalities. Every example given here is available in PEAK's repository.
 
 ## Run and configure a MAS
 You have two options to run agents with PEAK. You can run the same way as the SPADE framework or using the command line interface (CLI). 
@@ -51,32 +51,75 @@ After you run the agent you will see a new folder appear in the same directory o
 
 ### Run multiple agents
 
-To run multiple agents, instead of just creating as many terminal sessions as agents, you can use a configuration file in YAML format.
+To run multiple agents at the same time you can use a configuration file in YAML format.
+```python
+# sender.py
+from peak import Agent, OneShotBehaviour, Message
+  
+class sender(Agent):
+
+    class SendHelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            msg = Message(to="harry@localhost")
+            msg.body = "Hello World"
+            await self.send(msg)
+            await self.agent.stop()
+
+    async def setup(self) -> None:
+        self.add_behaviour(self.SendHelloWorld())
+```
+
+```python
+# receiver.py
+from peak import Agent, OneShotBehaviour
+  
+class receiver(Agent):
+
+    class ReceiveHelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+	        while msg := await self.receive(10):
+	            print(f"{msg.sender} sent me a message: '{msg.body}'")
+            await self.agent.stop()
+
+    async def setup(self) -> None:
+        self.add_behaviour(self.ReceiveHelloWorld())
+```
 
 ```yaml
-# dummies.yml
+# multiagent.yml
 defaults:
 	domain: localhost
 	log_level: debug
 agents:
-	agent1:
-		file: agent.py
+	john:
+		file: sender.py
 		resource: test
-	agent2: 
-		file: agent.py
-		clone: 2
+		clones: 2
+	harry: 
+		file: receiver.py
+		log_level: info
 ```
 
-Let's use the same agent.py file as the previous exercise. In the same directory create the YAML file above with the name `dummies.yml`. After that, run the following command:
+Let's create two agents one that sends the a message, the `receiver.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yml`. After that, run the following command:
 
 ```bash
-$ peak start dummies.yml
+$ peak start multiagent.yml
 ```
 
-Before diving into the YAML structure let me tell you what this command did. Three agents were created. One called `agent1@localhost/test`, other called `agent20@localhost` and the third one `agent21@localhost`. Each one of the agents printed `Hello World` in the terminal and the log files created were in loggin level `DEBUG`.
+So, what happened? Three agents were created, instead of two. One called `john0@localhost/test`, other called `john1@localhost/test` and the third one `harry@localhost`. The two `john` sent a message `Hello World` to `harry` and `harry` print them out. The log files created were in loggin level `DEBUG`, except for the `harry` that was level `INFO`.
 
+The strutucture of the configuration file is actually simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. 
 
+In this case we are defining, in the `defualts`, the default domain as `localhost` and the default logging level as `debug` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In `john` we are defining the agents source file, the resource of the JID and how many clones we want from this type of agent. When clones are defined they use the exact same configuration, the only thing that changes is the name, adding the correspondent clone number after the agent name, in this case `john0` and `john1`. In `harry` we are defining the source file and the logging level, overriding the deafult value.
 
+There is the list of options that you can define in the configuration file, inside each agent and in the deafults variable:
+- file - source file of the agent
+- domain - domain of the server to be used for the agent's connection
+- resource - resource to be used in the JID
+- log_level - loggin level of the log file
+- clones - number of clones to be executed
+- properties - source file of the agent's properties (more on that later)
+- verify_security - if present verifies the SSL certificates
 
 ### Thread vs. Process
 In development
