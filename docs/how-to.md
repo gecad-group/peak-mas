@@ -125,24 +125,132 @@ There is the list of options that you can define in the configuration file, insi
 In development
 
 ## Create a group of agents
-- MUC
-- Group tagging
-- Group Hierarchy
+
+The groups are a very usefull way to make the communication between agents. To create a group is very simple. There is a pre defined behaviour that enables the agent to join and create groups. 
+
+```python
+#agent.py
+from peak import Agent, JoinGroup, OneShotBehaviour, Message
+from asyncio import sleep
+
+class agent(Agent):
+    class HelloWorld(OneShotBehaviour):
+        async def on_start(self) -> None:
+            behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
+            self.agent.add_behaviour(behav)
+            await behav.join()
+
+        async def run(self) -> None:
+            msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
+            msg.body = "Hello World"
+            await self.send_to_group(msg)
+            await sleep(5)
+            msg.body = "Goodbye World"
+            await self.send_to_group(msg)
+            await self.agent.stop()
+
+    async def setup(self) -> None:
+        self.add_behaviour(self.HelloWorld())
+```
+As you can see in the example above, the agent has a behaviour `HelloWorld`. This behaviour will first use the `JoinGroup` behaviour to join a group called 'group1@conference.localhost' (assuming the domain is ``localhost``). If the group does not exists it will create it. It waits until the agent joins the group. After that it will run the `run` function. The ``run`` function will send a `Hello World` message to the group, waits for 5 seconds and then sends a `Goodbye World` and exits. If you want to leave the group without terminating the agent you can import the ``LeaveGroup`` behaviour from ``peak`` package and use it the same way as the `JoinGroup`.
+
+> **Note:**
+> For the this functionality to work the serve must have Multi-User Chat functionality activated. You need to create a component and give it a prefix, in this case is 'conference'. 
+
+> **Tip:**
+> You can see the messages being sent if you use the XMPP client and enter in the same room as the agent. Is a good way to debug the multi-agent.
+
+### Group tagging
+
+Group tagging, as the name suggests, is for tagging the groups. This allows the agents to identify the groups and then search for them using the tags to filter the groups. Let's see.
+
+```python
+#group_searcher.py
+from peak import Agent, JoinGroup, SearchGroup
+import logging
+logger = logging.getLogger(self.__class__.__name__)
+
+class group_searcher(Agent):
+    async def setup(self) -> None:
+        self.add_behaviour(
+            JoinGroup("group1", "conference.localhost", ["test", "awesome", "cool"])
+        )
+        self.add_behaviour(
+            JoinGroup("group2", "conference.localhost", ["test", "awesome"])
+        )
+        self.add_behaviour(
+            JoinGroup("group3", "conference.localhost", ["test"],)
+        )
+        self.add_behaviour(JoinGroup("group4", "conference.localhost"))
+        
+        def print_groups(tags, groups):
+            logger.info(str(tags), str(groups))
+            
+        self.add_behaviour(SearchGroup(["test"], print_groups))
+        self.add_behaviour(SearchGroup(["awesome"], print_groups))
+        self.add_behaviour(SearchGroup(["awesome", "cool"], print_groups))
+```
+In the example above we create an agent called `group_searcher`. This agent will create 3 different groups: `group1@conference.localhost` with the tags `test`, `awesome` and `cool`; `group2@conference.localhost` with the tags `test` and `awesome`; `group3@conference.localhost` with the tag `test`; and finally the fourth group `group4@conference.localhost`. After that will search for groups using the `SearchGroup` behavior.
+
+Firstly, the `JoinGroup` is used to create the groups and tag them. The groups can have more than one tag. To search the groups it's used the `SearchGroup` behavior. You can search for more than one tag, but be careful because it used conjugation to search for them. In other words it will get you the list of groups that have all the tags the you mentioned.
+
+### Group Hierarchy
+
+The group hierarchy allows the user to create subgroups in different depths. This does not only allow you to organize your multiagent system (e.g., society of agent) but also to communicate more efficiently through the hierarchical branches. You can send a single message to every agent that is in a specific branch, or every agent bellow some specific node.
+
+For this functionality you need to activate the Directory Facilitator (DF) agent. Is the DF that coordinates and monitors the hierarchical structure. To activate it you just need to run the following command:
+
+```bash
+$ peak df
+```
+
+Let's see an example of the group hierarchy.
+```python
+#agent.py
+from asyncio import sleep
+from peak import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
+
+class agent(Agent):
+    class HelloWorld(OneShotBehaviour):
+        async def run(self):
+			self.agent.add_behaviour(
+				JoinGroup("mas/retina/teste", f"conference.{self.agent.jid.domain}")
+			)
+			msg = Message(
+				to=f"retina@conference.{self.agent.jid.domain}"
+			)
+			msg.body = "Hello World"
+			await self.send_to_group(msg)
+
+    async def setup(self):
+        self.add_behaviour(self.HelloWorld())
+```
+
 
 ## Create a simulation environment
 - Clock
 - Dynamic clock
 
-## Integrate real smart devices
+## Integrate data providers
+
+Normally a multi-agent system uses external data so it can process that data. In PEAK you can integrate different data providers like files from the file system of your machine, databases in the web and from real devices using some real-time communication protocol.
+
+### File System
+- Excel
+- CSV
+
+### Smart devices
 - ModBus/TCP
 - HTTPs
 - Extending
 
-## Integrate data providers
-- Excel
-- CSV
-
 ## PEAK Dashboard
-- Group node graph
-- Graph visualization
-- Graph costumisation
+
+The PEAK Dashboard is a seperate project from PEAK. The Dashboard allows you to see in an interactive way the PEAK ecosystem using a web app. The Dashboard needs a Directory Facilitator (DF) agent in the XMPP server so it can monitor the system. The Dashboard communicates with the DF through its REST API. 
+To know how to activate the DF run the following command:
+```bash
+$ peak df -h
+```
+### Ecosystem Insight
+### Data Analisys
+### Full Plot Customization

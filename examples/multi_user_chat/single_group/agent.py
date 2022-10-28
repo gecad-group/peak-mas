@@ -4,8 +4,12 @@ from asyncio import sleep
 class agent(Agent):
 
     class HelloWorld(OneShotBehaviour):
+        async def on_start(self) -> None:
+            behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
+            self.agent.add_behaviour(behav)
+            await behav.join()
+
         async def run(self) -> None:
-            await self.execute(JoinGroup("group1", f"conference.{self.agent.jid.domain}"))
             msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
             msg.body = "Hello World"
             await self.send_to_group(msg)
