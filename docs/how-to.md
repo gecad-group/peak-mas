@@ -122,7 +122,7 @@ There is the list of options that you can define in the configuration file, insi
 - verify_security - if present verifies the SSL certificates
 
 ### Thread vs. Process
-In development
+_In development_
 
 ## Create a group of agents
 
@@ -198,7 +198,7 @@ Firstly, the `JoinGroup` is used to create the groups and tag them. The groups c
 
 The group hierarchy allows the user to create subgroups in different depths. This does not only allow you to organize your multiagent system (e.g., society of agent) but also to communicate more efficiently through the hierarchical branches. You can send a single message to every agent that is in a specific branch, or every agent bellow some specific node.
 
-For this functionality you need to activate the Directory Facilitator (DF) agent. Is the DF that coordinates and monitors the hierarchical structure. To activate it you just need to run the following command:
+For this functionality you need to activate the Directory Facilitator (DF) agent. DF coordinates and monitors the hierarchical structure. To activate it you just need to run the following command:
 
 ```bash
 $ peak df
@@ -225,11 +225,15 @@ class agent(Agent):
     async def setup(self):
         self.add_behaviour(self.HelloWorld())
 ```
+In the JoinGroup behaiour you can specify a path of groups. What these does is create an hierarchy of groups being the the first group the root and the last group an intermediate node ora a leaf. In this path we call the last node the target group, because you only enter in that group specificly. Another interisting thing acout this funcitonality is that for each node behind the target node you enter in a specially group whch the names ends in \_down. The ideia behind this is to send messages to the whole branch without entering and sending messages for each node in the tree. So if we want to send a message to the whole multi agent system we only have to send a message to, in the case of this example, mas_down. In the example above the agent entered in 
 
+> **Note:**
+> In the Dashboard, the groups that end in \_down do not appear in the node graph.
 
 ## Create a simulation environment
-- Clock
-- Dynamic clock
+### Clock
+### Dynamic clock
+_In development_
 
 ## Integrate data providers
 
