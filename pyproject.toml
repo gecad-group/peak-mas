@@ -9,7 +9,6 @@ version = "1.0.1"
 description = "Python-based framework for heterogeneous agent communities"
 readme = "README.md"
 authors = [{ name = "Bruno Ribeiro", email = "brgri@isep.ipp.pt" }]
-license = "GPL-3.0"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python",
