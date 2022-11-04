@@ -1,4 +1,4 @@
-# PEAK - Python-based framework for hEterogeneous Agent Communities
+# PEAK - Python-based framework for heterogeneous agent communities
 
 PEAK is a framework that helps users build, manage, analyze and maintain a multi-agent ecosystem. This ecosystem is where different multi-agent systems can coexist and share resources with it each other in a easy manner. 
 
@@ -24,7 +24,7 @@ class agent(Agent):
 You create an agent file like this one and then execute it using the following command:
 
 ```bash
-$ peak agent.py -j agent@localhost
+$ peak run agent.py -j agent@localhost
 ```
 
 That's easier than it can ever be!

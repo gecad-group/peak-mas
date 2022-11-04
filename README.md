@@ -26,7 +26,7 @@ This will create a conda environment called _peak_.
 
 To install using pip, just type the following command:
 ```bash
-$ pip install peak
+$ pip install peak-mas
 ```
 
 
@@ -47,31 +47,20 @@ In this example we will show you how to execute a single agent. Save the followi
 
 ```python 
 from peak import Agent
-
 from peak.behaviours import OneShotBehaviour
 
-  
-  
-
 class agent(Agent):
-
     class HelloWorld(OneShotBehaviour):
-
         async def run(self) -> None:
-
             print("Hello World")
-
             await self.agent.stop()
 
-  
-
     async def setup(self) -> None:
-
         self.add_behaviour(self.HelloWorld())
 ```
 It is necessary that the name of the file is the same as the name of the agent's class so PEAK can do the proper parsing. This agent only has a behavior that prints to the terminal the "Hello World" message. To execute the agent just type the following command:
 ```bash 
-$ peak path/to/agent.py -j agent@localhost
+$ peak run path/to/agent.py -j agent@localhost
 ```
 Change the `localhost` to the domain of the XMPP server you want to connect.
 
