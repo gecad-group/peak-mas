@@ -298,12 +298,7 @@ test/
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode
 
 ### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+.vscode/
 
 # Local History for Visual Studio Code
 .history/
@@ -316,10 +311,10 @@ test/
 .history
 .ionide
 
-# Support for Project snippet scope
-.vscode/*.code-snippets
-
 # Ignore code-workspaces
 *.code-workspace
 
+# Ignore Obsidian
+.obsidian/ 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
+output.json

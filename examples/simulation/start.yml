@@ -1,0 +1,8 @@
+defaults:
+  domain: localhost
+agents:
+  sync:
+    file: sync.py
+  agent:
+    file: agent.py
+

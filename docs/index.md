@@ -1,11 +1,48 @@
-# PEAK - Python-based framework for hEterogeneous Agent Communities
+# PEAK - Python-based framework for heterogeneous agent communities
 
-## What is it?
-PEAK is a Python framework which aims to help the users build, manage, analyse and maintain multi-agent systems which become part of a unique ecosystem. This ecosystem is a system where various multi-agent systems can coexist at the same time allowing for an easy management and analysis. 
-This framework is an extension of the [SPADE](https://spade-mas.readthedocs.io/en/latest/) framework which was built using the [XMPP](https://xmpp.org/) protocol. 
+PEAK is a framework that helps users build, manage, analyze and maintain a multi-agent ecosystem. This ecosystem is where different multi-agent systems can coexist and share resources with it each other in a easy manner. 
 
-## Main Features
-PEAK framework focus on two things: help build multi-agent system with ease, eleminating the use of many boilerplates and adding usefull functionalities, and help the users to manage, analyse and monitor interactivly every single aspect of each multi-agent system inside the ecosystem.
-Because of these PEAK was devided in two main components: the PEAK MAS, where are the tools to build the agents, and the PEAK Management, where it is the management, analysis and monitorization tools for the multi-agent ecosystem.
+PEAK is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/) framework, which was built using the [XMPP](https://xmpp.org/) protocol. 
 
-_More details will be provided soon_
+## PEAK made easy
+
+```python
+# agent.py
+from peak import Agent, OneShotBehaviour
+  
+class agent(Agent):
+
+    class HelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            print("Hello World")
+            await self.agent.stop()
+
+    async def setup(self) -> None:
+        self.add_behaviour(self.HelloWorld())
+```
+
+You create an agent file like this one and then execute it using the following command:
+
+```bash
+$ peak run agent.py -j agent@localhost
+```
+
+That's easier than it can ever be!
+
+## Table of Contents
+
+- [Foreword](foreword.md)
+- [Prerequisites](prerequistites.md)
+- [Installing PEAK](installation.md)
+- [How-to Guide](how-to.md)
+	- [Run and configure a MAS](how-to.md#run-and-configure-a-mas)
+	- [Create a simulation environment](how-to.md#create-simulation-environment)
+	- [Integrate real smart devices](how-to.md#integrate-real-smart-devices)
+	- [Integrate data providers](how-to.md#integrate-data-providers)
+	- [PEAK Dashboard](how-to.md#peak-dashboard)
+- [API Documentation](api-doc.md)
+- [Contributing](contributing.md)
+
+## Copyright Notice
+
+`PEAK` is an open source project by [gecad-group](). See the original [LICENSE](https://github.com/gecad-group/peak-mas/blob/master/LICENSE) for more information.

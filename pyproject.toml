@@ -1,0 +1,61 @@
+[build-system]
+
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peak-mas"
+version = "1.0.1"
+description = "Python-based framework for heterogeneous agent communities"
+readme = "README.md"
+authors = [{ name = "Bruno Ribeiro", email = "brgri@isep.ipp.pt" }]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Environment :: Console",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+keywords = ["framework", "multiagent", "agent-based", "ecosystem", "spade", "xmpp"]
+dependencies = [
+    "aiohttp_cors",
+    "aioxmpp",
+    "pandas",
+    "pyModbusTCP",
+    "spade >= 3.2.2",
+    "PyYAML"
+]
+requires-python = "==3.9.6"
+
+[project.optional-dependencies]
+build = ["build", "twine"]
+dev = ["black", "isort", "mypy", "bumpver", "pipreqs"]
+
+[project.urls]
+Homepage = "https://www.gecad.isep.ipp.pt/peak"
+Github = "https://github.com/gecad-group/peak-mas"
+
+[project.scripts]
+peak = "peak.__main__:main"
+
+[tool.bumpver]
+current_version = "1.0.1"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message  = "chore: bump version {old_version} -> {new_version}"
+commit          = true
+tag             = true
+push            = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
+"src/peak/__init__.py" = ["{version}"]
+
+[tool.isort]
+profile                   = "black"
+import_heading_stdlib     = "Standard library imports"
+import_heading_thirdparty = "Third party imports"
+import_heading_firstparty = "Reader imports"

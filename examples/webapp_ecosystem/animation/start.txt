@@ -1,1 +1,0 @@
-agent.py agent@localhost/main -l debug

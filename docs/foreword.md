@@ -1,0 +1,7 @@
+# Foreword
+
+## What is PEAK and why it was developed?
+PEAK is a framework for developing Multi-Agent Systems (MAS). But you may ask, why another one? Well, the fact is that there is very few frameworks in Python and most of them are for Agent Based Modeling, which are not for deployment. The most used MAS framework is Jade, but the problem with Jade is that is written in java. Nowadays Python is having a lot of attention when it comes to artificial intelligence algorithms, and unfortunately java is not seeing much improvement in this area. In Python, there are a lot of AI resources out there that can be easily implemented in projects. So we search for MAS frameworks in Python and the only one that filled most of or needs was SPADE. But SPADE lacks some functionalities that we think would be great to see implemented, that is why we developed PEAK. Instead of reinventing the wheel we used SPADE too build a more sophisticated MAS framework that is inspired by others frameworks, like Jade.
+
+## Recommendations before using PEAK
+Before continuing with PEAK we highly recommend you too go through the SPADE's docs and tutorials so you can be accustomed with SPADE's workflow. Every SPADE's functionality is available in PEAK. PEAK's how to guide only shows the features that are new in the PEAK framework. You only need to know to to create an Agent, how to create and execute Behavior's and how to communicate between agents.

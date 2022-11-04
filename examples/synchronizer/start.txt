@@ -1,2 +1,0 @@
-sync.py sync@localhost 
-agent.py agent@localhost
