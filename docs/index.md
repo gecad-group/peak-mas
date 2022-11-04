@@ -9,16 +9,16 @@ PEAK is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/) framework,
 ```python
 # agent.py
 from peak import Agent, OneShotBehaviour
-  
+
 class agent(Agent):
 
-    class HelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
-            print("Hello World")
-            await self.agent.stop()
+    class HelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            print("Hello World")
+            await self.agent.stop()
 
-    async def setup(self) -> None:
-        self.add_behaviour(self.HelloWorld())
+    async def setup(self) -> None:
+        self.add_behaviour(self.HelloWorld())
 ```
 
 You create an agent file like this one and then execute it using the following command:
@@ -35,11 +35,11 @@ That's easier than it can ever be!
 - [Prerequisites](prerequistites.md)
 - [Installing PEAK](installation.md)
 - [How-to Guide](how-to.md)
-	- [Run and configure a MAS](how-to.md#run-and-configure-a-mas)
-	- [Create a simulation environment](how-to.md#create-simulation-environment)
-	- [Integrate real smart devices](how-to.md#integrate-real-smart-devices)
-	- [Integrate data providers](how-to.md#integrate-data-providers)
-	- [PEAK Dashboard](how-to.md#peak-dashboard)
+    - [Run and configure a MAS](how-to.md#run-and-configure-a-mas)
+    - [Create a group of agents](how-to.md#create-a-group-of-agents)
+    - [Create a simulation environment](how-to.md#create-a-simulation-environment)
+    - [Integrate data providers](how-to.md#integrate-data-providers)
+    - [PEAK Dashboard](how-to.md#peak-dashboard)
 - [API Documentation](api-doc.md)
 - [Contributing](contributing.md)
 
