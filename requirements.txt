@@ -2,5 +2,5 @@ aiohttp_cors==0.7.0
 aioxmpp==0.13.2
 pandas==1.4.2
 pyModbusTCP==0.2.0
-setuptools==61.2.0
+PyYAML==6.0
 spade==3.2.2

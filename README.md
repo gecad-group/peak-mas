@@ -1,4 +1,4 @@
-# PEAK - Python-based framework for hEterogenous Agent Communities
+# PEAK - Python-based framework for heterogenous agent communities
 
 ![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas) ![GitHub branch checks state](https://img.shields.io/github/checks-status/gecad-group/peak-mas/main)
 
