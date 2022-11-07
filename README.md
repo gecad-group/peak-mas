@@ -1,9 +1,10 @@
-# PEAK - Python-based framework for heterogenous agent communities
+# PEAK: Python-based framework for heterogenous agent communities
 
-![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas) ![GitHub branch checks state](https://img.shields.io/github/checks-status/gecad-group/peak-mas/main)
+![DOI](https://img.shields.io/static/v1?link=https://doi.org/10.1007/978-3-031-18050-7_7&link=https://doi.org/10.1007/978-3-031-18050-7_7&label=DOI&message=978-3-031-18050-7&color=blue) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/peak-mas) ![PyPI](https://img.shields.io/pypi/v/peak-mas) ![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas) ![powered by](https://img.shields.io/static/v1?label=powered%20by&message=GECAD&color=177985&labelColor=de5d4a&?link=http://gecad.isep.ipp.pt&link=http://gecad.isep.ipp.pt/) ![code style](https://img.shields.io/badge/code%20style-black-black) ![imports isort](https://img.shields.io/static/v1?label=imports&message=isort&color=blue&labelColor=orange)
 
 PEAK is a multi-agent system framework which helps the users develop, monitor, analyze and maintain ecosystem of heterogeneous agent communities. This ecosystem is  where various multi-agent systems can coexist, interact and share resources between them. 
-This framework is based on [SPADE](https://spade-mas.readthedocs.io/en/latest/). 
+This framework is based on <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a>.
+
 
 ## Prerequisites
 
@@ -34,13 +35,13 @@ $ pip install peak-mas
 
 ### Notes on SPADE
 
-As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see [SPADE](spade-mas.readthedocs.io) examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
+As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a> examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
 
 ### Notes on XMPP
 
-To run any PEAK's agent you will need a XMPP server. You can either configure one on your machine, remotely or use a public server. The only issue with the public servers is that they don't usually have all the configurations required to run some PEAK's functionalities. To configure the server you can read the "Configure XMPP server" section in the [documentation](http://www.gecad.isep.ipp.pt/peak).
+To run any PEAK's agent you will need a XMPP server. You can either configure one on your machine, remotely or use a public server. The only issue with the public servers is that they don't usually have all the configurations required to run some PEAK's functionalities. To configure the server you can read the "Configure XMPP server" section in the <a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">documentation</a>.
 
-### Single Agent
+### Hello World Agent Example
 
 One thing that was added in PEAK was the way the user executes the agents. PEAK added a CLI, inspired in JADE, to help the user execute end configure each agent in a easy and intuitive manner.
 In this example we will show you how to execute a single agent. Save the following code in a file called `agent.py`.
@@ -72,13 +73,13 @@ If you want to know more about each command we recommend reading the [documentat
 </p>
 </details>
 
-For more advanced functionalities and examples we recommend you to head forward to the [documentation website](http://www.gecad.isep.ipp.pt/peak).
+For more advanced functionalities and examples we recommend you to head forward to the <a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">documentation website</a>.
 
 
 ## Support
 
-Use the [Discussion](https://github.com/gecad-group/peak-mas/discussions) page if you have any questions or ideas you would like so see implemented.
-To alert an issue or a bug please post in the [Issues](https://github.com/gecad-group/peak-mas/issues) page.
+Use the <a href="https://github.com/gecad-group/peak-mas/discussions" target="_blank">Discussion</a> page if you have any questions or ideas you would like so see implemented.
+To alert an issue or a bug please post in the <a href="https://github.com/gecad-group/peak-mas/issues" target="_blank">Issues</a> page.
 
 ## Roadmap
 
@@ -89,16 +90,20 @@ This are some functionalities that are being developed and will be released in a
 - [ ] Implement Yellow Page Service in DF agent.
 - [ ] Implement Data Analysis section in the Dashboard.
 
+## Scientific Publications
+
+- Ribeiro, B., Pereira, H., Gomes, L., Vale, Z. (2023). Python-Based Ecosystem for Agent Communities Simulation. In: , _et al._ 17th International Conference on Soft Computing Models in Industrial and Environmental Applications (SOCO 2022). SOCO 2022. Lecture Notes in Networks and Systems, vol 531. Springer, Cham. https://doi.org/10.1007/978-3-031-18050-7_7
+
 ## Contributing to PEAK
 
 Pull requests are welcome. For major changes, please open a discussion first to discuss what you would like to change.
 
 The examples are used as a form of testing the framework. So please make sure to update the examples as appropriate or make new ones. 
 
-To format the code please use the [black](https://pypi.org/project/black/) and [isort](https://pypi.org/project/isort/) packages. 
+To format the code please use the <a href="https://pypi.org/project/black/" target="_blank">black</a> and <a href="https://pypi.org/project/isort/" target="_blank">isort</a> packages. 
 
-For the commits please follow the [Conventional Commits Guideline](www.conventionalcommits.org).
+For the commits please follow the <a href="www.conventionalcommits.org" target="_blank">Conventional Commits Guideline</a>.
 
 ## License
 
-`PEAK` is free and open-source software licensed under the [GNU General Public License v3.0](https://github.com/gecad-group/peak-mas/blob/develop/LICENSE).
+`PEAK` is free and open-source software licensed under the <a href="https://github.com/gecad-group/peak-mas/blob/develop/LICENSE" target="_blank">GNU General Public License v3.0</a>.
