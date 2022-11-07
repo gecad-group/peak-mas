@@ -9,8 +9,7 @@ This framework is based on <a href="https://spade-mas.readthedocs.io/en/latest/"
 ## Prerequisites
 
 - Python == 3.9.6
-- XMPP Server (configurations, more on that later)
-- Linux or Windows (Mac not tested)
+- XMPP Server ([see docs](https://www.gecad.isep.ipp.pt/peak))
 
 
 ## Installing PEAK
