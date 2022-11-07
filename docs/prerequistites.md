@@ -1,12 +1,12 @@
 # Prerequisites
 
-To start using PEAK you will need a XMPP server. XMPP stands for Extensible Messaging and Presence Protocol. This server is what will enable us to create the agents and make them communicate. XMPP is a protocol used for real time chatting so it's a good protocol for agents. You can either create and configure a local server or use a public one. The downside of using a public one is that some features of PEAK will not work (e.g. auto registration, multi-user chat, discovery service) depending on the server configuration. Another option is to use a docker, specially if you are on a Windows machine. We recommend the use of Prosody XMPP server because it's more compatible. Another thing to be in mind is that the XMPP server and PEAK were only tested under Windows and Linux. 
+To start using PEAK you will need a XMPP server. XMPP stands for Extensible Messaging and Presence Protocol. This server is what will enable us to create the agents and make them communicate. XMPP is a protocol used for real time chatting so it's a good protocol for agents. You can either create and configure a local server or use a public one. The downside of using a public one is that some features of PEAK will not work (e.g. auto registration, multi-user chat, discovery service) depending on the server configuration. Another option is to use a docker, specially if you are on a Windows machine. We recommend the use of Prosody XMPP server because it's more compatible. PEAK was tested under Windows and Linux. To use PEAK you can either run in a local XMPP server configured by you, or run in a Docker with the XMPP server inside. 
 
 
-## Run a XMPP server
+## Run in a XMPP server
 
-To run and configure a local Prosody server you will need a Linux operating system. Prosody doesn't support Windows. If you have Windows and want to install locally anyway you can either chose to run in a [Docker](#run-in-a-docker), using Windows Subsystem for Linux or using other [servers providers](https://xmpp.org/software/servers/). Bare in mind that PEAK is only tested in Prosody server, but feel free to post any question in the Discussion section at our repository.
-To create a local server just go to [Prosody's docs](https://prosody.im/download/start). After creating the server head to [XMPP server configurations](#xmpp-server-configurations).
+To run and configure a local Prosody server you will need a Linux operating system. Prosody doesn't support Windows natively. If you have Windows and want to install locally anyway you can either chose to run in a [Docker](#run-in-a-docker), using Windows Subsystem for Linux or using other [server providers](https://xmpp.org/software/servers/). Bare in mind that PEAK is tested in Prosody server, but feel free to post a discussion about having problem with other servers in the [Discussion section](https://github.com/gecad-group/peak-mas/discussions) at our repository.
+To create a local server just go to [Prosody's docs](https://prosody.im/download/start) and follow the instructions. After creating the server head to [XMPP server configurations](#xmpp-server-configurations).
 
 ## Run in a Docker
 
@@ -15,6 +15,14 @@ There are some dockers available in Docker Hub. In the future we will make or ow
 ## XMPP server configurations
 
 To be able to use every functionality in PEAK you need specific configurations on the server. Bellow is the configuration file that you can use to configure the server. This file only has the essentials to run PEAK features. For any additional configurations you can head to [Prosody's documentation](https://prosody.im/doc/configure).
+
+If you are using other server than Prosody and want to know which functionalities you have to enable se the following list (its probable that you can not tweak or find every option in other servers):
+- Allow users to register freely
+- Multi-User Chat:
+    - make the room public as default
+    - make the JID's of the rooms public by default
+    - de-enable room locking
+    - change the max history messages to zero
 
 > **Note:** 
 > If you want to save messages logs in the server for debugging proposes use the `mam` and `message_logging` modules. Bare in mind that this will slow down your server, especially if you have high load on the server.
@@ -138,6 +146,6 @@ Component "pubsub.localhost" "pubsub"
 Include "conf.d/*.cfg.lua"
 ```
 
-## XMPP Client (Optional)
+## XMPP Client
 
-One way to debug PEAK, additionally to PEAK's debug system, is having a XMPP client to see the messages exchange between agents. There are plenty of [clients](https://xmpp.org/software/clients/) you can use. The one used to develop PEAK is [Pidgin](https://www.pidgin.im/).
+This is optional, but one good way to debug PEAK, additionally to PEAK's debug system, is having a XMPP client to see the messages exchange between agents. There are plenty of [clients](https://xmpp.org/software/clients/) you can use. The one used to develop PEAK is [Pidgin](https://www.pidgin.im/).

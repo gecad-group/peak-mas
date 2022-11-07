@@ -99,7 +99,7 @@ class receiver(Agent):
 ```
 
 ```yaml
-# multiagent.yml
+# multiagent.yaml
 defaults:
     domain: localhost
     log_level: debug
@@ -113,10 +113,10 @@ agents:
         log_level: info
 ```
 
-Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yml`. After that, run the following command:
+Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yaml`. After that, run the following command:
 
 ```bash
-$ peak start multiagent.yml
+$ peak start multiagent.yaml
 ```
 
 So, what happened? Three agents were created, instead of two. One called `john0@localhost/test`, other called `john1@localhost/test` and the third one `harry@localhost`. The two `john` sent a message `Hello World` to `harry` and `harry` print them out. The log files created were in loggin level `DEBUG`, except for the `harry` that was level `INFO`.
