@@ -18,7 +18,6 @@ use_libevent = true
 -- Paths for community models:
 plugin_paths = {
     "/usr/local/lib/prosody/modules";
-    "/home/happy_dori/Documentos/prosody-modules";
 }
 
 -- This is the list of modules Prosody will load on startup.
@@ -76,8 +75,8 @@ authentication = "internal_hashed"
 -- Logging configuration
 -- For advanced logging see https://prosody.im/doc/logging
 -- Debian:
---  Logs info and higher to /var/log
---  Logs errors to syslog also
+-- Logs info and higher to /var/log
+-- Logs errors to syslog also
 
 log = {
     -- Log files (change 'info' to 'debug' for debug logs):
