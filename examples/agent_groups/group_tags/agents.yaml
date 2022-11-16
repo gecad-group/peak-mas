@@ -1,0 +1,7 @@
+defaults:
+  domain: localhost
+agents:
+  group_admin:
+    file: group_admin.py
+  group_searcher:
+    file: group_searcher.py

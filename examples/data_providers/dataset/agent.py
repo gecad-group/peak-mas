@@ -1,4 +1,4 @@
-from peak import Agent, Message, PeriodicBehaviour
+from peak import Agent, JoinGroup, Message, PeriodicBehaviour
 
 
 class agent(Agent):
@@ -7,15 +7,11 @@ class agent(Agent):
             self.count = 0
 
         async def run(self):
-            msg = Message()
-            msg.to = "peak@conference.localhost"
-            msg.body = str(self.agent.message[self.count])
-            await self.send_to_group(msg)
+            print(self.agent.message[self.count])
 
             if self.count == 5:
                 await self.agent.stop()
             self.count += 1
 
     async def setup(self):
-        await self.join_group("peak@conference.localhost")
         self.add_behaviour(self.PrintMessages(2))

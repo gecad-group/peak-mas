@@ -13,9 +13,9 @@ class agent(Agent):
                 "mas/test/test2/peak",
                 "mas/retina/community/consumers",
             ]
-            while True:
+            for _ in range(3):
                 for groups_branch in groups_tree:
-                    await sleep(10)
+                    await sleep(5)
                     self.agent.add_behaviour(
                         JoinGroup(groups_branch, "conference." + self.agent.jid.domain)
                     )
@@ -26,10 +26,11 @@ class agent(Agent):
                     msg.body = "Hello World"
                     await self.send_to_group(msg)
                 for groups_branch in groups_tree:
-                    await sleep(10)
+                    await sleep(5)
                     self.agent.add_behaviour(
                         LeaveGroup(groups_branch, "conference." + self.agent.jid.domain)
                     )
+            await self.agent.stop()
 
     async def setup(self):
         self.add_behaviour(self.HelloWorld())

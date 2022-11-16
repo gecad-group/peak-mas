@@ -11,7 +11,19 @@ You have two options to run agents with PEAK. You can run the same way as in SPA
 > e.g. 
 > ```bash
 > $ peak -h
-> usage: peak [-h] [-version] [-v] {df,run,start} ...                                                                                                                                                                                             positional arguments:                                                                                                     {df,run,start}                                                                                                            df            Execute Directory Facilitator agent.                                                                      run           Execute PEAK's agents.                                                                                    start         Executes multiple agents using a YAML configuration file.                                                                                                                                                                     optional arguments:                                                                                                       -h, --help      show this help message and exit                                                                         -version        show program's version number and exit                                                                  -v              Verbose. Turns on the debug info.
+> usage: peak [-h] [-version] [-v] {df,run,start} ...
+>
+> positional arguments:
+>  {df,run,start}
+>    df            Execute Directory Facilitator agent.
+>    run           Execute PEAK's agents.
+>    start         Executes multiple agents using a YAML configuration
+>                  file.
+>
+>optional arguments:
+>  -h, --help      show this help message and exit
+>  -version        show program's version number and exit
+>  -v              Verbose. Turns on the debug info.
 > ```
 
 ### Run a single agent
@@ -24,13 +36,13 @@ from peak import Agent, OneShotBehaviour
   
 class agent(Agent):
 
-    class HelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
-            print("Hello World")
-            await self.agent.stop()
+    class HelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            print("Hello World")
+            await self.agent.stop()
 
-    async def setup(self) -> None:
-        self.add_behaviour(self.HelloWorld())
+    async def setup(self) -> None:
+        self.add_behaviour(self.HelloWorld())
 ```
 
 Consider the agent above. Create a file called agent.py and copy the code. This is a simple agent that will print "Hello World" in the terminal. 
@@ -59,15 +71,15 @@ from peak import Agent, OneShotBehaviour, Message
   
 class sender(Agent):
 
-    class SendHelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
-            msg = Message(to="harry@localhost")
-            msg.body = "Hello World"
-            await self.send(msg)
-            await self.agent.stop()
+    class SendHelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            msg = Message(to="harry@localhost")
+            msg.body = "Hello World"
+            await self.send(msg)
+            await self.agent.stop()
 
-    async def setup(self) -> None:
-        self.add_behaviour(self.SendHelloWorld())
+    async def setup(self) -> None:
+        self.add_behaviour(self.SendHelloWorld())
 ```
 
 ```python
@@ -76,35 +88,35 @@ from peak import Agent, OneShotBehaviour
   
 class receiver(Agent):
 
-    class ReceiveHelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
-	        while msg := await self.receive(10):
-	            print(f"{msg.sender} sent me a message: '{msg.body}'")
-            await self.agent.stop()
+    class ReceiveHelloWorld(OneShotBehaviour):
+        async def run(self) -> None:
+            while msg := await self.receive(10):
+                print(f"{msg.sender} sent me a message: '{msg.body}'")
+            await self.agent.stop()
 
-    async def setup(self) -> None:
-        self.add_behaviour(self.ReceiveHelloWorld())
+    async def setup(self) -> None:
+        self.add_behaviour(self.ReceiveHelloWorld())
 ```
 
 ```yaml
-# multiagent.yml
+# multiagent.yaml
 defaults:
-	domain: localhost
-	log_level: debug
+    domain: localhost
+    log_level: debug
 agents:
-	john:
-		file: sender.py
-		resource: test
-		clones: 2
-	harry: 
-		file: receiver.py
-		log_level: info
+    john:
+        file: sender.py
+        resource: test
+        clones: 2
+    harry: 
+        file: receiver.py
+        log_level: info
 ```
 
-Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yml`. After that, run the following command:
+Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yaml`. After that, run the following command:
 
 ```bash
-$ peak start multiagent.yml
+$ peak start multiagent.yaml
 ```
 
 So, what happened? Three agents were created, instead of two. One called `john0@localhost/test`, other called `john1@localhost/test` and the third one `harry@localhost`. The two `john` sent a message `Hello World` to `harry` and `harry` print them out. The log files created were in loggin level `DEBUG`, except for the `harry` that was level `INFO`.
@@ -135,23 +147,23 @@ from peak import Agent, JoinGroup, OneShotBehaviour, Message
 from asyncio import sleep
 
 class agent(Agent):
-    class HelloWorld(OneShotBehaviour):
-        async def on_start(self) -> None:
-            behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
-            self.agent.add_behaviour(behav)
-            await behav.join()
+    class HelloWorld(OneShotBehaviour):
+        async def on_start(self) -> None:
+            behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
+            self.agent.add_behaviour(behav)
+            await behav.join()
 
-        async def run(self) -> None:
-            msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
-            msg.body = "Hello World"
-            await self.send_to_group(msg)
-            await sleep(5)
-            msg.body = "Goodbye World"
-            await self.send_to_group(msg)
-            await self.agent.stop()
+        async def run(self) -> None:
+            msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
+            msg.body = "Hello World"
+            await self.send_to_group(msg)
+            await sleep(5)
+            msg.body = "Goodbye World"
+            await self.send_to_group(msg)
+            await self.agent.stop()
 
-    async def setup(self) -> None:
-        self.add_behaviour(self.HelloWorld())
+    async def setup(self) -> None:
+        self.add_behaviour(self.HelloWorld())
 ```
 As you can see in the example above, the agent has a behavior `HelloWorld`. This behavior will first use the `JoinGroup` behavior to join a group called 'group1@conference.localhost' (assuming the domain is ``localhost``). If the group does not exists it will create it. It waits until the agent joins the group. After that it will run the `run` function. The ``run`` function will send a `Hello World` message to the group, waits for 5 seconds and then sends a `Goodbye World` and exits. If you want to leave the group without terminating the agent you can import the ``LeaveGroup`` behavior from ``peak`` package and use it the same way as the `JoinGroup`.
 
@@ -172,24 +184,24 @@ import logging
 logger = logging.getLogger(self.__class__.__name__)
 
 class group_searcher(Agent):
-    async def setup(self) -> None:
-        self.add_behaviour(
-            JoinGroup("group1", "conference.localhost", ["test", "awesome", "cool"])
-        )
-        self.add_behaviour(
-            JoinGroup("group2", "conference.localhost", ["test", "awesome"])
-        )
-        self.add_behaviour(
-            JoinGroup("group3", "conference.localhost", ["test"],)
-        )
-        self.add_behaviour(JoinGroup("group4", "conference.localhost"))
-        
-        def print_groups(tags, groups):
-            logger.info(str(tags), str(groups))
-            
-        self.add_behaviour(SearchGroup(["test"], print_groups))
-        self.add_behaviour(SearchGroup(["awesome"], print_groups))
-        self.add_behaviour(SearchGroup(["awesome", "cool"], print_groups))
+    async def setup(self) -> None:
+        self.add_behaviour(
+            JoinGroup("group1", "conference.localhost", ["test", "awesome", "cool"])
+        )
+        self.add_behaviour(
+            JoinGroup("group2", "conference.localhost", ["test", "awesome"])
+        )
+        self.add_behaviour(
+            JoinGroup("group3", "conference.localhost", ["test"],)
+        )
+        self.add_behaviour(JoinGroup("group4", "conference.localhost"))
+        
+        def print_groups(tags, groups):
+            logger.info(str(tags), str(groups))
+            
+        self.add_behaviour(SearchGroup(["test"], print_groups))
+        self.add_behaviour(SearchGroup(["awesome"], print_groups))
+        self.add_behaviour(SearchGroup(["awesome", "cool"], print_groups))
 ```
 In the example above we create an agent called `group_searcher`. This agent will create 4 different groups: `group1@conference.localhost` with the tags `test`, `awesome` and `cool`; `group2@conference.localhost` with the tags `test` and `awesome`; `group3@conference.localhost` with the tag `test`; and finally the fourth group `group4@conference.localhost`. After that will search for groups using the `SearchGroup` behavior.
 
@@ -213,19 +225,19 @@ from asyncio import sleep
 from peak import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
 
 class agent(Agent):
-    class HelloWorld(OneShotBehaviour):
-        async def run(self):
-			self.agent.add_behaviour(
-				JoinGroup("mas/retina/teste", f"conference.{self.agent.jid.domain}")
-			)
-			msg = Message(
-				to=f"retina@conference.{self.agent.jid.domain}"
-			)
-			msg.body = "Hello World"
-			await self.send_to_group(msg)
+    class HelloWorld(OneShotBehaviour):
+        async def run(self):
+            self.agent.add_behaviour(
+                JoinGroup("mas/retina/teste", f"conference.{self.agent.jid.domain}")
+            )
+            msg = Message(
+                to=f"retina@conference.{self.agent.jid.domain}"
+            )
+            msg.body = "Hello World"
+            await self.send_to_group(msg)
 
-    async def setup(self):
-        self.add_behaviour(self.HelloWorld())
+    async def setup(self):
+        self.add_behaviour(self.HelloWorld())
 ```
 In the JoinGroup behavior you can specify a path of groups. What these does is create an hierarchy of groups, being the first group the root and the last group an intermediate node or a leaf. In this path we call the last node the target group, because you only enter in that group specifically. Another interesting thing about this functionality is that for each node behind the target node you enter in a specially group which the names ends in \_down. The ideia behind this is to send messages to the whole branch, so every agent that enters a node bellow enters in this group. So if we want to send a message to the whole multi agent system we only have to send a message to, in the case of this example, ``mas_down``. In the example above the agent entered in 
 

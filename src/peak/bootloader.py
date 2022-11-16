@@ -62,12 +62,15 @@ def _boot_agent(
     # creates a loop that waits until the agent dies.
     logger.debug("creating agent")
     agent_class = _get_class(file)
+    file_abs_path = file.parent.absolute()
     if properties:
+        os.chdir(properties.parent)
         properties = _get_class(properties)(jid.localpart, name, number)
         properties = properties.extract()
     else:
         properties = None
 
+    os.chdir(file_abs_path)
     agent_instance = agent_class(jid, properties, verify_security)
     logger.info("starting agent")
     try:

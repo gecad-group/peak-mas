@@ -19,7 +19,7 @@ from peak.properties import *
 
 __author__ = "Bruno Ribeiro"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 # filtering noisy loggers
 _logging.getLogger("aiosasl").setLevel(_logging.ERROR)
