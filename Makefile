@@ -16,7 +16,7 @@ data_extraction:
 	peak run examples\data_extraction\agent.py -j agent@localhost
 
 dataset:
-	peak run examples\data_providers\dataset\agent.py -j agent@localhost
+	peak run examples\data_providers\dataset\agent.py -j agent@localhost -p examples\data_providers\dataset\dataset.py
 
 simulation:
 	peak start examples\simulation\start.yml
