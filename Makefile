@@ -20,3 +20,12 @@ dataset:
 
 simulation:
 	peak start examples\simulation\start.yml
+
+patch:
+	python -m bumpver update --patch
+
+minor:
+	python -m bumpver update --minor
+
+major:
+	python -m bumpver update --major
