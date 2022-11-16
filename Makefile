@@ -4,7 +4,7 @@ single_agent:
 	peak run examples\hello_world_agent\agent.py -j agent@localhost
 
 single_group:
-	peak start examples\agent_groups\hello_world_group\agents.yml
+	peak start examples\agent_groups\hello_world_group\agents.yaml
 
 group_hierarchy:
 	peak run examples\agent_groups\group_hierarchy\agent.py -j agent@localhost
@@ -19,7 +19,7 @@ dataset:
 	peak run examples\data_providers\dataset\agent.py -j agent@localhost -p examples\data_providers\dataset\dataset.py
 
 simulation:
-	peak start examples\simulation\start.yml
+	peak start examples\simulation\start.yaml
 
 patch:
 	python -m bumpver update --patch
