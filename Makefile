@@ -29,3 +29,8 @@ minor:
 
 major:
 	python -m bumpver update --major
+
+publish:
+	python -m build
+	twine check dist/*
+	twine upload dist/*
