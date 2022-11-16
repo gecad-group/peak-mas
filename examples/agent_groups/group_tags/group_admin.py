@@ -1,5 +1,4 @@
 from asyncio import sleep
-
 from peak import Agent, JoinGroup, LeaveGroup
 
 
@@ -26,3 +25,4 @@ class group_admin(Agent):
         self.add_behaviour(LeaveGroup("group2", "conference.localhost"))
         self.add_behaviour(LeaveGroup("group3", "conference.localhost"))
         self.add_behaviour(LeaveGroup("group4", "conference.localhost"))
+        await self.stop()
