@@ -63,7 +63,12 @@ def _boot_agent(
     logger.debug("creating agent")
     agent_class = _get_class(file)
     if properties:
+        # changing dir to properties location so user does not have to change
+        # files location if the working dir changes
+        working_dir = os.getcwd()
+        os.chdir(properties.parent)
         properties = _get_class(properties)(jid.localpart, name, number)
+        os.chdir(working_dir)
         properties = properties.extract()
     else:
         properties = None
