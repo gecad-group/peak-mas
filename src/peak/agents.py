@@ -1,3 +1,4 @@
+# Standard library imports
 import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
@@ -5,9 +6,11 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from json import loads as json_loads
 
+# Third party imports
 import aiohttp_cors
 from aioxmpp import JID
 
+# Reader imports
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 from peak.properties import Properties
 
@@ -309,9 +312,11 @@ class DF(Agent):
                             self.agent.grouphierarchy_data["node_members"][node]
                         ) == 0 and not any(
                             node == source
-                            for source, _ in self.agent.grouphierarchy_data["links"]
+                            for source, _, _ in self.agent.grouphierarchy_data["links"]
                         ):
-                            self.agent.grouphierarchy_data["node_members"].pop(node)
+                            self.agent.grouphierarchy_data["node_members"].pop(
+                                node
+                            )  # this line can be removed, there is no need in removing the node from the dict
                             self.agent.grouphierarchy_data["nodes"].remove(
                                 (node, level + str(len(nodes) - 1 - i), domain)
                             )
@@ -334,11 +339,11 @@ class DF(Agent):
                     self.logger.debug(str(msg.sender) + " entering " + path)
                     last = None
                     for i, node in enumerate(nodes):
-                        if node not in self.agent.grouphierarchy_data["node_members"]:
-                            self.agent.grouphierarchy_data["node_members"][node] = []
                         self.agent.grouphierarchy_data["nodes"].add(
                             (node, level + str(i), domain)
                         )
+                        if node not in self.agent.grouphierarchy_data["node_members"]:
+                            self.agent.grouphierarchy_data["node_members"][node] = []
                         self.agent.grouphierarchy_data["categories"].add(level + str(i))
                         if last != None:
                             self.agent.grouphierarchy_data["links"].add(
@@ -351,7 +356,7 @@ class DF(Agent):
                                                 "node_members"
                                             ][last]
                                         )
-                                        + 1,
+                                        + 1,  # this plus one is for the dashboard to not draw empty nodes (size of the node)
                                         len(
                                             self.agent.grouphierarchy_data[
                                                 "node_members"
