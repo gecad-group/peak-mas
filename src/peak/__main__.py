@@ -1,18 +1,20 @@
+# Standard library imports
 import logging
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
-import sys
 
+# Reader imports
 from peak import JID
-from peak import __name__ as peak_name
+from peak import __name__ as peak_name, __version__ as version
 from peak.cli import df, mas
-
 
 logger = logging.getLogger()
 
+
 def main(args=None):
     parser = ArgumentParser(prog=peak_name)
-    parser.add_argument("-version", action="version", version="PEAK 1.0")
+    parser.add_argument("--version", action="version", version=version)
     parser.add_argument(
         "-v",
         action="store_true",
@@ -40,7 +42,10 @@ def main(args=None):
         help="Selects the logging level of the DF. Default is INFO.",
     )
     df_parser.add_argument(
-        "-port", type=str, default="10000", help="Port to be opened for the REST API. Default is 10000"
+        "-port",
+        type=str,
+        default="10000",
+        help="Port to be opened for the REST API. Default is 10000",
     )
     df_parser.set_defaults(func=df.exec)
 
@@ -63,7 +68,7 @@ def main(args=None):
         help="Python file where the agent properties are located.",
     )
     run_parser.add_argument(
-        "-clone",
+        "-clones",
         type=int,
         default=1,
         help="The number of clones of the agent. The name of each agent will be the same as the JID but with the number of the corresponding clone to it (e.g. john_0@localhost, john_1@localhost). The sequence starts in zero.",
@@ -90,8 +95,8 @@ def main(args=None):
         help="Path to the YAML configuration file.",
     )
     start_parser.set_defaults(func=mas.multi_agent_exec)
-    
-    if len(sys.argv)==1:
+
+    if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
 
