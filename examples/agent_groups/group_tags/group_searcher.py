@@ -1,11 +1,15 @@
+# Standard library imports
 import logging
-from peak import Agent, SearchGroup
 from asyncio import sleep
+
+# Reader imports
+from peak import Agent, SearchGroup
 
 
 class group_searcher(Agent):
     async def setup(self) -> None:
         await sleep(3)
+
         def print_groups(tags, groups):
             logger = logging.getLogger(self.__class__.__name__)
             logger.info(str(tags), str(groups))

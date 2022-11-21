@@ -1,8 +1,10 @@
+# Standard library imports
 import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Any, List
 
+# Third party imports
 import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
@@ -167,7 +169,7 @@ class _Behaviour:
             await room.send_message(raw_msg)
             await room.leave()
             _logger.debug(f"leaving {msg.to}")
-    
+
     async def execute(self, behaviour):
         """Executes and awaits synchronozly for a behaviour.
 
@@ -178,6 +180,7 @@ class _Behaviour:
         """
         self.agent.add_behaviour(behaviour)
         await behaviour.join()
+
 
 class OneShotBehaviour(
     _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta

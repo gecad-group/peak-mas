@@ -1,7 +1,9 @@
+# Standard library imports
 import logging
 from json import dumps as json_dumps
 from typing import Callable
 
+# Reader imports
 from peak import DF, Message, SyncAgent, Template
 from peak.core import CyclicBehaviour, OneShotBehaviour, PeriodicBehaviour
 from peak.properties import Property
@@ -88,7 +90,7 @@ class ExportData(OneShotBehaviour):
     when its not used. When the Synchronizer its being used the data
     is exported at the same rate as the Synchronizers clock. If its not
     used the user must define a interval in which the data is exported.
-    
+
     Warning: the file will be overwriten."""
 
     def __init__(

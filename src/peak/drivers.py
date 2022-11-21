@@ -1,6 +1,8 @@
+# Standard library imports
 import logging
 from abc import ABCMeta
 
+# Third party imports
 from pyModbusTCP.client import ModbusClient
 from pyModbusTCP.utils import get_2comp
 
