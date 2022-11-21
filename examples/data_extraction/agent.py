@@ -1,5 +1,7 @@
+# Standard library imports
 from random import random
 
+# Reader imports
 from peak import Agent, ExportData, PeriodicBehaviour
 
 
@@ -9,11 +11,11 @@ class agent(Agent):
             self.count = 0
 
         async def run(self) -> None:
-            if self.count == 10:
+            if self.count >= 10:
                 await self.agent.stop()
-            self.agent.x = random() * 100
-            self.agent.y = random() * 100
-            self.agent.z = random() * 100
+            self.agent.x = [self.count, random() * 100]
+            self.agent.y = [self.count, random() * 100]
+            self.agent.z = [self.count, random() * 100]
             self.count += 1
 
     async def setup(self) -> None:
@@ -21,4 +23,12 @@ class agent(Agent):
         self.y = 0
         self.z = 0
         self.add_behaviour(self.RandomTrial(1))
-        self.add_behaviour(ExportData("output.json", ["x", "y", "z"], 2, True, "test"))
+        self.add_behaviour(
+            ExportData(
+                "output.json",
+                ["x", "y", "z"],
+                interval=2,
+                to_graph=True,
+                graph_name=self.name,
+            )
+        )
