@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "peak-mas"
-version = "1.0.2"
+version = "1.0.3"
 description = "Python-based framework for heterogeneous agent communities"
 readme = "README.md"
 authors = [{ name = "Bruno Ribeiro", email = "brgri@isep.ipp.pt" }]
@@ -43,7 +43,7 @@ Github = "https://github.com/gecad-group/peak-mas"
 peak = "peak.__main__:main"
 
 [tool.bumpver]
-current_version = "1.0.2"
+current_version = "1.0.3"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "chore: bump version {old_version} -> {new_version}"
 commit          = true
