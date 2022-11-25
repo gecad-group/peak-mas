@@ -163,22 +163,24 @@ class _Behaviour:
         try:
             await self.agent.groups[str(msg.to)].send_message(raw_msg)
         except:
-            _logger.debug(f"agent not member of {msg.to}")
+            _logger.debug(f"agent not member of {msg.to}, sending message anyway")
             room, future = self.agent.muc_client.join(msg.to, self.agent.name)
             await future
             await room.send_message(raw_msg)
             await room.leave()
             _logger.debug(f"leaving {msg.to}")
 
-    async def execute(self, behaviour):
-        """Executes and awaits synchronozly for a behaviour.
+    async def wait_for(self, behaviour: _spade.behaviour.CyclicBehaviour):
+        """Awaits synchronozly for a behaviour.
 
+        Executes behaviour first, if not executed.
         It is used to chain behviour that are dependent on each other.
 
         Args:
             behaviour: SPADE's behaviour.
         """
-        self.agent.add_behaviour(behaviour)
+        if not behaviour.is_running:
+            self.agent.add_behaviour(behaviour)
         await behaviour.join()
 
 
