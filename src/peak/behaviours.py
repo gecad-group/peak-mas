@@ -1,6 +1,7 @@
 # Standard library imports
 import logging
 from json import dumps as json_dumps
+from json import loads as json_loads
 from typing import Callable
 
 # Reader imports
@@ -24,7 +25,7 @@ class JoinGroup(OneShotBehaviour):
         msg.set_metadata("resource", "treehierarchy")
         msg.set_metadata("path", self.path)
         msg.set_metadata("domain", self.domain)
-        msg.set_metadata("tags", str(self.tags))
+        msg.set_metadata("tags", json_dumps(self.tags))
         await self.send(msg)
         nodes = self.path.split("/")
         for node in nodes[:-1]:
@@ -62,6 +63,7 @@ class SearchGroup(OneShotBehaviour):
     def __init__(
         self, tags: list[str], callback: Callable[[list[str]], None], *args, **kargs
     ):
+        super().__init__()
         self.tags = tags
         self.callback = callback
         self.args = args
@@ -71,15 +73,17 @@ class SearchGroup(OneShotBehaviour):
         msg = Message()
         msg.to = DF.name(self.agent.jid.domain)
         msg.set_metadata("resource", "searchgroup")
-        msg.set_metadata("tags", str(self.tags))
+        msg.set_metadata("tags", json_dumps(self.tags))
         await self.send(msg)
         res = None
         while not res:
             res = await self.receive(60)
             if not res:
                 raise Exception("DF did not respond")
-            groups = res.get_metadata("groups")
-            logging.getLogger(self.__class__.__name__).info(self.tags, groups)
+            groups = json_loads(res.get_metadata("groups"))
+            logging.getLogger(self.__class__.__name__).debug(
+                f"search: {str(self.tags)}, result: {str(groups)}"
+            )
             self.callback(self.tags, groups, *self.args, **self.kargs)
 
 

@@ -4,6 +4,7 @@ import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
+from json import dumps as json_dumps
 from json import loads as json_loads
 
 # Third party imports
@@ -373,13 +374,15 @@ class DF(Agent):
 
         async def run(self) -> None:
             msg = await self.receive(60)
-            if msg:
-                tags = json_loads(msg.get_metadata("tags"))
-                groups = self.agent.grouphierarchy_data["tags"][tags[0]]
+            if msg and (meta_tags := msg.get_metadata("tags")):
+                tags = json_loads(meta_tags)
+                groups: set = self.agent.grouphierarchy_data["tags"][tags[0]]
                 for tag in tags[1:]:
-                    groups.intersection(self.agent.grouphierarchy_data["tags"][tag])
+                    groups = groups.intersection(
+                        self.agent.grouphierarchy_data["tags"][tag]
+                    )
                 res = msg.make_reply()
-                res.set_metadata("groups", groups)
+                res.set_metadata("groups", json_dumps(list(groups)))
                 await self.send(res)
 
     class _CreateGraph(CyclicBehaviour):
