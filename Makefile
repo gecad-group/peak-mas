@@ -21,16 +21,20 @@ dataset:
 simulation:
 	peak start examples\simulation\start.yaml
 
-patch:
+format:
+	black .
+	isort .
+
+patch: format
 	python -m bumpver update --patch
 
-minor:
+minor: format
 	python -m bumpver update --minor
 
-major:
+major: format
 	python -m bumpver update --major
 
-publish:
+publish: format
 	python -m build
 	twine check dist/*
 	twine upload dist/*
