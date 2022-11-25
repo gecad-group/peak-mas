@@ -312,7 +312,7 @@ class DF(Agent):
                             self.agent.grouphierarchy_data["node_members"][node]
                         ) == 0 and not any(
                             node == source
-                            for source, _, _ in self.agent.grouphierarchy_data["links"]
+                            for source, _ in self.agent.grouphierarchy_data["links"]
                         ):
                             self.agent.grouphierarchy_data["node_members"].pop(
                                 node
@@ -350,19 +350,6 @@ class DF(Agent):
                                 (
                                     last,
                                     node,
-                                    max(
-                                        len(
-                                            self.agent.grouphierarchy_data[
-                                                "node_members"
-                                            ][last]
-                                        )
-                                        + 1,  # this plus one is for the dashboard to not draw empty nodes (size of the node)
-                                        len(
-                                            self.agent.grouphierarchy_data[
-                                                "node_members"
-                                            ][node]
-                                        ),
-                                    ),
                                 )
                             )
                         last = node
@@ -473,10 +460,10 @@ class DF(Agent):
         self.add_behaviour(self._CreateGraph())
         self.add_behaviour(self._UpdateGraph())
 
-        # Creates routes.
-        self.web.add_get("/groups", self.groups, template=None)
+        # Create routes.
+        self.web.add_get("/groups", self.get_groups, template=None)
         self.web.add_get("/groups/refresh", self.refresh_groups, template=None)
-        self.web.add_get("/dataanalysis", self.dataanalysis, template=None)
+        self.web.add_get("/plots", self.get_plots, template=None)
 
         # Configure default CORS settings.
         cors = aiohttp_cors.setup(
@@ -498,17 +485,16 @@ class DF(Agent):
         self.web.start(port=self.port)
         _logger.info("REST API running on port " + self.port)
 
-    async def groups(self, request):
-        graph = {
+    async def get_groups(self, request):
+        return {
             "nodes": list(self.grouphierarchy_data["nodes"]),
             "links": list(self.grouphierarchy_data["links"]),
             "categories": list(self.grouphierarchy_data["categories"]),
             "node_members": self.grouphierarchy_data["node_members"],
         }
-        return graph
 
     async def refresh_groups(self, request):
         pass
 
-    async def dataanalysis(self, request):
+    async def get_plots(self, request):
         return self.dataanalysis_data
