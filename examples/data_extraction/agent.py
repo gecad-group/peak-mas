@@ -20,7 +20,7 @@ class agent(Agent):
                 2.316069946,
                 2.341042708,
                 2.402921031,
-                2.342395912
+                2.342395912,
             ]
             self.generation_data = [
                 0.017204275,
@@ -36,12 +36,17 @@ class agent(Agent):
                 0.373578536,
             ]
 
-
         async def run(self) -> None:
             if self.count >= 10:
                 await self.agent.stop()
-            self.agent.consumption = [self.count, self.consumption_data[self.count] * 1000 + random() * 100]
-            self.agent.generation = [self.count, self.generation_data[self.count] * 1000 + random() * 100]
+            self.agent.consumption = [
+                self.count,
+                self.consumption_data[self.count] * 1000 + random() * 100,
+            ]
+            self.agent.generation = [
+                self.count,
+                self.generation_data[self.count] * 1000 + random() * 100,
+            ]
             self.count += 1
 
     async def setup(self) -> None:
@@ -57,5 +62,3 @@ class agent(Agent):
                 graph_name=self.name,
             )
         )
-
-

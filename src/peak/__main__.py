@@ -6,7 +6,8 @@ from pathlib import Path
 
 # Reader imports
 from peak import JID
-from peak import __name__ as peak_name, __version__ as version
+from peak import __name__ as peak_name
+from peak import __version__ as version
 from peak.cli import df, mas
 
 logger = logging.getLogger()
