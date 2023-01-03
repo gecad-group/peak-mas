@@ -40,9 +40,10 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             if msg:
                 if msg.get_metadata("sync") == "step":
                     self.agent.period = int(msg.get_metadata("period"))
-                    self.agent.time = datetime.strptime(
-                        msg.get_metadata("time"), "%Y-%m-%d %H:%M:%S"
-                    )
+                    if msg.get_metadata("time"):
+                        self.agent.time = datetime.strptime(
+                            msg.get_metadata("time"), "%Y-%m-%d %H:%M:%S"
+                        )
                     if self.agent.period != 0:
                         self.agent.iterate_properties()
                     await self.agent.step()
@@ -72,7 +73,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         """
         super().__init__(jid, properties, verify_security)
         self.period = 0
-        self.time = None
+        self.time = 0
         template_step = Template()
         template_step.set_metadata("sync", "step")
         template_stop = Template()
@@ -117,7 +118,7 @@ class Synchronizer(Agent):
             self.periods = periods
 
         async def on_start(self):
-            while not len(self.agent.group_members(self.group_jid)) >= self.n_agents:
+            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
                 await _asyncio.sleep(1)
             self.current_period = 0
             _logger.info("Starting simulation...")
