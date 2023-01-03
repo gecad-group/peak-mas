@@ -185,32 +185,33 @@ class _ExportDataSync(CyclicBehaviour):
                 "properties": json_dumps(self.properties),
             }
             await self.send(msg)
-            self.logger.info("creating graph " + +self.graph_name)
+            self.logger.info("creating graph " + self.graph_name)
 
     async def run(self) -> None:
         msg = await self.receive(60)
         if msg:
             if msg.get_metadata("sync") == "step":
+                period = msg.get_metadata("period")
                 current_data = dict()
                 for property in self.file_data:
                     attribute = getattr(self.agent, property)
                     if type(attribute) is Property:
                         self.file_data[property].append(attribute.current_value)
-                        current_data[property] = attribute.current_value
+                        current_data[property] = [period, attribute.current_value]
                     else:
                         self.file_data[property].append(attribute)
-                        current_data[property] = attribute
+                        current_data[property] = [period, attribute]
                 if self.to_graph:
                     msg = Message(to=DF.name(self.agent.jid.domain))
-                    msg.body = "Update graph " + self.file_name
+                    msg.body = "Update graph " + self.graph_name
                     msg.metadata = {
                         "resource": "graph",
                         "action": "update",
-                        "graph_name": self.file_name,
+                        "graph_name": self.graph_name,
                         "data": json_dumps(current_data),
                     }
                     await self.send(msg)
-                    self.logger.info("updating graph " + +self.graph_name)
+                    self.logger.info("updating graph " + self.graph_name)
             if msg.get_metadata("sync") == "stop":
                 with open(self.file_name, "w") as f:
                     f.write(json_dumps(self.data))
