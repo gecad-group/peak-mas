@@ -170,7 +170,7 @@ class _Behaviour:
             await room.leave()
             _logger.debug(f"leaving {msg.to}")
 
-    async def wait_for(self, behaviour: _spade.behaviour.CyclicBehaviour):
+    async def wait_for(self, behaviour: _spade.behaviour.CyclicBehaviour, template: _spade.template.Template = None):
         """Awaits synchronozly for a behaviour.
 
         Executes behaviour first, if not executed.
@@ -180,7 +180,7 @@ class _Behaviour:
             behaviour: SPADE's behaviour.
         """
         if not behaviour.is_running:
-            self.agent.add_behaviour(behaviour)
+            self.agent.add_behaviour(behaviour, template)
         await behaviour.join()
 
 
