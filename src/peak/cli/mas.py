@@ -1,15 +1,19 @@
+# Standard library imports
 from argparse import ArgumentError, ArgumentTypeError
 from logging import getLevelName, getLogger
 from multiprocessing import Process
 from os import chdir
 from pathlib import Path
+
+# Third party imports
 import yaml
 
+# Reader imports
 from peak import JID
 from peak.bootloader import boot_agent
 
-
 _logger = getLogger()
+
 
 def agent_exec(
     file: Path,
@@ -19,7 +23,7 @@ def agent_exec(
     log_level: int = getLevelName("INFO"),
     verify_security: bool = False,
     *args,
-    **kargs
+    **kargs,
 ):
     """Executes and configures a single agent.
 
@@ -95,7 +99,7 @@ def multi_agent_exec(file: Path, *args, **kargs):
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
     else:
-        _logger.debug('no defaults in yaml file')
+        _logger.debug("no defaults in yaml file")
     if "agents" not in yml:
         raise Exception("agents argument required")
     _logger.debug("initialize processes")
@@ -124,5 +128,3 @@ def multi_agent_exec(file: Path, *args, **kargs):
             _logger.exception(e)
         except KeyboardInterrupt:
             break
-    
-

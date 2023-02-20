@@ -1,5 +1,6 @@
+# Reader imports
 from peak import Agent
-from peak.behaviours import OneShotBehaviour, Message
+from peak.behaviours import Message, OneShotBehaviour
 
 
 class agent(Agent):

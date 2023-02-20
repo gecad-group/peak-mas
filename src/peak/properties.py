@@ -1,9 +1,12 @@
+# Standard library imports
 from abc import ABCMeta, abstractmethod
 from random import uniform
 from typing import Dict, Iterable
 
+# Third party imports
 from pandas import DataFrame
 
+# Reader imports
 from peak.drivers import Driver
 
 

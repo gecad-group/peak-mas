@@ -1,13 +1,17 @@
+# Standard library imports
 import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
+from json import dumps as json_dumps
 from json import loads as json_loads
 
+# Third party imports
 import aiohttp_cors
 from aioxmpp import JID
 
+# Reader imports
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 from peak.properties import Properties
 
@@ -36,9 +40,10 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             if msg:
                 if msg.get_metadata("sync") == "step":
                     self.agent.period = int(msg.get_metadata("period"))
-                    self.agent.time = datetime.strptime(
-                        msg.get_metadata("time"), "%Y-%m-%d %H:%M:%S"
-                    )
+                    if msg.get_metadata("time"):
+                        self.agent.time = datetime.strptime(
+                            msg.get_metadata("time"), "%Y-%m-%d %H:%M:%S"
+                        )
                     if self.agent.period != 0:
                         self.agent.iterate_properties()
                     await self.agent.step()
@@ -68,7 +73,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         """
         super().__init__(jid, properties, verify_security)
         self.period = 0
-        self.time = None
+        self.time = 0
         template_step = Template()
         template_step.set_metadata("sync", "step")
         template_stop = Template()
@@ -113,7 +118,7 @@ class Synchronizer(Agent):
             self.periods = periods
 
         async def on_start(self):
-            while not len(self.agent.group_members(self.group_jid)) >= self.n_agents:
+            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
                 await _asyncio.sleep(1)
             self.current_period = 0
             _logger.info("Starting simulation...")
@@ -311,7 +316,9 @@ class DF(Agent):
                             node == source
                             for source, _ in self.agent.grouphierarchy_data["links"]
                         ):
-                            self.agent.grouphierarchy_data["node_members"].pop(node)
+                            self.agent.grouphierarchy_data["node_members"].pop(
+                                node
+                            )  # this line can be removed, there is no need in removing the node from the dict
                             self.agent.grouphierarchy_data["nodes"].remove(
                                 (node, level + str(len(nodes) - 1 - i), domain)
                             )
@@ -334,30 +341,17 @@ class DF(Agent):
                     self.logger.debug(str(msg.sender) + " entering " + path)
                     last = None
                     for i, node in enumerate(nodes):
-                        if node not in self.agent.grouphierarchy_data["node_members"]:
-                            self.agent.grouphierarchy_data["node_members"][node] = []
                         self.agent.grouphierarchy_data["nodes"].add(
                             (node, level + str(i), domain)
                         )
+                        if node not in self.agent.grouphierarchy_data["node_members"]:
+                            self.agent.grouphierarchy_data["node_members"][node] = []
                         self.agent.grouphierarchy_data["categories"].add(level + str(i))
                         if last != None:
                             self.agent.grouphierarchy_data["links"].add(
                                 (
                                     last,
                                     node,
-                                    max(
-                                        len(
-                                            self.agent.grouphierarchy_data[
-                                                "node_members"
-                                            ][last]
-                                        )
-                                        + 1,
-                                        len(
-                                            self.agent.grouphierarchy_data[
-                                                "node_members"
-                                            ][node]
-                                        ),
-                                    ),
                                 )
                             )
                         last = node
@@ -381,13 +375,15 @@ class DF(Agent):
 
         async def run(self) -> None:
             msg = await self.receive(60)
-            if msg:
-                tags = json_loads(msg.get_metadata("tags"))
-                groups = self.agent.grouphierarchy_data["tags"][tags[0]]
+            if msg and (meta_tags := msg.get_metadata("tags")):
+                tags = json_loads(meta_tags)
+                groups: set = self.agent.grouphierarchy_data["tags"][tags[0]]
                 for tag in tags[1:]:
-                    groups.intersection(self.agent.grouphierarchy_data["tags"][tag])
+                    groups = groups.intersection(
+                        self.agent.grouphierarchy_data["tags"][tag]
+                    )
                 res = msg.make_reply()
-                res.set_metadata("groups", groups)
+                res.set_metadata("groups", json_dumps(list(groups)))
                 await self.send(res)
 
     class _CreateGraph(CyclicBehaviour):
@@ -468,10 +464,10 @@ class DF(Agent):
         self.add_behaviour(self._CreateGraph())
         self.add_behaviour(self._UpdateGraph())
 
-        # Creates routes.
-        self.web.add_get("/groups", self.groups, template=None)
+        # Create routes.
+        self.web.add_get("/groups", self.get_groups, template=None)
         self.web.add_get("/groups/refresh", self.refresh_groups, template=None)
-        self.web.add_get("/dataanalysis", self.dataanalysis, template=None)
+        self.web.add_get("/plots", self.get_plots, template=None)
 
         # Configure default CORS settings.
         cors = aiohttp_cors.setup(
@@ -493,17 +489,16 @@ class DF(Agent):
         self.web.start(port=self.port)
         _logger.info("REST API running on port " + self.port)
 
-    async def groups(self, request):
-        graph = {
+    async def get_groups(self, request):
+        return {
             "nodes": list(self.grouphierarchy_data["nodes"]),
             "links": list(self.grouphierarchy_data["links"]),
             "categories": list(self.grouphierarchy_data["categories"]),
             "node_members": self.grouphierarchy_data["node_members"],
         }
-        return graph
 
     async def refresh_groups(self, request):
         pass
 
-    async def dataanalysis(self, request):
+    async def get_plots(self, request):
         return self.dataanalysis_data

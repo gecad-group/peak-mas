@@ -1,3 +1,47 @@
 {
-    
-}
+    "title": {
+      "text": "Consumption"
+    },
+    "tooltip": {
+      "trigger": "axis"
+    },
+    "legend": {
+      "data": ["Consumer1", "Prosumer1", "Consumer2"]
+    },
+    "grid": {
+      "left": "3%",
+      "right": "4%",
+      "bottom": "3%",
+      "containLabel": true
+    },
+    "toolbox": {
+      "feature": {
+        "saveAsImage": {}
+      }
+    },
+    "xAxis": {
+      "type": "category",
+      "boundaryGap": false,
+      "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    },
+    "yAxis": {
+      "type": "value"
+    },
+    "series": [
+      {
+        "name": "Consumer1",
+        "type": "line",
+        "data": [120, 132, 101, 134, 90, 230, 210]
+      },
+      {
+        "name": "Prosumer1",
+        "type": "line",
+        "data": [220, 182, 191, 234, 290, 330, 310]
+      },
+      {
+        "name": "Consumer2",
+        "type": "line",
+        "data": [150, 232, 201, 154, 190, 330, 410]
+      }
+    ]
+  }

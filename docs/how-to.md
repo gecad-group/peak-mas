@@ -4,10 +4,10 @@ In this section you will going through PEAK's functionalities. Every example giv
 
 ## Run and configure a MAS
 
-You have two options to run agents with PEAK. You can run the same way as in SPADE's doc or using the command line interface (CLI). 
+You have two options to run PEAK agents. You can run the same way as in SPADE by using a python script or using PEAK's command line interface (CLI). 
 
 > **Note:**
-> You can use the `-h` argument in `peak` commands and subcommands to know which arguments you can use.
+> After installing `peak` you can use the command `-h` to show you the commands available to you.
 > e.g. 
 > ```bash
 > $ peak -h
@@ -35,7 +35,6 @@ Let's run a simple agent.
 from peak import Agent, OneShotBehaviour
   
 class agent(Agent):
-
     class HelloWorld(OneShotBehaviour):
         async def run(self) -> None:
             print("Hello World")
@@ -45,22 +44,22 @@ class agent(Agent):
         self.add_behaviour(self.HelloWorld())
 ```
 
-Consider the agent above. Create a file called agent.py and copy the code. This is a simple agent that will print "Hello World" in the terminal. 
+Consider the agent above. Create a file called `agent.py` and copy the code. This is a simple agent that will print "Hello World" in the terminal. 
 
-To execute the agent you only need to open the directory of the agent.py in the CLI and then use the following command.
+To execute the agent you only need to open the directory where the file `agent.py` is in the CLI and then use the following command.
 
 ```bash
-$ peak run agent.py -j dummy@localhost/test
+$ peak run agent.py -j dummy@localhost
 ```
 
 > **Note:**
-> The name of the agent file must be the same as the agent class. That is the only way for PEAK to know which objects to run when executing and agent.
+> The name of the file must be the same as the name of the class. That is the only way for PEAK to know which objects to run when executing an agent.
 
-In this command we are telling PEAK to run the agent that is in the file `agent.py` with the JID `dummy@localhost/test`. 
+In this command we are telling PEAK to run the agent that is in the file `agent.py` with the JID `dummy@localhost`. 
 
-The JID is the ID used in the XMPP protocol and is divided by three parts: the localpart, the domain and the resource (`localpart@domain/resource`). The localpart is required and is the username of the agent. The domain is also required and is the domain of the server you want the agent to log in. The resource is optional and is used to differentiate sessions of the the same user. The resource, when missing, is created randomly. 
+The JID is the ID used in the XMPP protocol and is divided by three parts: the localpart, the domain and the resource (`localpart@domain/resource`). The localpart is required and is the username of the agent. The domain is also required and is the domain of the server you want the agent to log in. The resource is optional and is used to differentiate sessions of the the same user. The resource, when empty, is created randomly. 
 
-After you run the agent you will see a new folder appear in the same directory of the agent.py file. That folder is the `logs` folder and will contain the log files created for each agent you run. You can change the logging level for each agent using the command line argument `-l`. This files come in handy when running complex systems with lots of behaviors. You can track everything the agent and time when it does with this files.
+After you run the agent you will see a new folder appear in the same directory of the `agent.py`. That folder is the `logs` folder and will contain the log files created for each agent you run. You can change the logging level for each agent using the command line argument `-l`. This files come in handy when running complex systems with lots of behaviors. You can track everything the agent does and when it does with the logging functionality.
 
 ### Run multiple agents
 
@@ -70,7 +69,6 @@ To run multiple agents at the same time you can use a configuration file in YAML
 from peak import Agent, OneShotBehaviour, Message
   
 class sender(Agent):
-
     class SendHelloWorld(OneShotBehaviour):
         async def run(self) -> None:
             msg = Message(to="harry@localhost")
@@ -87,7 +85,6 @@ class sender(Agent):
 from peak import Agent, OneShotBehaviour
   
 class receiver(Agent):
-
     class ReceiveHelloWorld(OneShotBehaviour):
         async def run(self) -> None:
             while msg := await self.receive(10):
@@ -106,8 +103,6 @@ defaults:
 agents:
     john:
         file: sender.py
-        resource: test
-        clones: 2
     harry: 
         file: receiver.py
         log_level: info
@@ -119,27 +114,27 @@ Let's create two agents one that sends the a message, the `sender.py`, and one t
 $ peak start multiagent.yaml
 ```
 
-So, what happened? Three agents were created, instead of two. One called `john0@localhost/test`, other called `john1@localhost/test` and the third one `harry@localhost`. The two `john` sent a message `Hello World` to `harry` and `harry` print them out. The log files created were in loggin level `DEBUG`, except for the `harry` that was level `INFO`.
+So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a message `Hello World` to `harry` and `harry` printed it out. The log file of `jonh` was in logging level `DEBUG`, and `harry`'s file was in level `INFO`.
 
-The strutucture of the configuration file is actually simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. 
+The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. The parameters available in `defaults` and in the agents of the variable `agents` can be seen using the `-h` argument in the `peak run` command. 
 
-In this case we are defining, in the `defualts`, the default domain as `localhost` and the default logging level as `debug` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In `john` we are defining the agents source file, the resource of the JID and how many clones we want from this type of agent. When clones are defined they use the exact same configuration, the only thing that changes is the name, adding the correspondent clone number after the agent name, in this case `john0` and `john1`. In `harry` we are defining the source file and the logging level, overriding the deafult value.
+In this case we are defining, in the `defaults`, the default domain as `localhost` and the default logging level as `debug` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In `john` we are defining the agents source file. In `harry` we are defining the source file and the logging level, overriding the default value.
 
-There is the list of options that you can define in the configuration file, inside each agent and in the deafults variable:
-- file - source file of the agent
-- domain - domain of the server to be used for the agent's connection
-- resource - resource to be used in the JID
-- log_level - loggin level of the log file
-- clones - number of clones to be executed
-- properties - source file of the agent's properties (more on that later)
-- verify_security - if present verifies the SSL certificates
+There is the list of options that you can define in the configuration file, inside each agent and in the `defaults` variable:
+- `file` - source file of the agent
+- `domain` - domain of the server to be used for the agent's connection
+- `resource` - resource to be used in the JID
+- `log_level` - logging level of the log file
+- `clones` - number of clones to be executed
+- `properties` - source file of the agent's properties (more on that later)
+- `verify_security` - if present verifies the SSL certificates
 
 ### Thread vs. Process
 _In development_
 
 ## Create a group of agents
 
-The groups are a very useful way to make the communication between agents. To create a group is very simple. There is a pre defined behavior that enables the agent to create and join groups. 
+The groups are a very useful way to make the communication between more than two agents. To create a group is very simple. There is a pre defined behavior that enables the agent to create and join groups. 
 
 ```python
 #agent.py
@@ -149,9 +144,7 @@ from asyncio import sleep
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
         async def on_start(self) -> None:
-            behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
-            self.agent.add_behaviour(behav)
-            await behav.join()
+            await self.wait_for(JoinGroup("group1", f"conference.{self.agent.jid.domain}"))
 
         async def run(self) -> None:
             msg = Message(to=f"group1@conference.{self.agent.jid.domain}")

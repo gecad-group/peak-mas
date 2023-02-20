@@ -32,9 +32,9 @@ That's easier than it can ever be!
 ## Table of Contents
 
 - [Foreword](foreword.md)
-- [Glossary](glossary.md)
 - [Prerequisites](prerequistites.md)
 - [Installing PEAK](installation.md)
+- [Main PEAK concepts](glossary.md)
 - [How-to Guide](how-to.md)
     - [Run and configure a MAS](how-to.md#run-and-configure-a-mas)
     - [Create a group of agents](how-to.md#create-a-group-of-agents)

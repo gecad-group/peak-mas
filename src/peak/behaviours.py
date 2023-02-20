@@ -1,7 +1,10 @@
+# Standard library imports
 import logging
 from json import dumps as json_dumps
+from json import loads as json_loads
 from typing import Callable
 
+# Reader imports
 from peak import DF, Message, SyncAgent, Template
 from peak.core import CyclicBehaviour, OneShotBehaviour, PeriodicBehaviour
 from peak.properties import Property
@@ -22,7 +25,7 @@ class JoinGroup(OneShotBehaviour):
         msg.set_metadata("resource", "treehierarchy")
         msg.set_metadata("path", self.path)
         msg.set_metadata("domain", self.domain)
-        msg.set_metadata("tags", str(self.tags))
+        msg.set_metadata("tags", json_dumps(self.tags))
         await self.send(msg)
         nodes = self.path.split("/")
         for node in nodes[:-1]:
@@ -60,6 +63,7 @@ class SearchGroup(OneShotBehaviour):
     def __init__(
         self, tags: list[str], callback: Callable[[list[str]], None], *args, **kargs
     ):
+        super().__init__()
         self.tags = tags
         self.callback = callback
         self.args = args
@@ -69,15 +73,17 @@ class SearchGroup(OneShotBehaviour):
         msg = Message()
         msg.to = DF.name(self.agent.jid.domain)
         msg.set_metadata("resource", "searchgroup")
-        msg.set_metadata("tags", str(self.tags))
+        msg.set_metadata("tags", json_dumps(self.tags))
         await self.send(msg)
         res = None
         while not res:
             res = await self.receive(60)
             if not res:
                 raise Exception("DF did not respond")
-            groups = res.get_metadata("groups")
-            logging.getLogger(self.__class__.__name__).info(self.tags, groups)
+            groups = json_loads(res.get_metadata("groups"))
+            logging.getLogger(self.__class__.__name__).debug(
+                f"search: {str(self.tags)}, result: {str(groups)}"
+            )
             self.callback(self.tags, groups, *self.args, **self.kargs)
 
 
@@ -88,7 +94,7 @@ class ExportData(OneShotBehaviour):
     when its not used. When the Synchronizer its being used the data
     is exported at the same rate as the Synchronizers clock. If its not
     used the user must define a interval in which the data is exported.
-    
+
     Warning: the file will be overwriten."""
 
     def __init__(
@@ -179,32 +185,33 @@ class _ExportDataSync(CyclicBehaviour):
                 "properties": json_dumps(self.properties),
             }
             await self.send(msg)
-            self.logger.info("creating graph " + +self.graph_name)
+            self.logger.info("creating graph " + self.graph_name)
 
     async def run(self) -> None:
         msg = await self.receive(60)
         if msg:
             if msg.get_metadata("sync") == "step":
+                period = msg.get_metadata("period")
                 current_data = dict()
                 for property in self.file_data:
                     attribute = getattr(self.agent, property)
                     if type(attribute) is Property:
                         self.file_data[property].append(attribute.current_value)
-                        current_data[property] = attribute.current_value
+                        current_data[property] = [period, attribute.current_value]
                     else:
                         self.file_data[property].append(attribute)
-                        current_data[property] = attribute
+                        current_data[property] = [period, attribute]
                 if self.to_graph:
                     msg = Message(to=DF.name(self.agent.jid.domain))
-                    msg.body = "Update graph " + self.file_name
+                    msg.body = "Update graph " + self.graph_name
                     msg.metadata = {
                         "resource": "graph",
                         "action": "update",
-                        "graph_name": self.file_name,
+                        "graph_name": self.graph_name,
                         "data": json_dumps(current_data),
                     }
                     await self.send(msg)
-                    self.logger.info("updating graph " + +self.graph_name)
+                    self.logger.info("updating graph " + self.graph_name)
             if msg.get_metadata("sync") == "stop":
                 with open(self.file_name, "w") as f:
                     f.write(json_dumps(self.data))

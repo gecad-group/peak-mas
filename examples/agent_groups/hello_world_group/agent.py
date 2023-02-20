@@ -1,8 +1,11 @@
-from peak import Agent, JoinGroup, OneShotBehaviour, Message
+# Standard library imports
 from asyncio import sleep
 
-class agent(Agent):
+# Reader imports
+from peak import Agent, JoinGroup, Message, OneShotBehaviour
 
+
+class agent(Agent):
     class HelloWorld(OneShotBehaviour):
         async def on_start(self) -> None:
             behav = JoinGroup("group1", f"conference.{self.agent.jid.domain}")
@@ -20,4 +23,3 @@ class agent(Agent):
 
     async def setup(self) -> None:
         self.add_behaviour(self.HelloWorld())
-

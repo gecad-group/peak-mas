@@ -1,3 +1,4 @@
+# Standard library imports
 import importlib
 import logging
 import os
@@ -6,6 +7,7 @@ import time
 from pathlib import Path
 from typing import Type
 
+# Third party imports
 from aioxmpp import JID
 from spade import quit_spade
 
@@ -76,7 +78,7 @@ def _boot_agent(
     try:
         agent_instance.start().result()
     except Exception as err:
-        logger.error("could not start the agent: {}".format(err))
+        logger.exception(f"could not start the agent: {err}")
     while agent_instance.is_alive():
         try:
             time.sleep(1)
