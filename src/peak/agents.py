@@ -118,7 +118,9 @@ class Synchronizer(Agent):
             self.periods = periods
 
         async def on_start(self):
-            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
+            while (
+                not len(await self.agent.group_members(self.group_jid)) >= self.n_agents
+            ):
                 await _asyncio.sleep(1)
             self.current_period = 0
             _logger.info("Starting simulation...")
