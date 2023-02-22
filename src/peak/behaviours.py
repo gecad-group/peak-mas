@@ -1,7 +1,6 @@
 # Standard library imports
 import logging
-from json import dumps as json_dumps
-from json import loads as json_loads
+import json
 from typing import Callable
 
 # Reader imports
@@ -25,7 +24,7 @@ class JoinGroup(OneShotBehaviour):
         msg.set_metadata("resource", "treehierarchy")
         msg.set_metadata("path", self.path)
         msg.set_metadata("domain", self.domain)
-        msg.set_metadata("tags", json_dumps(self.tags))
+        msg.set_metadata("tags", json.dumps(self.tags))
         await self.send(msg)
         nodes = self.path.split("/")
         for node in nodes[:-1]:
@@ -73,19 +72,40 @@ class SearchGroup(OneShotBehaviour):
         msg = Message()
         msg.to = DF.name(self.agent.jid.domain)
         msg.set_metadata("resource", "searchgroup")
-        msg.set_metadata("tags", json_dumps(self.tags))
+        msg.set_metadata("tags", json.dumps(self.tags))
         await self.send(msg)
         res = None
         while not res:
             res = await self.receive(60)
             if not res:
                 raise Exception("DF did not respond")
-            groups = json_loads(res.get_metadata("groups"))
+            groups = json.loads(res.get_metadata("groups"))
             logging.getLogger(self.__class__.__name__).debug(
                 f"search: {str(self.tags)}, result: {str(groups)}"
             )
             self.callback(self.tags, groups, *self.args, **self.kargs)
 
+class CreateGraph(OneShotBehaviour):
+    """Creates a graph in the dashboard.
+    
+    Sends the graph configuration and data to the DF so he can host it.
+    """
+    def __init__(self, id: str, graph: dict):
+        super().__init__()
+        self.id = id
+        self.graph = graph
+    
+    async def run(self) -> None:
+        msg = Message()
+        msg.to = DF.name(self.agent.jid.domain)
+        msg.body = f"Create graph {self.id}"
+        msg.metadata = {
+            "resource": "graph",
+            "action": "create",
+            "id": self.id,
+            "graph": json.dumps(self.graph),
+        }
+        await self.send(msg)
 
 class ExportData(OneShotBehaviour):
     """Exports data to a file and optionaly to the DF.
@@ -182,7 +202,7 @@ class _ExportDataSync(CyclicBehaviour):
                 "action": "create",
                 "graph_name": self.graph_name,
                 "graph_options": self.graph_options,
-                "properties": json_dumps(self.properties),
+                "properties": json.dumps(self.properties),
             }
             await self.send(msg)
             self.logger.info("creating graph " + self.graph_name)
@@ -208,13 +228,13 @@ class _ExportDataSync(CyclicBehaviour):
                         "resource": "graph",
                         "action": "update",
                         "graph_name": self.graph_name,
-                        "data": json_dumps(current_data),
+                        "data": json.dumps(current_data),
                     }
                     await self.send(msg)
                     self.logger.info("updating graph " + self.graph_name)
             if msg.get_metadata("sync") == "stop":
                 with open(self.file_name, "w") as f:
-                    f.write(json_dumps(self.data))
+                    f.write(json.dumps(self.data))
 
 
 class _ExportData(PeriodicBehaviour):
@@ -250,7 +270,7 @@ class _ExportData(PeriodicBehaviour):
                 "action": "create",
                 "graph_name": self.graph_name,
                 "graph_options": self.graph_options,
-                "properties": json_dumps(self.properties),
+                "properties": json.dumps(self.properties),
             }
             await self.send(msg)
             self.logger.info("creating graph " + self.graph_name)
@@ -275,7 +295,7 @@ class _ExportData(PeriodicBehaviour):
                 "resource": "graph",
                 "action": "update",
                 "graph_name": self.graph_name,
-                "data": json_dumps(current_data),
+                "data": json.dumps(current_data),
             }
             await self.send(msg)
             self.logger.debug("updating graph " + self.graph_name)
@@ -283,4 +303,4 @@ class _ExportData(PeriodicBehaviour):
     async def on_end(self) -> None:
         self.logger.info('exporting to file "' + self.file_name + '"')
         with open(self.file_name, "w") as f:
-            f.write(json_dumps(self.file_data))
+            f.write(json.dumps(self.file_data))
