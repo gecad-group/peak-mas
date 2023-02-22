@@ -4,8 +4,7 @@ import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from json import dumps as json_dumps
-from json import loads as json_loads
+import json 
 
 # Third party imports
 import aiohttp_cors
@@ -118,7 +117,9 @@ class Synchronizer(Agent):
             self.periods = periods
 
         async def on_start(self):
-            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
+            while (
+                not len(await self.agent.group_members(self.group_jid)) >= self.n_agents
+            ):
                 await _asyncio.sleep(1)
             self.current_period = 0
             _logger.info("Starting simulation...")
@@ -293,7 +294,7 @@ class DF(Agent):
                 path = msg.get_metadata("path")
                 domain = msg.get_metadata("domain")
                 if meta_tags := msg.get_metadata("tags"):
-                    tags = json_loads(meta_tags)
+                    tags = json.loads(meta_tags)
                 nodes = path.split("/")
                 self.logger.debug("nodes: " + str(nodes))
                 level = "level"
@@ -376,14 +377,14 @@ class DF(Agent):
         async def run(self) -> None:
             msg = await self.receive(60)
             if msg and (meta_tags := msg.get_metadata("tags")):
-                tags = json_loads(meta_tags)
+                tags = json.loads(meta_tags)
                 groups: set = self.agent.grouphierarchy_data["tags"][tags[0]]
                 for tag in tags[1:]:
                     groups = groups.intersection(
                         self.agent.grouphierarchy_data["tags"][tag]
                     )
                 res = msg.make_reply()
-                res.set_metadata("groups", json_dumps(list(groups)))
+                res.set_metadata("groups", json.dumps(list(groups)))
                 await self.send(res)
 
     class _CreateGraph(CyclicBehaviour):
@@ -400,16 +401,10 @@ class DF(Agent):
         async def run(self) -> None:
             msg = await self.receive(60)
             if msg:
-                self.logger.debug(msg.body)
-                graph_name = msg.get_metadata("graph_name")
-                graph_options = msg.get_metadata("graph_options")
-                properties = json_loads(msg.get_metadata("properties"))
-                self.agent.dataanalysis_data[graph_name] = {
-                    "graph_options": graph_options,
-                    "data": {},
-                }
-                for property in properties:
-                    self.agent.dataanalysis_data[graph_name]["data"][property] = []
+                self.logger.debug(msg)
+                id = msg.get_metadata('id')
+                graph = json.loads(msg.get_metadata("graph"))
+                self.agent.dataanalysis_data[id] = graph
 
     class _UpdateGraph(CyclicBehaviour):
         """Handles the requests to update the data of a given graph."""
@@ -427,7 +422,7 @@ class DF(Agent):
             if msg:
                 self.logger.debug(msg.body)
                 graph_name = msg.get_metadata("graph_name")
-                data = json_loads(msg.get_metadata("data"))
+                data = json.loads(msg.get_metadata("data"))
                 for property in data:
                     self.agent.dataanalysis_data[graph_name]["data"][property].append(
                         data[property]

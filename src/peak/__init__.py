@@ -20,7 +20,7 @@ from peak.drivers import *
 
 __author__ = "Bruno Ribeiro"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 # filtering noisy loggers
 _logging.getLogger("aiosasl").setLevel(_logging.ERROR)
