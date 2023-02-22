@@ -22,7 +22,7 @@ class DriverModBusTCP(Driver):
         client: handles the ModBus/TCP comunication.
     """
 
-    def __init__(self, host: str, unit_id: int = None):
+    def __init__(self, host: str, unit_id: int = 1):
         """Inits Driver ModBus/TCP.
 
         Args:
@@ -44,7 +44,7 @@ class DriverModBusTCP(Driver):
             target.
         """
         if unit_id is not None:
-            self.client.unit_id(unit_id)
+            self.client.unit_id = unit_id
         data = self.client.read_input_registers(reg_addr=register)
         if not data:
             log.warning(
@@ -66,7 +66,7 @@ class DriverModBusTCP(Driver):
             unit_id: Unit ID.
         """
         if unit_id is not None:
-            self.client.unit_id(unit_id)
+            self.client.unit_id = unit_id
         if not self.client.write_single_register(register, get_2comp(value)):
             log.warning(
                 "%s cannot write to target %s.",
@@ -74,3 +74,5 @@ class DriverModBusTCP(Driver):
                 self.client.host(),
                 exc_info=self.client.last_except_txt(),
             )
+            return False
+        return True
