@@ -406,30 +406,6 @@ class DF(Agent):
                 graph = json.loads(msg.get_metadata("graph"))
                 self.agent.dataanalysis_data[id] = graph
 
-    class _UpdateGraph(CyclicBehaviour):
-        """Handles the requests to update the data of a given graph."""
-
-        async def on_start(self) -> None:
-            self.logger = _logging.getLogger(self.__class__.__name__)
-            self.logger.debug("starting behaviour")
-            template = Template()
-            template.set_metadata("resource", "graph")
-            template.set_metadata("action", "update")
-            self.set_template(template)
-
-        async def run(self) -> None:
-            msg = await self.receive(60)
-            if msg:
-                self.logger.debug(msg.body)
-                graph_name = msg.get_metadata("graph_name")
-                data = json.loads(msg.get_metadata("data"))
-                for property in data:
-                    self.agent.dataanalysis_data[graph_name]["data"][property].append(
-                        data[property]
-                    )
-                    self.logger.debug(
-                        'updating property "' + property + '" : ' + str(data[property])
-                    )
 
     def __init__(self, domain, verify_security, port):
         super().__init__(
