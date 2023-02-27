@@ -1,9 +1,7 @@
 # How-to Guides
+This section will going to guide you through PEAK's fundamental ideas and functionalities. Every example given here is available in the [repository](https://github.com/gecad-group/peak-mas).
 
-In this section you will going through PEAK's functionalities. Every example given here is available in PEAK's repository.
-
-## Run and configure a MAS
-
+## PEAK Basic principles
 You have two options to run PEAK agents. You can run the same way as in SPADE by using a python script or using PEAK's command line interface (CLI). 
 
 > **Note:**
@@ -26,8 +24,7 @@ You have two options to run PEAK agents. You can run the same way as in SPADE by
 >  -v              Verbose. Turns on the debug info.
 > ```
 
-### Run a single agent
-
+### How to create and Agent
 Let's run a simple agent.
 
 ```python
@@ -61,7 +58,7 @@ The JID is the ID used in the XMPP protocol and is divided by three parts: the l
 
 After you run the agent you will see a new folder appear in the same directory of the `agent.py`. That folder is the `logs` folder and will contain the log files created for each agent you run. You can change the logging level for each agent using the command line argument `-l`. This files come in handy when running complex systems with lots of behaviors. You can track everything the agent does and when it does with the logging functionality.
 
-### Run multiple agents
+### Communication between Agents
 
 To run multiple agents at the same time you can use a configuration file in YAML format.
 ```python
@@ -96,7 +93,7 @@ class receiver(Agent):
 ```
 
 ```yaml
-# multiagent.yaml
+# mas.yaml
 defaults:
     domain: localhost
     log_level: debug
@@ -108,13 +105,13 @@ agents:
         log_level: info
 ```
 
-Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yaml`. After that, run the following command:
+Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `mas.yaml`. After that, run the following command:
 
 ```bash
-$ peak start multiagent.yaml
+$ peak start mas.yaml
 ```
 
-So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a message `Hello World` to `harry` and `harry` printed it out. The log file of `jonh` was in logging level `DEBUG`, and `harry`'s file was in level `INFO`.
+So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a `Hello World` to `harry` and `harry` printed it out. The log file of `jonh` was in logging level `DEBUG`, and `harry`'s file was in level `INFO`.
 
 The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. The parameters available in `defaults` and in the agents of the variable `agents` can be seen using the `-h` argument in the `peak run` command. 
 
@@ -129,10 +126,12 @@ There is the list of options that you can define in the configuration file, insi
 - `properties` - source file of the agent's properties (more on that later)
 - `verify_security` - if present verifies the SSL certificates
 
+### Multi-Agent System configuration
+_In development_
 ### Thread vs. Process
 _In development_
 
-## Create a group of agents
+## Organizational Structure of the Multi-Agent System
 
 The groups are a very useful way to make the communication between more than two agents. To create a group is very simple. There is a pre defined behavior that enables the agent to create and join groups. 
 
@@ -237,31 +236,17 @@ In the JoinGroup behavior you can specify a path of groups. What these does is c
 > **Note:**
 > In the Dashboard, the groups that end in \_down do not appear in the node graph.
 
-## Create a simulation environment
+## Simulation Environment
 ### Clock
 ### Dynamic clock
 _In development_
 
-## Integrate data providers
-
-Normally a multi-agent system uses external data so it can process that data. In PEAK you can integrate different data providers like files from the file system of your machine, databases in the web and from real devices using some real-time communication protocol.
-
-### File System
-- Excel
-- CSV
-
-### Smart devices
-- ModBus/TCP
-- HTTPs
-- Extending
-
 ## PEAK Dashboard
-
 The PEAK Dashboard is a separate project from PEAK. The Dashboard allows you to see in an interactive way the PEAK ecosystem using a web app. The Dashboard needs a Directory Facilitator (DF) agent in the XMPP server so it can monitor the system. The Dashboard communicates with the DF through its REST API. 
 To know how to activate the DF run the following command:
 ```bash
 $ peak df -h
 ```
-### Ecosystem Insight
+### Ecosystem Overview
 ### Data Analysis
 ### Full Plot Customization
