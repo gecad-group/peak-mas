@@ -25,20 +25,15 @@ def agent_exec(
     *args,
     **kargs,
 ):
-    """Executes and configures a single agent.
-
-    The arguments args and kargs are used to ignore extra parameters given be the parser.
+    """Executes an agent.
 
     Args:
         file: Path to the agent's python file.
-        properties: Path to the agent's properties python file.
         jid: JID of the agent.
+        properties: Path to the agent's properties python file.
         clones: Number of clones to be made.
-        log_leve: Logging level.
+        log_level: Logging level.
         verify_security: Verifies the SSL certificates.
-
-    Raises:
-        ArgumentTypeError if the file provided is not a python file.
     """
 
     log_level = getLevelName(log_level)
@@ -76,9 +71,7 @@ def agent_exec(
 
 
 def multi_agent_exec(file: Path, *args, **kargs):
-    """Executes multiple agents using a YAML configuration file.
-
-    The arguments args and kargs are used to ignore extra parameters given be the parser.
+    """Executes agents using a YAML configuration file.
 
     Args:
         file: Path to the agent's python file.
