@@ -1,4 +1,4 @@
-"""PEAK - Python-based framework for hEterogeneous Agent Communities.
+"""PEAK - Python-based framework for heterogeneous agent communities.
 
 PEAK is a framework for developing communities of heterogeneous agents. 
 This communities are multi-agent systems that can coexist and exchange 
