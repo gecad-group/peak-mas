@@ -14,23 +14,23 @@ from aioxmpp import JID
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 from peak.properties import Properties
 
-_logger = _logging.getLogger(__name__)
-
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
-    """Agent that is synchronized by the Synchronizer.
+    """Is synchronized by the Synchronizer.
 
     Every agent that needs to be synchronized needs
     to extend this class.
+
+    Args:
+        jid: XMPP identifier of the agent.
+        properties: Atributes of the agent to be injected.
+        verify_security: If True verifies SSL certificates.
 
     Attributes:
         period: An integer representing the number of the period inside the simulation.
         time: A datetime of the current moment in the simmulation.
     """
-
     class _StepBehaviour(CyclicBehaviour):
-        """Listens for the Synchronizer's clock's ticks."""
-
         async def on_start(self):
             _logger.info("Waiting for simulation to start...")
 
@@ -63,13 +63,6 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
     def __init__(
         self, jid: JID, properties: Properties = None, verify_security: bool = False
     ):
-        """Agent that listens to the Synchronizer.
-
-        Args:
-            jid: XMPP identifier of the agent.
-            properties: Atributes of the agent to be injected.
-            verify_security: If True verifies SSL certificates.
-        """
         super().__init__(jid, properties, verify_security)
         self.period = 0
         self.time = 0
@@ -89,7 +82,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
 
 
 class Synchronizer(Agent):
-    """Agent that synchronizes the other agents.
+    """Synchronizes the syncagents.
 
     The Synchronizer creates a group of agents, awaits for
     the agents to join the group and starts the clock of the
@@ -406,7 +399,7 @@ class DF(Agent):
                 graph = json.loads(msg.get_metadata("graph"))
                 self.agent.dataanalysis_data[id] = graph
 
-    class _UpdateGraph(CyclicBehaviour):
+    class _UpdateGraph(CyclicBehaviour): # TODO: update this class to the new CreateGraph
         """Handles the requests to update the data of a given graph."""
 
         async def on_start(self) -> None:

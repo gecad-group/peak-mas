@@ -3,31 +3,36 @@ import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Any, List
+from aioxmpp.callbacks import first_signal
 
 # Third party imports
 import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
 
-_logger = _logging.getLogger(__name__)
 
 
-class _XMPPAgent(_spade.agent.Agent):
-    """Agent that integrates XMPP functionalities.
+class Agent(_spade.agent.Agent):
+    """PEAK's base agent.
 
     Attributes:
-        jid: XMPP identifier.
-        verify_security: If true verifies the SSL certificates.
+        groups (list of :obj:`Room`): Has all the groups that the agent is member of.
+        logger (:obj:`Logger`)
     """
 
     def __init__(self, jid: JID, verify_security: bool = False):
-        _logging.getLogger(jid.localpart).setLevel(_logging.ERROR)
-        self.groups = dict()
-        self.muc_client = None
-        pw = str(jid.bare())
-        jid = str(jid)
-        super().__init__(jid, pw, verify_security)
+        """Inits an agent with a JID.
 
+        Args:
+            jid (:obj:`JID`): The agent XMPP identifier.
+            verify_security (bool, optional): If True, verifies the SSL certificates. 
+                Defaults to False.
+        """
+        super().__init__(str(jid), str(jid.bare()), verify_security)
+        self.groups = dict()
+        self._muc_client = None
+        self.logger = _logging.getLogger(jid.localpart)
+    
     async def _hook_plugin_after_connection(self):
         """Executed after SPADE Agent's connection.
 
@@ -35,10 +40,8 @@ class _XMPPAgent(_spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         """
         self.presence.approve_all = True
-
-        self.muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
-        self.disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
-
+        self._muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
+        self._disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
         self.message_dispatcher.register_callback(
             _aioxmpp.MessageType.GROUPCHAT,
             None,
@@ -50,11 +53,14 @@ class _XMPPAgent(_spade.agent.Agent):
             self._message_received,
         )
 
-    def _on_muc_failure_handler(self, exc):
-        """Handles MUC failed connections."""
 
-        _logger.critical("Failed to enter MUC room")
-        raise exc
+class _Behaviour:
+    """Adds XMPP functinalities to SPADE's base behaviours."""
+
+    agent: Agent
+
+    def __init__(self) -> None:
+        self.logger = _logging.getLogger(self.__class__.__name__)
 
     async def join_group(self, jid: str):
         """Joins the agent in a group.
@@ -67,11 +73,15 @@ class _XMPPAgent(_spade.agent.Agent):
         """
         room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         room.on_failure.connect(self._on_muc_failure_handler)
+        try:
+            await first_signal(room.on_enter, room.on_failure)
+        except Exception as e:
+            self.logger
         await _asyncio.wait([fut], timeout=3)
         if fut.done():
             if jid not in self.groups:
                 self.groups[jid] = room
-                _logger.info("joined group: " + jid)
+                self.logger.debug("joined group: " + jid)
         else:
             raise Exception("invalid group JID: " + str(jid))
 
@@ -79,7 +89,7 @@ class _XMPPAgent(_spade.agent.Agent):
         """Leaves a group.
 
         Args:
-            jid: Group's XMPP identifier.
+            jid (str): Group's XMPP identifier.
         """
         room = self.groups.pop(jid, None)
         if room:
@@ -87,7 +97,7 @@ class _XMPPAgent(_spade.agent.Agent):
             await room.leave()
 
     async def list_groups(self, node_jid: str):
-        """Retrieves the list of the existing groups.
+        """Retrieves the list of the existing groups in the server.
 
         Args:
             node_jid: JID of the domain responsable for the MUC functionality.
@@ -101,13 +111,14 @@ class _XMPPAgent(_spade.agent.Agent):
         return info.items
 
     async def group_members(self, jid: str) -> List:
-        """Extracts list of group members from a group.
+        """Retrieves list of members from a group.
 
         Args:
             jid: Group's XMPP identifier.
 
         Returns:
-            A copy of the list of occupants. The local user is always the first item in the list.
+            A copy of the list of occupants. The local user is always the first item in 
+            the list.
         """
         if jid in self.groups:
             return self.groups[jid].members
@@ -116,38 +127,6 @@ class _XMPPAgent(_spade.agent.Agent):
             members = self.groups[jid].members
             await self.leave_group(jid)
             return members
-
-
-class Agent(_XMPPAgent):
-    """PEAK's base agent.
-
-    Attributes:
-        jid: XMPP identifier.
-        properties: Properties to be injected in the agent.
-        verify_security: If True, it verifies the SSL certificates.
-    """
-
-    def __init__(self, jid: JID, properties: Any = None, verify_security: bool = False):
-        """Inits Agent and fills it with properties."""
-        super().__init__(jid, verify_security=verify_security)
-        if properties:
-            self.properties = properties
-            for key in properties:
-                setattr(self, key, properties[key])
-
-    def iterate_properties(self):
-        """Iterates one index over the properties."""
-        if hasattr(self, "properties"):
-            for key in self.properties:
-                attr = getattr(self, key)
-                if attr:
-                    getattr(self, key).next()
-
-
-class _Behaviour:
-    """Adds functinality to the SPADE base behaviours."""
-
-    agent: Agent
 
     async def send_to_group(self, msg: _spade.message.Message):
         """Sends a message to a group.
@@ -164,7 +143,7 @@ class _Behaviour:
             await self.agent.groups[str(msg.to)].send_message(raw_msg)
         except:
             _logger.debug(f"agent not member of {msg.to}, sending message anyway")
-            room, future = self.agent.muc_client.join(msg.to, self.agent.name)
+            room, future = self.agent._muc_client.join(msg.to, self.agent.name)
             await future
             await room.send_message(raw_msg)
             await room.leave()
@@ -191,18 +170,21 @@ class _Behaviour:
 class OneShotBehaviour(
     _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
 ):
-    pass
+    """This behaviour is only executed once."""
+    def __init__(self):
+        super().__init__()
 
 
 class PeriodicBehaviour(
     _spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=_ABCMeta
 ):
-    pass
+    """This behaviour is executed periodically with an interval."""
 
 
 class CyclicBehaviour(_spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=_ABCMeta):
-    pass
+    """This behaviour is executed cyclically until it is stopped."""
 
 
 class FSMBehaviour(_spade.behaviour.FSMBehaviour, _Behaviour, metaclass=_ABCMeta):
-    pass
+    """A behaviour composed of states (oneshotbehaviours) that may transition from one 
+    state to another."""
