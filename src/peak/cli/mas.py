@@ -18,7 +18,6 @@ _logger = getLogger()
 def agent_exec(
     file: Path,
     jid: JID,
-    properties: Path = None,
     clones: int = 1,
     log_level: int = getLevelName("INFO"),
     verify_security: bool = False,
@@ -30,23 +29,20 @@ def agent_exec(
     Args:
         file: Path to the agent's python file.
         jid: JID of the agent.
-        properties: Path to the agent's properties python file.
         clones: Number of clones to be made.
         log_level: Logging level.
         verify_security: Verifies the SSL certificates.
     """
 
     log_level = getLevelName(log_level)
-    for f in [file, properties]:
-        if f and not f.is_file():
-            raise ArgumentTypeError("'{}' must be a python file".format(f))
+    if file and not file.is_file():
+        raise ArgumentTypeError(f"Agent's file must be a python file, not '{file}'.")
 
     kwargs = {
         "file": file,
         "jid": jid,
         "name": jid.localpart,
         "number": None,
-        "properties": properties,
         "log_level": log_level,
         "verify_security": verify_security,
     }
@@ -82,7 +78,6 @@ def multi_agent_exec(file: Path, *args, **kargs):
         "resource": None,
         "ssl": False,
         "log_level": "info",
-        "properties": None,
         "clones": 1,
     }
     _logger.debug("parsing yaml file")
@@ -105,8 +100,6 @@ def multi_agent_exec(file: Path, *args, **kargs):
         if agent_args["domain"] is None:
             raise Exception(f"{agent}: domain argument required")
         agent_args["file"] = Path(agent_args["file"])
-        if agent_args["properties"]:
-            agent_args["properties"] = Path(agent_args["properties"])
         agent_args["jid"] = JID(agent, agent_args["domain"], agent_args["resource"])
         agent_args["log_level"] = agent_args["log_level"].upper()
 
