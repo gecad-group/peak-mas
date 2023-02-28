@@ -17,7 +17,7 @@ class Agent(_spade.agent.Agent):
 
     Attributes:
         groups (list of :obj:`Room`): Has all the groups that the agent is member of.
-        logger (:obj:`Logger`)
+        logger (:obj:`Logger`): Used to log all the necessary events in the agent.
     """
 
     def __init__(self, jid: JID, verify_security: bool = False):
@@ -32,6 +32,7 @@ class Agent(_spade.agent.Agent):
         self.groups = dict()
         self._muc_client = None
         self.logger = _logging.getLogger(jid.localpart)
+        self.logger.setLevel(_logging.DEBUG) #TODO: test if it works with the cli log_level configuration
     
     async def _hook_plugin_after_connection(self):
         """Executed after SPADE Agent's connection.
@@ -55,35 +56,35 @@ class Agent(_spade.agent.Agent):
 
 
 class _Behaviour:
-    """Adds XMPP functinalities to SPADE's base behaviours."""
+    """Adds XMPP functinalities to SPADE's base behaviours.
+    
+    Acts as Mixin in the SPADE's behaviours.
+    
+    Attributes:
+        logger (:obj:`Logger`): Used to log every event in a behaviour."""
 
     agent: Agent
 
-    def __init__(self) -> None:
-        self.logger = _logging.getLogger(self.__class__.__name__)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.logger = self.agent.logger.getChild(self.__class__.__name__)
 
     async def join_group(self, jid: str):
-        """Joins the agent in a group.
+        """Joins a group.
 
         Args:
-            jid: Group's XMPP identifier.
+            jid (str): Group's XMPP identifier.
 
         Raises:
             Exception if the group JID is invalid.
         """
-        room, fut = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
-        room.on_failure.connect(self._on_muc_failure_handler)
+        room, _ = self.muc_client.join(_aioxmpp.JID.fromstr(jid), self.name)
         try:
             await first_signal(room.on_enter, room.on_failure)
-        except Exception as e:
-            self.logger
-        await _asyncio.wait([fut], timeout=3)
-        if fut.done():
-            if jid not in self.groups:
-                self.groups[jid] = room
-                self.logger.debug("joined group: " + jid)
-        else:
-            raise Exception("invalid group JID: " + str(jid))
+            self.groups[jid] = room
+            self.logger.info(f"Joined group: {jid}")
+        except Exception as error:
+            self.logger.exception(f"Couldn't join group (reason: {error}):  {jid}")
 
     async def leave_group(self, jid: str):
         """Leaves a group.
@@ -93,14 +94,18 @@ class _Behaviour:
         """
         room = self.groups.pop(jid, None)
         if room:
-            _logger.info("leaving group: " + jid)
             await room.leave()
+            self.logger.info("Left group: {jid}")
 
     async def list_groups(self, node_jid: str):
         """Retrieves the list of the existing groups in the server.
 
+        This method uses the Service Discovery functionality of the XMPP 
+        server. In orther to work the server must have this functionality 
+        configured.
+
         Args:
-            node_jid: JID of the domain responsable for the MUC functionality.
+            jid: XMPP identifier of the Service Discovery domain.
 
         Returns:
             A list of XMPP groups.
@@ -113,11 +118,14 @@ class _Behaviour:
     async def group_members(self, jid: str) -> List:
         """Retrieves list of members from a group.
 
+        If the agent is not a member of the group, it will enter the room , 
+        retrieve the list of members and then leave the group.
+
         Args:
             jid: Group's XMPP identifier.
 
         Returns:
-            A copy of the list of occupants. The local user is always the first item in 
+            The list of :obj:`Occupants`. The local user is always the first item in 
             the list.
         """
         if jid in self.groups:
@@ -131,36 +139,36 @@ class _Behaviour:
     async def send_to_group(self, msg: _spade.message.Message):
         """Sends a message to a group.
 
-        If the agent is not in the group, the agent enters the room first,
+        If the agent is not a member of the group, the agent enters the room first,
         sends the message and then leaves the group.
 
         Args:
             msg: The XMPP message.
         """
         raw_msg = msg.prepare()
-        _logger.debug(f"sending message '{msg.body}' to {msg.to}")
+        self.logger.debug(f"Sending message: {msg}")
+        group = str(msg.to)
         try:
-            await self.agent.groups[str(msg.to)].send_message(raw_msg)
+            await self.agent.groups[group].send_message(raw_msg)
         except:
-            _logger.debug(f"agent not member of {msg.to}, sending message anyway")
-            room, future = self.agent._muc_client.join(msg.to, self.agent.name)
-            await future
-            await room.send_message(raw_msg)
-            await room.leave()
-            _logger.debug(f"leaving {msg.to}")
+            self.logger.warning(f"Sending a message to a group which the agent is not a member of: {group}")
+            await self.join_group(group)
+            await self.group[group].send_message(raw_msg)
+            await self.leave_group(group)
 
     async def wait_for(
         self,
         behaviour: _spade.behaviour.CyclicBehaviour,
         template: _spade.template.Template = None,
     ):
-        """Awaits synchronozly for a behaviour.
+        """Awaits synchronously for a behaviour.
 
         Executes behaviour first, if not executed.
-        It is used to chain behviour that are dependent on each other.
+        It is used to chain behviours that are dependent on each other.
 
         Args:
             behaviour: SPADE's behaviour.
+            tempalte: SPADE's template.
         """
         if not behaviour.is_running:
             self.agent.add_behaviour(behaviour, template)
@@ -168,23 +176,21 @@ class _Behaviour:
 
 
 class OneShotBehaviour(
-    _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
+    _Behaviour, _spade.behaviour.OneShotBehaviour, metaclass=_ABCMeta
 ):
     """This behaviour is only executed once."""
-    def __init__(self):
-        super().__init__()
 
 
 class PeriodicBehaviour(
-    _spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=_ABCMeta
+    _Behaviour, _spade.behaviour.PeriodicBehaviour, metaclass=_ABCMeta
 ):
     """This behaviour is executed periodically with an interval."""
 
 
-class CyclicBehaviour(_spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=_ABCMeta):
+class CyclicBehaviour(_Behaviour, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta):
     """This behaviour is executed cyclically until it is stopped."""
 
 
-class FSMBehaviour(_spade.behaviour.FSMBehaviour, _Behaviour, metaclass=_ABCMeta):
+class FSMBehaviour(_Behaviour, _spade.behaviour.FSMBehaviour, metaclass=_ABCMeta):
     """A behaviour composed of states (oneshotbehaviours) that may transition from one 
     state to another."""
