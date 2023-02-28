@@ -10,17 +10,10 @@ from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak.cli import df, mas
 
-logger = logging.getLogger()
-
 
 def main(args=None):
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("--version", action="version", version=version)
-    parser.add_argument(
-        "-v",
-        action="store_true",
-        help="Verbose. Turns on the debug info.",
-    )
     subparsers = parser.add_subparsers(required=True)
 
     # parser for "df" command
@@ -64,11 +57,6 @@ def main(args=None):
         "-jid", type=JID.fromstr, help="JID of the agent to be executed.", required=True
     )
     run_parser.add_argument(
-        "-properties",
-        type=Path,
-        help="Python file where the agent properties are located.",
-    )
-    run_parser.add_argument(
         "-clones",
         type=int,
         default=1,
@@ -85,7 +73,7 @@ def main(args=None):
     )
     run_parser.set_defaults(func=mas.agent_exec)
 
-    # parser for the "run" command
+    # parser for the "start" command
     start_parser = subparsers.add_parser(
         name="start",
         help="Executes multiple agents using a YAML configuration file.",
@@ -102,8 +90,6 @@ def main(args=None):
         sys.exit(1)
 
     args = parser.parse_args(args)
-    if args.v:
-        logger.setLevel("DEBUG")
     args.func(**vars(args))
 
 
@@ -111,6 +97,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        logger.exception(e)
+        logger = logging.getLogger()
+        logger.critical(e,exc_info=1)
     except KeyboardInterrupt:
         pass

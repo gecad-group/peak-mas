@@ -19,7 +19,6 @@ def boot_agent(
     jid: JID,
     name: str,
     number: int,
-    properties: Path,
     log_level: int,
     verify_security: bool,
 ):
@@ -31,7 +30,6 @@ def boot_agent(
         name: The name of the agent.
         number: If the agent its a clone is the number of present in
             the name of the agent, else its None.
-        properties: Properties to be injected in the agent.
         log_level: Logging level to be used in the agents logging file.
         verify_security: If true it validates the SSL certificates.
     """
@@ -47,7 +45,7 @@ def boot_agent(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    _boot_agent(file, jid, name, number, properties, verify_security)
+    _boot_agent(file, jid, name, number, verify_security)
 
 
 def _boot_agent(
@@ -55,42 +53,32 @@ def _boot_agent(
     jid: JID,
     name: str,
     number: int,
-    properties: Path,
     verify_security: bool,
 ):
     """Boots the agent."""
     # Gets the agent and properties classes. Creates the agent with the
     # properties and the attributes already provided. Runs the agent and
     # creates a loop that waits until the agent dies.
-    logger.debug("creating agent")
+    logger.debug("Creating agent.")
     agent_class = _get_class(file)
     file_abs_path = file.parent.absolute()
-    if properties:
-        os.chdir(properties.parent)
-        properties = _get_class(properties)(jid.localpart, name, number)
-        properties = properties.extract()
-    else:
-        properties = None
 
     os.chdir(file_abs_path)
-    agent_instance = agent_class(jid, properties, verify_security)
-    logger.info("starting agent")
+    agent_instance = agent_class(jid, verify_security)
+    logger.debug("Starting agent.")
     try:
         agent_instance.start().result()
-    except Exception as err:
-        logger.exception(f"could not start the agent: {err}")
-    while agent_instance.is_alive():
-        try:
+        logger.info('Agent initialized.')
+        while agent_instance.is_alive():
             time.sleep(1)
-        except Exception as e:
-            logger.error("AGENT CRACHED")
-            logger.exception(e)
-            agent_instance.stop()
-        except KeyboardInterrupt:
-            logger.info("Keyboard Interrupt")
-            agent_instance.stop()
+    except Exception as error:
+        logger.exception(f"Stoping agent (reason: {error}).")
+        agent_instance.stop().result()
+    except KeyboardInterrupt as error:
+        logger.info(f"Stoping agent (reason: {error}).")
+        agent_instance.stop().result()
+    logger.info("Agent stoped.")
     quit_spade()
-    logger.info("agent stoped")
 
 
 def _get_class(file: Path) -> Type:
