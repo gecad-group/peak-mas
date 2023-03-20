@@ -15,8 +15,6 @@ from spade.template import Template
 from peak.core import *
 from peak.agents import *
 from peak.behaviours import *
-from peak.properties import *
-from peak.drivers import *
 
 __author__ = "Bruno Ribeiro"
 __email__ = "brgri@isep.ipp.pt"
