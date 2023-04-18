@@ -10,78 +10,101 @@ from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak.cli import df, mas
 
+_logger = logging.getLogger(peak_name)
+
 
 def main(args=None):
+    _logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    _logger.addHandler(handler)
+    try:
+        _main()
+    except Exception as e:
+        _logger.critical(e, exc_info=1)
+    except KeyboardInterrupt:
+        _logger.info("Stoping PEAK: (reason: KeyboardInterrupt)")
+
+
+def _main(args=None):
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("--version", action="version", version=version)
     subparsers = parser.add_subparsers(required=True)
 
     # parser for "df" command
     df_parser = subparsers.add_parser(
-        name="df", help="Execute Directory Facilitator agent."
+        name="df", help="execute Directory Facilitator agent"
     )
     df_parser.add_argument(
         "-domain",
         type=str,
         default="localhost",
-        help="XMPP domain to which the DF must register and login. Default is localhost.",
+        help="XMPP server domain (default: localhost)",
     )
     df_parser.add_argument(
-        "--verify_security", action="store_true", help="Verifies the SLL certificates."
+        "--verify_security", action="store_true", help="verify SLL certificates"
     )
     df_parser.add_argument(
         "-log_level",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
-        help="Selects the logging level of the DF. Default is INFO.",
+        help="PEAK logging level (default: INFO)",
     )
     df_parser.add_argument(
         "-port",
         type=str,
         default="10000",
-        help="Port to be opened for the REST API. Default is 10000",
+        help="REST API port (default: 10000)",
     )
     df_parser.set_defaults(func=df.exec)
 
     # parser for the "run" command
     run_parser = subparsers.add_parser(
         name="run",
-        help="Execute PEAK's agents.",
+        help="execute PEAK's agents",
     )
     run_parser.add_argument(
         "file",
         type=Path,
-        help="This file must be a python file. The Python file must contain a class of a single agent to be executed. The name of the class must be the same of the name of the file. ",
+        help="Python file containing the class of the agent to be executed (the same name must be used in the class and in the file) ",
     )
     run_parser.add_argument(
-        "-jid", type=JID.fromstr, help="JID of the agent to be executed.", required=True
+        "-jid", type=JID.fromstr, help="agent XMPP ID", required=True
     )
     run_parser.add_argument(
         "-clones",
         type=int,
         default=1,
-        help="The number of clones of the agent. The name of each agent will be the same as the JID but with the number of the corresponding clone to it (e.g. john_0@localhost, john_1@localhost). The sequence starts in zero.",
+        help="number of clones",
     )
     run_parser.add_argument(
         "-log_level",
         type=lambda x: logging.getLevelName(str.upper(x)),
         default=logging.getLevelName("INFO"),
-        help="Selects the logging level of the agent.",
+        help="PEAK logging level (default: INFO)",
     )
     run_parser.add_argument(
-        "--verify_security", action="store_true", help="Verifies the SLL certificates."
+        "--verify_security", action="store_true", help="verify SLL certificates"
     )
     run_parser.set_defaults(func=mas.agent_exec)
 
     # parser for the "start" command
     start_parser = subparsers.add_parser(
         name="start",
-        help="Executes multiple agents using a YAML configuration file.",
+        help="execute a multiagent system using an YAML configuration file",
     )
     start_parser.add_argument(
         "file",
         type=Path,
-        help="Path to the YAML configuration file.",
+        help="YAML configuration file",
+    )
+    start_parser.add_argument(
+        "-log_level",
+        type=lambda x: logging.getLevelName(str.upper(x)),
+        default=logging.getLevelName("INFO"),
+        help="PEAK logging level (default: INFO)",
     )
     start_parser.set_defaults(func=mas.multi_agent_exec)
 
@@ -90,14 +113,7 @@ def main(args=None):
         sys.exit(1)
 
     args = parser.parse_args(args)
+    _logger.setLevel(args.log_level)
+    _logger.info("Starting PEAK")
     args.func(**vars(args))
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        logger = logging.getLogger()
-        logger.critical(e,exc_info=1)
-    except KeyboardInterrupt:
-        pass
+    _logger.info("Stoping PEAK")

@@ -3,13 +3,12 @@ import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Any, List
-from aioxmpp.callbacks import first_signal
 
 # Third party imports
 import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
-
+from aioxmpp.callbacks import first_signal
 
 
 class Agent(_spade.agent.Agent):
@@ -20,20 +19,19 @@ class Agent(_spade.agent.Agent):
         logger (:obj:`Logger`): Used to log all the necessary events in the agent.
     """
 
-    def __init__(self, jid: JID, verify_security: bool = False):
+    def __init__(self, jid: JID, cid: int = 0, verify_security: bool = False):
         """Inits an agent with a JID.
 
         Args:
             jid (:obj:`JID`): The agent XMPP identifier.
-            verify_security (bool, optional): If True, verifies the SSL certificates. 
+            verify_security (bool, optional): If True, verifies the SSL certificates.
                 Defaults to False.
         """
         super().__init__(str(jid), str(jid.bare()), verify_security)
         self.groups = dict()
+        self.cid = cid
         self._muc_client = None
-        self.logger = _logging.getLogger(jid.localpart)
-        self.logger.setLevel(_logging.DEBUG) #TODO: test if it works with the cli log_level configuration
-    
+
     async def _hook_plugin_after_connection(self):
         """Executed after SPADE Agent's connection.
 
@@ -57,17 +55,11 @@ class Agent(_spade.agent.Agent):
 
 class _Behaviour:
     """Adds XMPP functinalities to SPADE's base behaviours.
-    
+
     Acts as Mixin in the SPADE's behaviours.
-    
+
     Attributes:
         logger (:obj:`Logger`): Used to log every event in a behaviour."""
-
-    agent: Agent
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.logger = self.agent.logger.getChild(self.__class__.__name__)
 
     async def join_group(self, jid: str):
         """Joins a group.
@@ -100,8 +92,8 @@ class _Behaviour:
     async def list_groups(self, node_jid: str):
         """Retrieves the list of the existing groups in the server.
 
-        This method uses the Service Discovery functionality of the XMPP 
-        server. In orther to work the server must have this functionality 
+        This method uses the Service Discovery functionality of the XMPP
+        server. In orther to work the server must have this functionality
         configured.
 
         Args:
@@ -118,14 +110,14 @@ class _Behaviour:
     async def group_members(self, jid: str) -> List:
         """Retrieves list of members from a group.
 
-        If the agent is not a member of the group, it will enter the room , 
+        If the agent is not a member of the group, it will enter the room ,
         retrieve the list of members and then leave the group.
 
         Args:
             jid: Group's XMPP identifier.
 
         Returns:
-            The list of :obj:`Occupants`. The local user is always the first item in 
+            The list of :obj:`Occupants`. The local user is always the first item in
             the list.
         """
         if jid in self.groups:
@@ -151,7 +143,9 @@ class _Behaviour:
         try:
             await self.agent.groups[group].send_message(raw_msg)
         except:
-            self.logger.warning(f"Sending a message to a group which the agent is not a member of: {group}")
+            self.logger.warning(
+                f"Sending a message to a group which the agent is not a member of: {group}"
+            )
             await self.join_group(group)
             await self.group[group].send_message(raw_msg)
             await self.leave_group(group)
@@ -176,21 +170,21 @@ class _Behaviour:
 
 
 class OneShotBehaviour(
-    _Behaviour, _spade.behaviour.OneShotBehaviour, metaclass=_ABCMeta
+    _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
 ):
     """This behaviour is only executed once."""
 
 
 class PeriodicBehaviour(
-    _Behaviour, _spade.behaviour.PeriodicBehaviour, metaclass=_ABCMeta
+    _spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=_ABCMeta
 ):
     """This behaviour is executed periodically with an interval."""
 
 
-class CyclicBehaviour(_Behaviour, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta):
+class CyclicBehaviour(_spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=_ABCMeta):
     """This behaviour is executed cyclically until it is stopped."""
 
 
-class FSMBehaviour(_Behaviour, _spade.behaviour.FSMBehaviour, metaclass=_ABCMeta):
-    """A behaviour composed of states (oneshotbehaviours) that may transition from one 
+class FSMBehaviour(_spade.behaviour.FSMBehaviour, _Behaviour, metaclass=_ABCMeta):
+    """A behaviour composed of states (oneshotbehaviours) that may transition from one
     state to another."""

@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import time
+from multiprocessing import Process
 from pathlib import Path
 from typing import Type
 
@@ -14,11 +15,22 @@ from spade import quit_spade
 logger = logging.getLogger(__name__)
 
 
+def bootloader(agents: list):
+    logger.info("Loading agents")
+    procs = []
+    for agent in agents:
+        proc = Process(target=boot_agent, kwargs=agent, daemon=False)
+        proc.start()
+        procs.append(proc)
+    logger.info("Agents loaded")
+    for proc in procs:
+        proc.join()
+
+
 def boot_agent(
     file: Path,
     jid: JID,
-    name: str,
-    number: int,
+    cid: int,
     log_level: int,
     verify_security: bool,
 ):
@@ -28,57 +40,44 @@ def boot_agent(
         file: File path where the agent's class is.
         jid: JID of the agent.
         name: The name of the agent.
-        number: If the agent its a clone is the number of present in
-            the name of the agent, else its None.
-        log_level: Logging level to be used in the agents logging file.
+        cid: Clone ID, zero if its the original.
         verify_security: If true it validates the SSL certificates.
     """
-    log_file_name: str = jid.localpart + ("_" + jid.resource if jid.resource else "")
+    log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
     logs_folder = file.parent.absolute().joinpath("logs")
     log_file = logs_folder.joinpath(f"{log_file_name}.log")
 
     os.makedirs(logs_folder, exist_ok=True)
-    logging.basicConfig(
-        filename=log_file,
-        filemode="w",
-        level=log_level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    sys.stdout = open(log_file, "a", buffering=1)
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
+    logger.parent.handlers = []
+    logger.parent.addHandler(handler)
+    logger.parent.setLevel(log_level)
+    handler.setLevel(log_level)
 
-    _boot_agent(file, jid, name, number, verify_security)
-
-
-def _boot_agent(
-    file: Path,
-    jid: JID,
-    name: str,
-    number: int,
-    verify_security: bool,
-):
-    """Boots the agent."""
-    # Gets the agent and properties classes. Creates the agent with the
-    # properties and the attributes already provided. Runs the agent and
-    # creates a loop that waits until the agent dies.
-    logger.debug("Creating agent.")
+    logger.info("Creating agent from file")
     agent_class = _get_class(file)
     file_abs_path = file.parent.absolute()
 
     os.chdir(file_abs_path)
-    agent_instance = agent_class(jid, verify_security)
-    logger.debug("Starting agent.")
+    agent_instance = agent_class(jid, cid, verify_security)
     try:
+        logger.info("Agent starting")
         agent_instance.start().result()
-        logger.info('Agent initialized.')
+        logger.info("Agent initialized")
         while agent_instance.is_alive():
             time.sleep(1)
     except Exception as error:
-        logger.exception(f"Stoping agent (reason: {error}).")
+        logger.exception(f"Stoping agent (reason: {error})")
         agent_instance.stop().result()
     except KeyboardInterrupt as error:
-        logger.info(f"Stoping agent (reason: {error}).")
+        logger.info(f"Stoping agent (reason: {error})")
         agent_instance.stop().result()
-    logger.info("Agent stoped.")
     quit_spade()
+    logger.info("Agent stoped")
 
 
 def _get_class(file: Path) -> Type:
