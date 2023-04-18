@@ -1,6 +1,6 @@
 # Standard library imports
-import logging
 import json
+import logging
 from typing import Callable
 
 # Reader imports
@@ -87,14 +87,15 @@ class SearchGroup(OneShotBehaviour):
 
 class CreateGraph(OneShotBehaviour):
     """Creates a graph in the dashboard.
-    
+
     Sends the graph configuration and data to the DF so he can host it.
     """
+
     def __init__(self, id: str, graph: dict):
         super().__init__()
         self.id = id
         self.graph = graph
-    
+
     async def run(self) -> None:
         msg = Message()
         msg.to = DF.name(self.agent.jid.domain)

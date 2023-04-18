@@ -1,10 +1,10 @@
 # Standard library imports
 import asyncio as _asyncio
+import json
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
-import json 
 
 # Third party imports
 import aiohttp_cors
@@ -20,6 +20,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
     Every agent that needs to be synchronized needs
     to extend this class.
     """
+
     class _StepBehaviour(CyclicBehaviour):
         async def on_start(self):
             self.logger.info("Waiting for simulation to start...")
@@ -43,14 +44,12 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         async def on_end(self):
             await self.agent.stop()
 
-    def __init__(
-        self, jid: JID, verify_security: bool = False
-    ):
+    def __init__(self, jid: JID, verify_security: bool = False):
         """Inits the SyncAgent with the JID provided.
 
         Args:
             jid (:obj:`JID`): Agent's XMPP identifier.
-            verify_security (bool, optional): If True, verifies the SSL certificates. 
+            verify_security (bool, optional): If True, verifies the SSL certificates.
                 Defaults to False.
         """
         super().__init__(jid, verify_security)
@@ -66,10 +65,10 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         """Executed at each tick of the Synchronizer clock.
 
         To be implemented by the user.
-        
+
         Args:
             period (int): Number of the current period.
-            time (datetime, optional): Current datetime inside the simulation. It must be 
+            time (datetime, optional): Current datetime inside the simulation. It must be
                 configured in the Synchronizer."""
         raise NotImplementedError()
 
@@ -169,12 +168,8 @@ class Synchronizer(Agent):
                 msg.set_metadata("sync", "stop")
                 self.kill()
             else:
-                self.logger.info(
-                    f"Period {self.current_period} ({self.time})"
-                )
-                msg.body = (
-                    f"Period {self.current_period} ({self.time})"
-                )
+                self.logger.info(f"Period {self.current_period} ({self.time})")
+                msg.body = f"Period {self.current_period} ({self.time})"
                 msg.set_metadata("sync", "step")
                 msg.set_metadata("period", str(self.current_period))
                 msg.set_metadata(
@@ -204,9 +199,7 @@ class Synchronizer(Agent):
             periods: Number of periods to simulate.
         """
         await self.join_group(group_jid)
-        self.add_behaviour(
-            self._PeriodicClock(group_jid, n_agents, periods, interval)
-        )
+        self.add_behaviour(self._PeriodicClock(group_jid, n_agents, periods, interval))
 
     async def sync_group_time(
         self,
@@ -394,7 +387,7 @@ class DF(Agent):
             msg = await self.receive(60)
             if msg:
                 self.logger.debug(msg)
-                id = msg.get_metadata('id')
+                id = msg.get_metadata("id")
                 graph = json.loads(msg.get_metadata("graph"))
                 self.agent.dataanalysis_data[id] = graph
 
