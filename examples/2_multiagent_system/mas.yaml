@@ -1,0 +1,7 @@
+defaults:
+    domain: localhost
+agents:
+    john:
+        file: sender.py
+    harry: 
+        file: receiver.py

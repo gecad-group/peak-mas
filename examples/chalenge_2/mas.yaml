@@ -1,0 +1,7 @@
+defaults:
+  domain: localhost
+agents:
+  tagger:
+    file: tagger.py
+  searcher:
+    file: searcher.py

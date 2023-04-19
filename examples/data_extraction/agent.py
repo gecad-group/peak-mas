@@ -2,7 +2,9 @@
 from random import random
 
 # Reader imports
-from peak import Agent, ExportData, PeriodicBehaviour
+from peak import Agent, CreateGraph, PeriodicBehaviour
+
+import json
 
 
 class agent(Agent):
@@ -35,30 +37,24 @@ class agent(Agent):
                 0.198094934,
                 0.373578536,
             ]
+            with open("graph_options.json") as file:
+                self.graph = json.load(file) 
 
         async def run(self) -> None:
             if self.count >= 10:
                 await self.agent.stop()
-            self.agent.consumption = [
+            consumption = [
                 self.count,
                 self.consumption_data[self.count] * 1000 + random() * 100,
             ]
-            self.agent.generation = [
+            generation = [
                 self.count,
                 self.generation_data[self.count] * 1000 + random() * 100,
             ]
+            self.graph["series"][0]["data"].append(consumption)
+            self.graph["series"][1]["data"].append(generation)
+            self.agent.add_behaviour(CreateGraph("house", self.graph))
             self.count += 1
 
     async def setup(self) -> None:
-        self.consumption = 0
-        self.generation = 0
-        self.add_behaviour(self.RandomTrial(1))
-        self.add_behaviour(
-            ExportData(
-                "output.json",
-                ["consumption", "generation"],
-                interval=1,
-                to_graph=True,
-                graph_name=self.name,
-            )
-        )
+        self.add_behaviour(self.RandomTrial(5))
