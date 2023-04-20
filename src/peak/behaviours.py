@@ -1,9 +1,7 @@
-# Standard library imports
 import json
 import logging
 from typing import Callable
 
-# Reader imports
 from peak import DF, Message, Template
 from peak.core import OneShotBehaviour
 

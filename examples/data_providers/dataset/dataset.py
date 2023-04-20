@@ -1,4 +1,3 @@
-# Reader imports
 from peak import Properties, Property
 
 

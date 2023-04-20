@@ -1,5 +1,4 @@
 # agent.py
-# Reader imports
 from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour, SearchCommunity
 
 

@@ -1,7 +1,5 @@
-# Standard library imports
 from asyncio import sleep
 
-# Reader imports
 from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour
 
 

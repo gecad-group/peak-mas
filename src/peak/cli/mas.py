@@ -1,13 +1,10 @@
-# Standard library imports
 from argparse import ArgumentTypeError
 from logging import getLevelName, getLogger
 from os import chdir
 from pathlib import Path
 
-# Third party imports
 import yaml
 
-# Reader imports
 from peak import JID
 from peak.bootloader import bootloader
 

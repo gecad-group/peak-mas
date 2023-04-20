@@ -1,8 +1,6 @@
-# Standard library imports
 import json
 from random import random
 
-# Reader imports
 from peak import Agent, CreateGraph, PeriodicBehaviour
 
 

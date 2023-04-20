@@ -1,10 +1,8 @@
-# Standard library imports
 import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
-# Reader imports
 from peak import JID
 from peak import __name__ as peak_name
 from peak import __version__ as version

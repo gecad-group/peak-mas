@@ -1,4 +1,3 @@
-# Standard library imports
 import asyncio as _asyncio
 import json
 import logging as _logging
@@ -6,11 +5,9 @@ from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
 
-# Third party imports
 import aiohttp_cors
 from aioxmpp import JID
 
-# Reader imports
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 
 _logger = _logging.getLogger(__name__)

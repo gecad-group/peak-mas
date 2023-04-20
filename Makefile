@@ -1,10 +1,12 @@
 DOMAIN?=localhost
 
+lint:
+	pylint src/peak/
+
 format:
 	autoflake --remove-all-unused-imports --remove-unused-variables --expand-star-imports --ignore-init-module-imports -ri .
 	isort --profile black .
 	black .
- 	pylint src/peak/
 
 patch: format
 	python -m bumpver update --patch
@@ -18,4 +20,4 @@ major: format
 publish: format
 	python -m build
 	twine check dist/*
-	twine upload dist/*
+	twine upload -u gecad-group dist/*

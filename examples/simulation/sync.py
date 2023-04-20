@@ -1,10 +1,7 @@
-# Standard library imports
 from datetime import datetime, timedelta
 
-# Third party imports
 import settings
 
-# Reader imports
 from peak import Synchronizer
 
 

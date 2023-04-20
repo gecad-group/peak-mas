@@ -1,7 +1,5 @@
-# Third party imports
 import settings
 
-# Reader imports
 from peak import Message, OneShotBehaviour, SyncAgent
 
 
