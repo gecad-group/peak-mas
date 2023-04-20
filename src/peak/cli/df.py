@@ -1,6 +1,8 @@
+# Standard library imports
 import logging
 from time import sleep
 
+# Reader imports
 from peak import DF
 
 
