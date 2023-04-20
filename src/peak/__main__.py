@@ -48,8 +48,8 @@ def _main(args=None):
     )
     df_parser.add_argument(
         "-log_level",
-        type=lambda x: logging.getLevelName(str.upper(x)),
-        default=logging.getLevelName("INFO"),
+        type=str.upper,
+        default="INFO",
         help="PEAK logging level (default: INFO)",
     )
     df_parser.add_argument(
@@ -81,8 +81,8 @@ def _main(args=None):
     )
     run_parser.add_argument(
         "-log_level",
-        type=lambda x: logging.getLevelName(str.upper(x)),
-        default=logging.getLevelName("INFO"),
+        type=str.upper,
+        default="INFO",
         help="PEAK logging level (default: INFO)",
     )
     run_parser.add_argument(
@@ -102,8 +102,8 @@ def _main(args=None):
     )
     start_parser.add_argument(
         "-log_level",
-        type=lambda x: logging.getLevelName(str.upper(x)),
-        default=logging.getLevelName("INFO"),
+        type=str.upper,
+        default="INFO",
         help="PEAK logging level (default: INFO)",
     )
     start_parser.set_defaults(func=mas.multi_agent_exec)

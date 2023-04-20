@@ -4,9 +4,9 @@ import logging
 import os
 import sys
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Pool
 from pathlib import Path
-from typing import Type
+from typing import Type, List
 
 # Third party imports
 from aioxmpp import JID
@@ -17,14 +17,16 @@ logger = logging.getLogger(__name__)
 
 def bootloader(agents: list):
     logger.info("Loading agents")
-    procs = []
-    for agent in agents:
-        proc = Process(target=boot_agent, kwargs=agent, daemon=False)
+    procs: List[Process] = []
+    for i, agent in enumerate(agents):
+        proc = Process(target=boot_agent, kwargs=agent, daemon=False, name=agents[i]['jid'].localpart)
         proc.start()
         procs.append(proc)
     logger.info("Agents loaded")
-    for proc in procs:
+    for i, proc in enumerate(procs):
         proc.join()
+        if proc.exitcode != 0:
+            logger.error(f"{proc.name}'s process ended unexpectedly.")
 
 
 def boot_agent(
@@ -49,6 +51,7 @@ def boot_agent(
 
     os.makedirs(logs_folder, exist_ok=True)
     sys.stdout = open(log_file, "a", buffering=1)
+    sys.stderr = sys.stdout
     handler = logging.FileHandler(log_file)
     handler.setFormatter(
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -60,10 +63,9 @@ def boot_agent(
 
     logger.info("Creating agent from file")
     agent_class = _get_class(file)
-    file_abs_path = file.parent.absolute()
-
-    os.chdir(file_abs_path)
+    os.chdir(file.parent.absolute())
     agent_instance = agent_class(jid, cid, verify_security)
+
     try:
         logger.info("Agent starting")
         agent_instance.start().result()
@@ -93,8 +95,12 @@ def _get_class(file: Path) -> Type:
     Returns:
         A class object with the same name as the file.
     """
-    module_path, module_file = os.path.split(file.absolute())
-    module_name = module_file.split(".")[0]
-    sys.path.append(module_path)
-    module = importlib.import_module(module_name)
-    return getattr(module, module_name)
+    try:
+        module_path, module_file = os.path.split(file.absolute())
+        module_name = module_file.split(".")[0]
+        sys.path.append(module_path)
+        module = importlib.import_module(module_name)
+        return getattr(module, module_name)
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(f"the file does not exist or the file name wasn't used as the agent's class name ({file})")
+

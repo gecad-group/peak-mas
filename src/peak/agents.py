@@ -13,6 +13,8 @@ from aioxmpp import JID
 # Reader imports
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
 
+_logger = _logging.getLogger(__name__)
+
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
     """Is synchronized by the Synchronizer.
@@ -255,22 +257,15 @@ class DF(Agent):
     agents.
     """
 
-    class _GroupHierarchy(CyclicBehaviour):
+    class _EcosystemHierarchy(CyclicBehaviour):
         """Manages the group structure of all the multi-agent systems."""
 
         async def on_start(self):
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "treehierarchy")
             self.set_template(template)
-            self.agent.grouphierarchy_data = {
-                "nodes": set(),
-                "links": set(),
-                "categories": set(),
-                "node_members": {},
-                "tags": {},
-            }
 
         async def run(self):
             msg = await self.receive(60)
@@ -287,73 +282,73 @@ class DF(Agent):
                 if (
                     msg.get_metadata("leave")
                     and msg.sender
-                    in self.agent.grouphierarchy_data["node_members"][nodes[-1]]
+                    in self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]]
                 ):
                     self.logger.debug(str(msg.sender) + " leaving " + path)
-                    self.agent.grouphierarchy_data["node_members"][nodes[-1]].remove(
+                    self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]].remove(
                         msg.sender
                     )
                     nodes = nodes[::-1]
                     # remove empty nodes and links
                     for i, node in enumerate(nodes):
                         if len(
-                            self.agent.grouphierarchy_data["node_members"][node]
+                            self.agent.ecosystemhierarchy_data["node_members"][node]
                         ) == 0 and not any(
                             node == source
-                            for source, _ in self.agent.grouphierarchy_data["links"]
+                            for source, _ in self.agent.ecosystemhierarchy_data["links"]
                         ):
-                            self.agent.grouphierarchy_data["node_members"].pop(
+                            self.agent.ecosystemhierarchy_data["node_members"].pop(
                                 node
                             )  # this line can be removed, there is no need in removing the node from the dict
-                            self.agent.grouphierarchy_data["nodes"].remove(
+                            self.agent.ecosystemhierarchy_data["nodes"].remove(
                                 (node, level + str(len(nodes) - 1 - i), domain)
                             )
                             if i + 1 < len(nodes):
-                                self.agent.grouphierarchy_data["links"].remove(
+                                self.agent.ecosystemhierarchy_data["links"].remove(
                                     (nodes[i + 1], node)
                                 )
                     existing_categories = set()
 
                     # remove categories if empty
-                    for _, level, _ in self.agent.grouphierarchy_data["nodes"]:
+                    for _, level, _ in self.agent.ecosystemhierarchy_data["nodes"]:
                         existing_categories.add(level)
-                    difference = self.agent.grouphierarchy_data[
+                    difference = self.agent.ecosystemhierarchy_data[
                         "categories"
                     ].difference(existing_categories)
                     if any(difference):
-                        self.agent.grouphierarchy_data["categories"] -= difference
+                        self.agent.ecosystemhierarchy_data["categories"] -= difference
 
                 else:
                     self.logger.debug(str(msg.sender) + " entering " + path)
                     last = None
                     for i, node in enumerate(nodes):
-                        self.agent.grouphierarchy_data["nodes"].add(
+                        self.agent.ecosystemhierarchy_data["nodes"].add(
                             (node, level + str(i), domain)
                         )
-                        if node not in self.agent.grouphierarchy_data["node_members"]:
-                            self.agent.grouphierarchy_data["node_members"][node] = []
-                        self.agent.grouphierarchy_data["categories"].add(level + str(i))
+                        if node not in self.agent.ecosystemhierarchy_data["node_members"]:
+                            self.agent.ecosystemhierarchy_data["node_members"][node] = []
+                        self.agent.ecosystemhierarchy_data["categories"].add(level + str(i))
                         if last != None:
-                            self.agent.grouphierarchy_data["links"].add(
+                            self.agent.ecosystemhierarchy_data["links"].add(
                                 (
                                     last,
                                     node,
                                 )
                             )
                         last = node
-                    self.agent.grouphierarchy_data["node_members"][last].append(
+                    self.agent.ecosystemhierarchy_data["node_members"][last].append(
                         msg.sender
                     )
                     for tag in tags:
-                        if tag not in self.agent.grouphierarchy_data["tags"]:
-                            self.agent.grouphierarchy_data["tags"][tag] = set()
-                        self.agent.grouphierarchy_data["tags"][tag].add(last)
+                        if tag not in self.agent.ecosystemhierarchy_data["tags"]:
+                            self.agent.ecosystemhierarchy_data["tags"][tag] = set()
+                        self.agent.ecosystemhierarchy_data["tags"][tag].add(last)
 
-    class _SearchGroup(CyclicBehaviour):
+    class _SearchCommunity(CyclicBehaviour):
         """Handles all the requests to search for groups."""
 
         async def on_start(self) -> None:
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "searchgroup")
@@ -363,20 +358,20 @@ class DF(Agent):
             msg = await self.receive(60)
             if msg and (meta_tags := msg.get_metadata("tags")):
                 tags = json.loads(meta_tags)
-                groups: set = self.agent.grouphierarchy_data["tags"][tags[0]]
+                communities: set = self.agent.ecosystemhierarchy_data["tags"][tags[0]]
                 for tag in tags[1:]:
-                    groups = groups.intersection(
-                        self.agent.grouphierarchy_data["tags"][tag]
+                    communities = communities.intersection(
+                        self.agent.ecosystemhierarchy_data["tags"][tag]
                     )
                 res = msg.make_reply()
-                res.set_metadata("groups", json.dumps(list(groups)))
+                res.set_metadata("communities", json.dumps(list(communities)))
                 await self.send(res)
 
     class _CreateGraph(CyclicBehaviour):
         """Handles the requests to create graphs"""
 
         async def on_start(self):
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "graph")
@@ -396,6 +391,7 @@ class DF(Agent):
             JID.fromstr("df@" + domain + "/admin"), verify_security=verify_security
         )
         self.port = port
+        self.logger = _logger.getChild(self.__class__.__name__)
 
     @classmethod
     def name(cls, domain: str) -> str:
@@ -410,14 +406,19 @@ class DF(Agent):
         return "df@" + domain + "/admin"
 
     async def setup(self):
-        self.grouphierarchy_data = dict()
+        self.ecosystemhierarchy_data = {
+                "nodes": set(),
+                "links": set(),
+                "categories": set(),
+                "node_members": {},
+                "tags": {},
+            }
         self.dataanalysis_data = dict()
         self.group_tags = dict()
 
-        self.add_behaviour(self._GroupHierarchy())
-        self.add_behaviour(self._SearchGroup())
+        self.add_behaviour(self._EcosystemHierarchy())
+        self.add_behaviour(self._SearchCommunity())
         self.add_behaviour(self._CreateGraph())
-        self.add_behaviour(self._UpdateGraph())
 
         # Create routes.
         self.web.add_get("/groups", self.get_groups, template=None)
@@ -442,14 +443,14 @@ class DF(Agent):
 
         # Start web API
         self.web.start(port=self.port)
-        _logger.info("REST API running on port " + self.port)
+        self.logger.info("REST API running on port " + self.port)
 
     async def get_groups(self, request):
         return {
-            "nodes": list(self.grouphierarchy_data["nodes"]),
-            "links": list(self.grouphierarchy_data["links"]),
-            "categories": list(self.grouphierarchy_data["categories"]),
-            "node_members": self.grouphierarchy_data["node_members"],
+            "nodes": list(self.ecosystemhierarchy_data["nodes"]),
+            "links": list(self.ecosystemhierarchy_data["links"]),
+            "categories": list(self.ecosystemhierarchy_data["categories"]),
+            "node_members": self.ecosystemhierarchy_data["node_members"],
         }
 
     async def refresh_groups(self, request):

@@ -54,7 +54,7 @@ def agent_exec(
     bootloader(agents)
 
 
-def multi_agent_exec(file: Path, log_level: int, *args, **kargs):
+def multi_agent_exec(file: Path, log_level, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
@@ -80,25 +80,25 @@ def multi_agent_exec(file: Path, log_level: int, *args, **kargs):
         defaults = defaults | yml["defaults"]
     if "agents" not in yml:
         raise Exception("YAML: 'agents' argument required")
-    for agent, agent_args in yml["agents"].items():
+    for agent_name, agent_args in yml["agents"].items():
         if agent_args is not None:
             agent_args = defaults | agent_args
         else:
             agent_args = defaults
         if agent_args["file"] is None:
-            raise Exception(f"{agent}: file argument required")
+            raise Exception(f"{agent_name}: file argument required")
         if agent_args["domain"] is None:
-            raise Exception(f"{agent}: domain argument required")
+            raise Exception(f"{agent_name}: domain argument required")
         kwargs = {
             "file": Path(agent_args["file"]),
-            "jid": JID(agent, agent_args["domain"], agent_args["resource"]),
+            "jid": JID(agent_name, agent_args["domain"], agent_args["resource"]),
             "cid": 0,
-            "log_level": agent_args["log_level"].upper(),
+            "log_level": agent_args["log_level"],
             "verify_security": agent_args["ssl"],
         }
         for cid in range(agent_args["clones"]):
             agent = kwargs.copy()
             agents.append(agent)
-            kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent}{cid}")
+            kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
             kwargs["cid"] = cid
     bootloader(agents)
