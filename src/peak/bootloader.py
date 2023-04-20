@@ -4,7 +4,8 @@ import logging
 import os
 import sys
 import time
-from multiprocessing import Process, Pool
+from multiprocessing import Process
+import asyncio
 from pathlib import Path
 from typing import Type, List
 
@@ -14,6 +15,12 @@ from spade import quit_spade
 
 logger = logging.getLogger(__name__)
 
+async def _wait_for_processes(processes):
+    def join_process(process):
+        process.join()
+        if process.exitcode != 0:
+            logger.error(f"{process.name}'s process ended unexpectedly.")
+    await asyncio.gather(*[asyncio.to_thread(join_process, process) for process in processes])
 
 def bootloader(agents: list):
     logger.info("Loading agents")
@@ -23,10 +30,7 @@ def bootloader(agents: list):
         proc.start()
         procs.append(proc)
     logger.info("Agents loaded")
-    for i, proc in enumerate(procs):
-        proc.join()
-        if proc.exitcode != 0:
-            logger.error(f"{proc.name}'s process ended unexpectedly.")
+    asyncio.run(_wait_for_processes(procs))
 
 
 def boot_agent(
@@ -73,13 +77,15 @@ def boot_agent(
         while agent_instance.is_alive():
             time.sleep(1)
     except Exception as error:
-        logger.exception(f"Stoping agent (reason: {error})")
+        logger.exception(f"Stoping agent (reason: {error.__class__.__name__})")
         agent_instance.stop().result()
-    except KeyboardInterrupt as error:
-        logger.info(f"Stoping agent (reason: {error})")
+        raise SystemExit(1)
+    except KeyboardInterrupt:
+        logger.info(f"Stoping agent (reason: KeyboardInterrupt)")
         agent_instance.stop().result()
-    quit_spade()
-    logger.info("Agent stoped")
+    finally:
+        quit_spade()
+        logger.info("Agent stoped")
 
 
 def _get_class(file: Path) -> Type:
