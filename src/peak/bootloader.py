@@ -1,4 +1,3 @@
-# Standard library imports
 import asyncio
 import importlib
 import logging
@@ -9,7 +8,6 @@ from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
 
-# Third party imports
 from aioxmpp import JID
 from spade import quit_spade
 

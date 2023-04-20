@@ -1,13 +1,7 @@
-# Standard library imports
-<<<<<<< HEAD
-=======
-import asyncio as _asyncio
->>>>>>> main
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Dict, List
 
-# Third party imports
 import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
@@ -158,7 +152,6 @@ class _Behaviour:
         try:
             await self.agent.communities[group].send_message(raw_msg)
         except:
-<<<<<<< HEAD
             self._logger.debug(
                 f"Sending a message to a group which the agent is not a member of: {group}"
             )
@@ -175,29 +168,12 @@ class _Behaviour:
 
         Executes behaviour first, if not executed.
         It is used to chain behviours that are dependent on each other.
-=======
-            _logger.debug(f"agent not member of {msg.to}, sending message anyway")
-            room, future = self.agent.muc_client.join(msg.to, self.agent.name)
-            await future
-            await room.send_message(raw_msg)
-            await room.leave()
-            _logger.debug(f"leaving {msg.to}")
-
-    async def wait_for(self, behaviour: _spade.behaviour.CyclicBehaviour, template: _spade.template.Template = None):
-        """Awaits synchronozly for a behaviour.
-
-        Executes behaviour first, if not executed.
-        It is used to chain behviour that are dependent on each other.
->>>>>>> main
 
         Args:
             behaviour: SPADE's behaviour.
             tempalte: SPADE's template.
         """
-<<<<<<< HEAD
         self._logger.debug(f"Waiting for behaviour: {behaviour}")
-=======
->>>>>>> main
         if not behaviour.is_running:
             self.agent.add_behaviour(behaviour, template)
         await behaviour.join()

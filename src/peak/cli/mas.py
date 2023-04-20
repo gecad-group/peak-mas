@@ -5,12 +5,10 @@ from pathlib import Path
 
 import yaml
 
-# Reader imports
 from peak import JID
 from peak.bootloader import bootloader
 
 _logger = getLogger(__name__)
-
 
 
 def agent_exec(

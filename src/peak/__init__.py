@@ -7,14 +7,11 @@ resources and information with each other easly.
 isort: skip_file
 """
 
-# Standard library imports
 import logging
 
-# Third party imports
 from spade.message import Message
 from spade.template import Template
 
-# Reader imports
 from peak.core import *
 from peak.agents import *
 from peak.behaviours import *
