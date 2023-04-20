@@ -128,13 +128,15 @@ This section will talk about how to run agents as different threads of the same 
 
 ## PEAK Communities
 
-In PEAK, communities can be seen as groups of agents that share similar goals. Communities are a very useful and efficient way to make communication between three or more agents. What makes this usefull is that for each message sent to the community every member will receive the message.
+In PEAK, communities can be seen as groups of agents that share similar goals. Communities are a very useful and efficient way to make communication between three or more agents. What makes this usefull is that for each message sent to the community every member will receive the message. 
 
 <img src="peak_communities.png" height="300">
 
+For this examples you will need to execute a pre-defined PEAK agent called Directory Facilitator, for short DF. He is responsable to maintain the PEAK communities structures. More details about the DF [here]().
+
 ### Creating a community ([Example 3](https://github.com/gecad-group/peak-mas/tree/main/examples/3_simple_community))
 
-To create a community is very simple. There is a pre defined behavior that enables the agent join communities. 
+To create a community is very simple. There is a pre defined behavior that enables the agent join communities. For only this functionality you don't need DF, but it is recommended.
 
 ```python
 #agent.py
@@ -179,18 +181,16 @@ As you can see in the example above, the agent has a behavior `HelloWorld`. This
 > **Chalenge 1:**
 > Try to implement the [Communication between agents](#communication-between-agents-example-2) example using communities. ([Solution]())
 
-### Community tagging ([Example 4](https://github.com/gecad-group/peak-mas/tree/main/examples/3_community_tagging))
+### Community tagging ([Example 4](https://github.com/gecad-group/peak-mas/tree/main/examples/4_community_tags))
 
 Community tagging, as the name suggests, is for tagging communities. This allows the agents to identify the communities and then search for them using the tags to filter them. Let's see.
 
 ```python
-#tagger.py
-from asyncio import sleep
-
-from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour
+#agent.py
+from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour, SearchCommunity
 
 
-class tagger(Agent):
+class agent(Agent):
     class TagCommunities(OneShotBehaviour):
         async def run(self) -> None:
             self.agent.add_behaviour(
@@ -205,7 +205,12 @@ class tagger(Agent):
                     "group2", f"conference.{self.agent.jid.domain}", ["test"]
                 )
             )
-            await sleep(10)
+            def print_communities(tags, communities):
+                print(f"Communities ({tags}): {communities}")
+
+            await self.wait_for(SearchCommunity(["awesome"], print_communities))
+            await self.wait_for(SearchCommunity(["test"], print_communities))
+            
             await self.wait_for(
                 LeaveCommunity("group1", f"conference.{self.agent.jid.domain}")
             )
@@ -218,46 +223,58 @@ class tagger(Agent):
         self.add_behaviour(self.TagCommunities())
 ```
 
-In the example above we create an agent called `tagger` and `searcher`. `tagger` will create and tag two groups: `group1@conference.localhost` with the tags `test`, `awesome` and `cool`; `group2@conference.localhost` with the tags `test` and `awesome`; `group3@conference.localhost` with the tag `test`; and finally the fourth group `group4@conference.localhost`. After that will search for groups using the `SearchGroup` behavior.
+For this to work you need to execute the DF agent (more details [here]()). In the example above we create an agent that will create and tag two communities: `group1@conference.localhost` with tags `test` and `awesome`, and `group2@conference.localhost` with tag `test`. After that will search for communities using the `SearchCommunity` behavior. Note that for the `SearchCommunity` and for `LeaveCommunity` behaviours we do not add the behaviour directly to the agent, because the agent would stop before the behaviours would be accomplished. We use `wait_for` method, available in every behaviour, to wait for the completeness of the behaviour before continuing, making the behaviour synchrounous.
 
-Firstly, the `JoinGroup` is used to create the groups and tag them. The groups can have more than one tag. To search the groups it's used the `SearchGroup` behavior. You can search for more than one tag, but be careful because it used conjugation to search for them. In other words it will get you the list of groups that have all the tags the you mentioned.
+In simple words the tagging system will search for the communities that have the tags that you want. For instance, if you search for three tags it will give you every community that have all those three tags.
 
 > **Chalenge 2:**
-> Try to implement this example with two agents: one that creates and tags the groups and other that searches for them. ([Solution](https://github.com/gecad-group/peak-mas/tree/main/examples/chalenge_2))
+> Try to implement this example with two agents: one that creates and tags the communities and other that searches for them. ([Solution](https://github.com/gecad-group/peak-mas/tree/main/examples/chalenge_2))
 
-### Group Hierarchy
+### Community hierarchy ([Example 5](https://github.com/gecad-group/peak-mas/tree/main/examples/5_community_hierarchy))
 
-The group hierarchy allows the user to create subgroups in different depths. This does not only allow you to organize your multiagent system (e.g., society of agent) but also to communicate more efficiently through the hierarchical branches. You can send a single message to every agent that is in a specific branch, or every agent bellow some specific node.
+The community hierarchy allows the user to create different levels of communities associated with one another. This does not only allow your agents to organize themselves but also to communicate more efficiently through the hierarchical branches. For instance, consider the hirarchy bellow.
 
-For this functionality you need to activate the Directory Facilitator (DF) agent. DF coordinates and monitors the hierarchical structure. To activate it you just need to run the following command:
+_Image_
 
-```bash
-$ peak df
-```
+For every community of the hierarchy two nodes are created: the actual node of the community, which only the members can interact, and a node which has all the members of that community all the way down to the roots. This special node that we call the `echo node` will work has an echoer for the whole branch beneaf. In other words, if you want to send a message from X to Y you just need to send a message to the X_down node.
 
-To change the server domain use the `-d` argument.
-Let's see an example of the group hierarchy.
+Let's see an example of the community hierarchy.
+
 ```python
 #agent.py
+# Standard library imports
 from asyncio import sleep
-from peak import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
+
+# Reader imports
+from peak import Agent, JoinCommunity, LeaveCommunity, Message, OneShotBehaviour
+
 
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
         async def run(self):
-            self.agent.add_behaviour(
-                JoinGroup("mas/retina/teste", f"conference.{self.agent.jid.domain}")
-            )
-            msg = Message(
-                to=f"retina@conference.{self.agent.jid.domain}"
-            )
-            msg.body = "Hello World"
-            await self.send_to_group(msg)
+            groups_tree = [
+                "peak/A0/B0",
+                "peak/A0",
+                "peak/A1",
+                "peak/A2/B2/C0",
+                "peak/A1/B3/C1",
+            ]
+            for groups_branch in groups_tree:
+                await self.wait_for(
+                    JoinCommunity(groups_branch, "conference." + self.agent.jid.domain)
+                )
+                await sleep(1)
+            for groups_branch in groups_tree:
+                await self.wait_for(
+                    LeaveCommunity(groups_branch, "conference." + self.agent.jid.domain)
+                )
+                await sleep(1)
+            await self.agent.stop()
 
     async def setup(self):
         self.add_behaviour(self.HelloWorld())
 ```
-In the JoinGroup behavior you can specify a path of groups. What these does is create an hierarchy of groups, being the first group the root and the last group an intermediate node or a leaf. In this path we call the last node the target group, because you only enter in that group specifically. Another interesting thing about this functionality is that for each node behind the target node you enter in a specially group which the names ends in \_down. The ideia behind this is to send messages to the whole branch, so every agent that enters a node bellow enters in this group. So if we want to send a message to the whole multi agent system we only have to send a message to, in the case of this example, ``mas_down``. In the example above the agent entered in 
+For this to work you need to execute the DF agent (more details [here]()). In the `JoinCommunity` behavior you can specify a path representing the hierarchy of the communities. For instance in path `peak/A0/B0`, `peak` is the root community, beneath is community `A0`, at level 1, and `B0` at level 2. The last node of the path does not need necessarilly to be a leaf. We call the last node the target onde, because you only enter in that community specifically. 
 
 > **Note:**
 > In the Dashboard, the groups that end in \_down do not appear in the node graph.
