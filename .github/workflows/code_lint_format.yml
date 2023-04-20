@@ -1,13 +1,13 @@
-name: Pylint
+name: Code lint and formatter
 
-on: [push]
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -17,7 +17,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
+        pip install pylint autoflake isort black
+    - name: Python Linter autoflake, isort, black
+      uses: jiwidi/python-lint-action@v1
     - name: Analysing the code with pylint
       run: |
+        autoflake --remove-all-unused-imports --remove-unused-variables --expand-star-imports --ignore-init-module-imports -ri .
+        isort --profile black .
+        black .
         pylint $(git ls-files '*.py')
