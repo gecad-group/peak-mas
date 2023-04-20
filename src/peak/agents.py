@@ -1,79 +1,57 @@
-# Standard library imports
 import asyncio as _asyncio
+import json
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from json import dumps as json_dumps
-from json import loads as json_loads
 
-# Third party imports
 import aiohttp_cors
 from aioxmpp import JID
 
-# Reader imports
 from peak import Agent, CyclicBehaviour, Message, PeriodicBehaviour, Template
-from peak.properties import Properties
 
 _logger = _logging.getLogger(__name__)
 
 
 class SyncAgent(Agent, metaclass=_ABCMeta):
-    """Agent that is synchronized by the Synchronizer.
+    """Is synchronized by the Synchronizer.
 
     Every agent that needs to be synchronized needs
     to extend this class.
-
-    Attributes:
-        period: An integer representing the number of the period inside the simulation.
-        time: A datetime of the current moment in the simmulation.
     """
 
     class _StepBehaviour(CyclicBehaviour):
-        """Listens for the Synchronizer's clock's ticks."""
-
         async def on_start(self):
-            _logger.info("Waiting for simulation to start...")
+            self.logger.info("Waiting for simulation to start...")
 
         async def run(self):
             msg = await self.receive(10)
             if msg:
                 if msg.get_metadata("sync") == "step":
-                    self.agent.period = int(msg.get_metadata("period"))
+                    period = int(msg.get_metadata("period"))
+                    time = None
                     if msg.get_metadata("time"):
-                        self.agent.time = datetime.strptime(
+                        time = datetime.strptime(
                             msg.get_metadata("time"), "%Y-%m-%d %H:%M:%S"
                         )
-                    if self.agent.period != 0:
-                        self.agent.iterate_properties()
-                    await self.agent.step()
-                    _logger.info(
-                        "Period "
-                        + str(self.agent.period)
-                        + " ("
-                        + str(self.agent.time)
-                        + ")"
-                    )
+                    await self.agent.step(period, time)
+                    self.logger.info(msg.body)
                 if msg.get_metadata("sync") == "stop":
-                    _logger.info("Simulation ended")
+                    self.logger.info("Simulation ended.")
                     self.kill()
 
         async def on_end(self):
             await self.agent.stop()
 
-    def __init__(
-        self, jid: JID, properties: Properties = None, verify_security: bool = False
-    ):
-        """Agent that listens to the Synchronizer.
+    def __init__(self, jid: JID, verify_security: bool = False):
+        """Inits the SyncAgent with the JID provided.
 
         Args:
-            jid: XMPP identifier of the agent.
-            properties: Atributes of the agent to be injected.
-            verify_security: If True verifies SSL certificates.
+            jid (:obj:`JID`): Agent's XMPP identifier.
+            verify_security (bool, optional): If True, verifies the SSL certificates.
+                Defaults to False.
         """
-        super().__init__(jid, properties, verify_security)
-        self.period = 0
-        self.time = 0
+        super().__init__(jid, verify_security)
         template_step = Template()
         template_step.set_metadata("sync", "step")
         template_stop = Template()
@@ -82,15 +60,20 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
         self.add_behaviour(self._StepBehaviour(), template)
 
     @abstractmethod
-    async def step(self):
+    async def step(self, period: int, time: datetime = None):
         """Executed at each tick of the Synchronizer clock.
 
-        To be implemented by the user."""
+        To be implemented by the user.
+
+        Args:
+            period (int): Number of the current period.
+            time (datetime, optional): Current datetime inside the simulation. It must be
+                configured in the Synchronizer."""
         raise NotImplementedError()
 
 
 class Synchronizer(Agent):
-    """Agent that synchronizes the other agents.
+    """Synchronizes the syncagents.
 
     The Synchronizer creates a group of agents, awaits for
     the agents to join the group and starts the clock of the
@@ -118,10 +101,13 @@ class Synchronizer(Agent):
             self.periods = periods
 
         async def on_start(self):
-            while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
+            self.logger.info("Waiting for all agents to enter the group...")
+            while (
+                not len(await self.agent.group_members(self.group_jid)) >= self.n_agents
+            ):
                 await _asyncio.sleep(1)
             self.current_period = 0
-            _logger.info("Starting simulation...")
+            self.logger.info("Starting simulation...")
 
         async def run(self):
             msg = Message()
@@ -130,15 +116,15 @@ class Synchronizer(Agent):
                 msg.set_metadata("sync", "stop")
                 self.kill()
             else:
-                _logger.info("Period " + str(self.current_period))
-                msg.body = "Period " + str(self.current_period)
+                self.logger.info(f"Period {self.current_period}")
+                msg.body = f"Period {self.current_period}"
                 msg.set_metadata("sync", "step")
                 msg.set_metadata("period", str(self.current_period))
             await self.send_to_group(msg)
             self.current_period += 1
 
         async def on_end(self):
-            _logger.info("Ending simulation...")
+            self.logger.info("Ending simulation...")
             await self.agent.stop()
 
     class _DateTimeClock(PeriodicBehaviour):
@@ -166,13 +152,13 @@ class Synchronizer(Agent):
             self.period_time = period_time_simulated
 
         async def on_start(self):
-            _logger.info("Waiting for all agents to enter the group...")
+            self.logger.info("Waiting for all agents to enter the group...")
             while (
                 not len(await self.agent.group_members(self.group_jid)) >= self.n_agents
             ):
                 await _asyncio.sleep(1)
             self.current_period = 0
-            _logger.info("Starting simulation...")
+            self.logger.info("Starting simulation...")
 
         async def run(self):
             msg = Message()
@@ -181,12 +167,8 @@ class Synchronizer(Agent):
                 msg.set_metadata("sync", "stop")
                 self.kill()
             else:
-                _logger.info(
-                    "Period " + str(self.current_period) + " (" + str(self.time) + ")"
-                )
-                msg.body = (
-                    "Period " + str(self.current_period) + " (" + str(self.time) + ")"
-                )
+                self.logger.info(f"Period {self.current_period} ({self.time})")
+                msg.body = f"Period {self.current_period} ({self.time})"
                 msg.set_metadata("sync", "step")
                 msg.set_metadata("period", str(self.current_period))
                 msg.set_metadata(
@@ -197,11 +179,11 @@ class Synchronizer(Agent):
             self.time += self.period_time
 
         async def on_end(self):
-            _logger.info("Ending simulation...")
+            self.logger.info("Ending simulation...")
             await self.agent.stop()
 
     async def sync_group_period(
-        self, group_jid: str, n_agents: int, time_per_period: float, periods: int
+        self, group_jid: str, n_agents: int, interval: float, periods: int
     ):
         """Synchronizes a group of agents.
 
@@ -212,39 +194,42 @@ class Synchronizer(Agent):
             n_agents: Number of agents to be synchronized. Synchronizer
                 awaits for this number of agents to join the group before
                 it starts the simulation.
-            time_per_period: time in seconds between each period.
-            periods: number of periods to simulate.
+            interval: Time in seconds between each period.
+            periods: Number of periods to simulate.
         """
         await self.join_group(group_jid)
-        self.add_behaviour(
-            self._PeriodicClock(group_jid, n_agents, periods, time_per_period)
-        )
+        self.add_behaviour(self._PeriodicClock(group_jid, n_agents, periods, interval))
 
     async def sync_group_time(
         self,
         group_jid: str,
         n_agents: int,
-        initial_time: datetime,
-        end_time: datetime,
-        internal_period_time: timedelta,
+        initial_datetime: datetime,
+        end_datetime: datetime,
+        internal_interval: timedelta,
         external_period_time: float,
         start_at: datetime = None,
     ):
         """Synchronizes a group of agents.
 
-        The clock is based on the date and time inside of the simulation.
+        Here two time dimensions are created. One is the real-time at which
+        the clock of the Synchronizer will run. The other is the fictional
+        datetime created inside the simulation. For example, one second
+        can correspond to one day inside the simulation.
 
         Args:
             group_jid: Identifier of the XMPP group to be synchronized.
             n_agents: Number of agents to be synchronized. Synchronizer
                 awaits for this number of agents to join the group before
                 it starts the simulation.
-            initial_time: defines the internal date and time at the start of the
+            initial_datetime: Defines the initial date and time inside the
                 simulation.
-            end_time: defines the internal date and time at which the simulation ends.
-            internal_period_time: time between each period inside the simulation.
-            period_time_real: time between each tick of the clock.
-            start_at: schedules the simulation start at a given time. If None the
+            end_datetime: Defines the date and time at which the simulation ends.
+            internal_interval: Time between each period relative to the initial and
+                end datetimes.
+            interval: Time in seconds between each period relative to the Synchronizers
+                clock.
+            start_at: Schedules the simulation to start at a given time. If None the
                 simulation starts right away.
         """
         await self.join_group(group_jid)
@@ -252,9 +237,9 @@ class Synchronizer(Agent):
             self._DateTimeClock(
                 group_jid,
                 n_agents,
-                initial_time,
-                end_time,
-                internal_period_time,
+                initial_datetime,
+                end_datetime,
+                internal_interval,
                 external_period_time,
                 start_at,
             )
@@ -269,22 +254,15 @@ class DF(Agent):
     agents.
     """
 
-    class _GroupHierarchy(CyclicBehaviour):
+    class _EcosystemHierarchy(CyclicBehaviour):
         """Manages the group structure of all the multi-agent systems."""
 
         async def on_start(self):
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "treehierarchy")
             self.set_template(template)
-            self.agent.grouphierarchy_data = {
-                "nodes": set(),
-                "links": set(),
-                "categories": set(),
-                "node_members": {},
-                "tags": {},
-            }
 
         async def run(self):
             msg = await self.receive(60)
@@ -293,7 +271,7 @@ class DF(Agent):
                 path = msg.get_metadata("path")
                 domain = msg.get_metadata("domain")
                 if meta_tags := msg.get_metadata("tags"):
-                    tags = json_loads(meta_tags)
+                    tags = json.loads(meta_tags)
                 nodes = path.split("/")
                 self.logger.debug("nodes: " + str(nodes))
                 level = "level"
@@ -301,73 +279,80 @@ class DF(Agent):
                 if (
                     msg.get_metadata("leave")
                     and msg.sender
-                    in self.agent.grouphierarchy_data["node_members"][nodes[-1]]
+                    in self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]]
                 ):
                     self.logger.debug(str(msg.sender) + " leaving " + path)
-                    self.agent.grouphierarchy_data["node_members"][nodes[-1]].remove(
-                        msg.sender
-                    )
+                    self.agent.ecosystemhierarchy_data["node_members"][
+                        nodes[-1]
+                    ].remove(msg.sender)
                     nodes = nodes[::-1]
                     # remove empty nodes and links
                     for i, node in enumerate(nodes):
                         if len(
-                            self.agent.grouphierarchy_data["node_members"][node]
+                            self.agent.ecosystemhierarchy_data["node_members"][node]
                         ) == 0 and not any(
                             node == source
-                            for source, _ in self.agent.grouphierarchy_data["links"]
+                            for source, _ in self.agent.ecosystemhierarchy_data["links"]
                         ):
-                            self.agent.grouphierarchy_data["node_members"].pop(
+                            self.agent.ecosystemhierarchy_data["node_members"].pop(
                                 node
                             )  # this line can be removed, there is no need in removing the node from the dict
-                            self.agent.grouphierarchy_data["nodes"].remove(
+                            self.agent.ecosystemhierarchy_data["nodes"].remove(
                                 (node, level + str(len(nodes) - 1 - i), domain)
                             )
                             if i + 1 < len(nodes):
-                                self.agent.grouphierarchy_data["links"].remove(
+                                self.agent.ecosystemhierarchy_data["links"].remove(
                                     (nodes[i + 1], node)
                                 )
                     existing_categories = set()
 
                     # remove categories if empty
-                    for _, level, _ in self.agent.grouphierarchy_data["nodes"]:
+                    for _, level, _ in self.agent.ecosystemhierarchy_data["nodes"]:
                         existing_categories.add(level)
-                    difference = self.agent.grouphierarchy_data[
+                    difference = self.agent.ecosystemhierarchy_data[
                         "categories"
                     ].difference(existing_categories)
                     if any(difference):
-                        self.agent.grouphierarchy_data["categories"] -= difference
+                        self.agent.ecosystemhierarchy_data["categories"] -= difference
 
                 else:
                     self.logger.debug(str(msg.sender) + " entering " + path)
                     last = None
                     for i, node in enumerate(nodes):
-                        self.agent.grouphierarchy_data["nodes"].add(
+                        self.agent.ecosystemhierarchy_data["nodes"].add(
                             (node, level + str(i), domain)
                         )
-                        if node not in self.agent.grouphierarchy_data["node_members"]:
-                            self.agent.grouphierarchy_data["node_members"][node] = []
-                        self.agent.grouphierarchy_data["categories"].add(level + str(i))
+                        if (
+                            node
+                            not in self.agent.ecosystemhierarchy_data["node_members"]
+                        ):
+                            self.agent.ecosystemhierarchy_data["node_members"][
+                                node
+                            ] = []
+                        self.agent.ecosystemhierarchy_data["categories"].add(
+                            level + str(i)
+                        )
                         if last != None:
-                            self.agent.grouphierarchy_data["links"].add(
+                            self.agent.ecosystemhierarchy_data["links"].add(
                                 (
                                     last,
                                     node,
                                 )
                             )
                         last = node
-                    self.agent.grouphierarchy_data["node_members"][last].append(
+                    self.agent.ecosystemhierarchy_data["node_members"][last].append(
                         msg.sender
                     )
                     for tag in tags:
-                        if tag not in self.agent.grouphierarchy_data["tags"]:
-                            self.agent.grouphierarchy_data["tags"][tag] = set()
-                        self.agent.grouphierarchy_data["tags"][tag].add(last)
+                        if tag not in self.agent.ecosystemhierarchy_data["tags"]:
+                            self.agent.ecosystemhierarchy_data["tags"][tag] = set()
+                        self.agent.ecosystemhierarchy_data["tags"][tag].add(last)
 
-    class _SearchGroup(CyclicBehaviour):
+    class _SearchCommunity(CyclicBehaviour):
         """Handles all the requests to search for groups."""
 
         async def on_start(self) -> None:
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "searchgroup")
@@ -376,21 +361,21 @@ class DF(Agent):
         async def run(self) -> None:
             msg = await self.receive(60)
             if msg and (meta_tags := msg.get_metadata("tags")):
-                tags = json_loads(meta_tags)
-                groups: set = self.agent.grouphierarchy_data["tags"][tags[0]]
+                tags = json.loads(meta_tags)
+                communities: set = self.agent.ecosystemhierarchy_data["tags"][tags[0]]
                 for tag in tags[1:]:
-                    groups = groups.intersection(
-                        self.agent.grouphierarchy_data["tags"][tag]
+                    communities = communities.intersection(
+                        self.agent.ecosystemhierarchy_data["tags"][tag]
                     )
                 res = msg.make_reply()
-                res.set_metadata("groups", json_dumps(list(groups)))
+                res.set_metadata("communities", json.dumps(list(communities)))
                 await self.send(res)
 
     class _CreateGraph(CyclicBehaviour):
         """Handles the requests to create graphs"""
 
         async def on_start(self):
-            self.logger = _logging.getLogger(self.__class__.__name__)
+            self.logger = self.agent.logger.getChild(self.__class__.__name__)
             self.logger.debug("starting behaviour")
             template = Template()
             template.set_metadata("resource", "graph")
@@ -400,47 +385,17 @@ class DF(Agent):
         async def run(self) -> None:
             msg = await self.receive(60)
             if msg:
-                self.logger.debug(msg.body)
-                graph_name = msg.get_metadata("graph_name")
-                graph_options = msg.get_metadata("graph_options")
-                properties = json_loads(msg.get_metadata("properties"))
-                self.agent.dataanalysis_data[graph_name] = {
-                    "graph_options": graph_options,
-                    "data": {},
-                }
-                for property in properties:
-                    self.agent.dataanalysis_data[graph_name]["data"][property] = []
-
-    class _UpdateGraph(CyclicBehaviour):
-        """Handles the requests to update the data of a given graph."""
-
-        async def on_start(self) -> None:
-            self.logger = _logging.getLogger(self.__class__.__name__)
-            self.logger.debug("starting behaviour")
-            template = Template()
-            template.set_metadata("resource", "graph")
-            template.set_metadata("action", "update")
-            self.set_template(template)
-
-        async def run(self) -> None:
-            msg = await self.receive(60)
-            if msg:
-                self.logger.debug(msg.body)
-                graph_name = msg.get_metadata("graph_name")
-                data = json_loads(msg.get_metadata("data"))
-                for property in data:
-                    self.agent.dataanalysis_data[graph_name]["data"][property].append(
-                        data[property]
-                    )
-                    self.logger.debug(
-                        'updating property "' + property + '" : ' + str(data[property])
-                    )
+                self.logger.debug(msg)
+                id = msg.get_metadata("id")
+                graph = json.loads(msg.get_metadata("graph"))
+                self.agent.dataanalysis_data[id] = graph
 
     def __init__(self, domain, verify_security, port):
         super().__init__(
             JID.fromstr("df@" + domain + "/admin"), verify_security=verify_security
         )
         self.port = port
+        self.logger = _logger.getChild(self.__class__.__name__)
 
     @classmethod
     def name(cls, domain: str) -> str:
@@ -455,14 +410,19 @@ class DF(Agent):
         return "df@" + domain + "/admin"
 
     async def setup(self):
-        self.grouphierarchy_data = dict()
+        self.ecosystemhierarchy_data = {
+            "nodes": set(),
+            "links": set(),
+            "categories": set(),
+            "node_members": {},
+            "tags": {},
+        }
         self.dataanalysis_data = dict()
         self.group_tags = dict()
 
-        self.add_behaviour(self._GroupHierarchy())
-        self.add_behaviour(self._SearchGroup())
+        self.add_behaviour(self._EcosystemHierarchy())
+        self.add_behaviour(self._SearchCommunity())
         self.add_behaviour(self._CreateGraph())
-        self.add_behaviour(self._UpdateGraph())
 
         # Create routes.
         self.web.add_get("/groups", self.get_groups, template=None)
@@ -487,14 +447,14 @@ class DF(Agent):
 
         # Start web API
         self.web.start(port=self.port)
-        _logger.info("REST API running on port " + self.port)
+        self.logger.info("REST API running on port " + self.port)
 
     async def get_groups(self, request):
         return {
-            "nodes": list(self.grouphierarchy_data["nodes"]),
-            "links": list(self.grouphierarchy_data["links"]),
-            "categories": list(self.grouphierarchy_data["categories"]),
-            "node_members": self.grouphierarchy_data["node_members"],
+            "nodes": list(self.ecosystemhierarchy_data["nodes"]),
+            "links": list(self.ecosystemhierarchy_data["links"]),
+            "categories": list(self.ecosystemhierarchy_data["categories"]),
+            "node_members": self.ecosystemhierarchy_data["node_members"],
         }
 
     async def refresh_groups(self, request):

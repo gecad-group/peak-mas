@@ -1,25 +1,50 @@
-# Standard library imports
+import asyncio
 import importlib
 import logging
 import os
 import sys
 import time
+from multiprocessing import Process
 from pathlib import Path
-from typing import Type
+from typing import List, Type
 
-# Third party imports
 from aioxmpp import JID
 from spade import quit_spade
 
 logger = logging.getLogger(__name__)
 
 
+async def _wait_for_processes(processes):
+    def join_process(process):
+        process.join()
+        if process.exitcode != 0:
+            logger.error(f"{process.name}'s process ended unexpectedly.")
+
+    await asyncio.gather(
+        *[asyncio.to_thread(join_process, process) for process in processes]
+    )
+
+
+def bootloader(agents: list):
+    logger.info("Loading agents")
+    procs: List[Process] = []
+    for i, agent in enumerate(agents):
+        proc = Process(
+            target=boot_agent,
+            kwargs=agent,
+            daemon=False,
+            name=agents[i]["jid"].localpart,
+        )
+        proc.start()
+        procs.append(proc)
+    logger.info("Agents loaded")
+    asyncio.run(_wait_for_processes(procs))
+
+
 def boot_agent(
     file: Path,
     jid: JID,
-    name: str,
-    number: int,
-    properties: Path,
+    cid: int,
     log_level: int,
     verify_security: bool,
 ):
@@ -29,68 +54,46 @@ def boot_agent(
         file: File path where the agent's class is.
         jid: JID of the agent.
         name: The name of the agent.
-        number: If the agent its a clone is the number of present in
-            the name of the agent, else its None.
-        properties: Properties to be injected in the agent.
-        log_level: Logging level to be used in the agents logging file.
+        cid: Clone ID, zero if its the original.
         verify_security: If true it validates the SSL certificates.
     """
-    log_file_name: str = jid.localpart + ("_" + jid.resource if jid.resource else "")
+    log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
     logs_folder = file.parent.absolute().joinpath("logs")
     log_file = logs_folder.joinpath(f"{log_file_name}.log")
 
     os.makedirs(logs_folder, exist_ok=True)
-    logging.basicConfig(
-        filename=log_file,
-        filemode="w",
-        level=log_level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    sys.stdout = open(log_file, "a", buffering=1)
+    sys.stderr = sys.stdout
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
+    logger.parent.handlers = []
+    logger.parent.addHandler(handler)
+    logger.parent.setLevel(log_level)
+    handler.setLevel(log_level)
 
-    _boot_agent(file, jid, name, number, properties, verify_security)
-
-
-def _boot_agent(
-    file: Path,
-    jid: JID,
-    name: str,
-    number: int,
-    properties: Path,
-    verify_security: bool,
-):
-    """Boots the agent."""
-    # Gets the agent and properties classes. Creates the agent with the
-    # properties and the attributes already provided. Runs the agent and
-    # creates a loop that waits until the agent dies.
-    logger.debug("creating agent")
+    logger.info("Creating agent from file")
     agent_class = _get_class(file)
-    file_abs_path = file.parent.absolute()
-    if properties:
-        os.chdir(properties.parent)
-        properties = _get_class(properties)(jid.localpart, name, number)
-        properties = properties.extract()
-    else:
-        properties = None
+    os.chdir(file.parent.absolute())
+    agent_instance = agent_class(jid, cid, verify_security)
 
-    os.chdir(file_abs_path)
-    agent_instance = agent_class(jid, properties, verify_security)
-    logger.info("starting agent")
     try:
+        logger.info("Agent starting")
         agent_instance.start().result()
-    except Exception as err:
-        logger.exception(f"could not start the agent: {err}")
-    while agent_instance.is_alive():
-        try:
+        logger.info("Agent initialized")
+        while agent_instance.is_alive():
             time.sleep(1)
-        except Exception as e:
-            logger.error("AGENT CRACHED")
-            logger.exception(e)
-            agent_instance.stop()
-        except KeyboardInterrupt:
-            logger.info("Keyboard Interrupt")
-            agent_instance.stop()
-    quit_spade()
-    logger.info("agent stoped")
+    except Exception as error:
+        logger.exception(f"Stoping agent (reason: {error.__class__.__name__})")
+        agent_instance.stop().result()
+        raise SystemExit(1)
+    except KeyboardInterrupt:
+        logger.info(f"Stoping agent (reason: KeyboardInterrupt)")
+        agent_instance.stop().result()
+    finally:
+        quit_spade()
+        logger.info("Agent stoped")
 
 
 def _get_class(file: Path) -> Type:
@@ -106,8 +109,13 @@ def _get_class(file: Path) -> Type:
     Returns:
         A class object with the same name as the file.
     """
-    module_path, module_file = os.path.split(file.absolute())
-    module_name = module_file.split(".")[0]
-    sys.path.append(module_path)
-    module = importlib.import_module(module_name)
-    return getattr(module, module_name)
+    try:
+        module_path, module_file = os.path.split(file.absolute())
+        module_name = module_file.split(".")[0]
+        sys.path.append(module_path)
+        module = importlib.import_module(module_name)
+        return getattr(module, module_name)
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"the file does not exist or the file name wasn't used as the agent's class name ({file})"
+        )

@@ -1,9 +1,7 @@
 # How-to Guides
+This section will going to guide you through PEAK's fundamental ideas and functionalities. Every example given here is available in the [repository](https://github.com/gecad-group/peak-mas).
 
-In this section you will going through PEAK's functionalities. Every example given here is available in PEAK's repository.
-
-## Run and configure a MAS
-
+## PEAK Basic principles
 You have two options to run PEAK agents. You can run the same way as in SPADE by using a python script or using PEAK's command line interface (CLI). 
 
 > **Note:**
@@ -16,18 +14,16 @@ You have two options to run PEAK agents. You can run the same way as in SPADE by
 > positional arguments:
 >  {df,run,start}
 >    df            Execute Directory Facilitator agent.
->    run           Execute PEAK's agents.
+>    run           Execute PEAK agents.
 >    start         Executes multiple agents using a YAML configuration
 >                  file.
 >
 >optional arguments:
 >  -h, --help      show this help message and exit
->  -version        show program's version number and exit
->  -v              Verbose. Turns on the debug info.
+>  --version        show programs version number and exit
 > ```
 
-### Run a single agent
-
+### How to create and Agent ([Example 1](https://github.com/gecad-group/peak-mas/tree/main/examples/1_simple_agent))
 Let's run a simple agent.
 
 ```python
@@ -61,7 +57,7 @@ The JID is the ID used in the XMPP protocol and is divided by three parts: the l
 
 After you run the agent you will see a new folder appear in the same directory of the `agent.py`. That folder is the `logs` folder and will contain the log files created for each agent you run. You can change the logging level for each agent using the command line argument `-l`. This files come in handy when running complex systems with lots of behaviors. You can track everything the agent does and when it does with the logging functionality.
 
-### Run multiple agents
+### Communication between Agents ([Example 2](https://github.com/gecad-group/peak-mas/tree/main/examples/2_multiagent_system))
 
 To run multiple agents at the same time you can use a configuration file in YAML format.
 ```python
@@ -70,13 +66,13 @@ from peak import Agent, OneShotBehaviour, Message
   
 class sender(Agent):
     class SendHelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
+        async def run(self):
             msg = Message(to="harry@localhost")
             msg.body = "Hello World"
             await self.send(msg)
             await self.agent.stop()
 
-    async def setup(self) -> None:
+    async def setup(self):
         self.add_behaviour(self.SendHelloWorld())
 ```
 
@@ -86,39 +82,45 @@ from peak import Agent, OneShotBehaviour
   
 class receiver(Agent):
     class ReceiveHelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
+        async def run(self):
             while msg := await self.receive(10):
                 print(f"{msg.sender} sent me a message: '{msg.body}'")
             await self.agent.stop()
 
-    async def setup(self) -> None:
+    async def setup(self):
         self.add_behaviour(self.ReceiveHelloWorld())
 ```
 
 ```yaml
-# multiagent.yaml
+# mas.yaml
 defaults:
     domain: localhost
-    log_level: debug
 agents:
     john:
         file: sender.py
     harry: 
         file: receiver.py
-        log_level: info
 ```
 
-Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `multiagent.yaml`. After that, run the following command:
+Let's create two agents one that sends the a message, the `sender.py`, and one that receives the message, the `receiver.py`. In the same directory create the YAML file above with the name `mas.yaml`. After that, run the following command:
 
 ```bash
-$ peak start multiagent.yaml
+$ peak start mas.yaml
 ```
 
+<<<<<<< HEAD
+So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a `Hello World` to `harry` and `harry` printed it out.
+
+The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their individual parameters. Type `peak start -h` on the terminal to see the list of available parameters. 
+
+In this case we are defining, in the `defaults`, the default domain as `localhost` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In both agents we are defining their source file. The `agents` parameters will override the `defaults` parameters if they are the same.
+=======
 So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a message `Hello World` to `harry` and `harry` printed it out. The log file of `jonh` was in logging level `DEBUG`, and `harry`'s file was in level `INFO`.
 
 The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. The parameters available in `defaults` and in the agents of the variable `agents` can be seen using the `-h` argument in the `peak run` command. 
 
 In this case we are defining, in the `defaults`, the default domain as `localhost` and the default logging level as `debug` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In `john` we are defining the agents source file. In `harry` we are defining the source file and the logging level, overriding the default value.
+>>>>>>> main
 
 There is the list of options that you can define in the configuration file, inside each agent and in the `defaults` variable:
 - `file` - source file of the agent
@@ -126,142 +128,189 @@ There is the list of options that you can define in the configuration file, insi
 - `resource` - resource to be used in the JID
 - `log_level` - logging level of the log file
 - `clones` - number of clones to be executed
+<<<<<<< HEAD
+=======
 - `properties` - source file of the agent's properties (more on that later)
+>>>>>>> main
 - `verify_security` - if present verifies the SSL certificates
 
 ### Thread vs. Process
 _In development_
+This section will talk about how to run agents as different threads of the same process or as multiple processes and the benefits and use cases for each approach.
 
-## Create a group of agents
+## PEAK Communities
 
+<<<<<<< HEAD
+In PEAK, communities can be seen as groups of agents that share similar goals. Communities are a very useful and efficient way to make communication between three or more agents. What makes this usefull is that for each message sent to the community every member will receive the message. 
+
+<img src="peak_communities.png" height="300">
+
+For this examples you will need to execute a pre-defined PEAK agent called Directory Facilitator, for short DF. He is responsable to maintain the PEAK communities structures. More details about the DF [here]().
+
+### Creating a community ([Example 3](https://github.com/gecad-group/peak-mas/tree/main/examples/3_simple_community))
+
+To create a community is very simple. There is a pre defined behavior that enables the agent join communities. For only this functionality you don't need DF, but it is recommended.
+=======
 The groups are a very useful way to make the communication between more than two agents. To create a group is very simple. There is a pre defined behavior that enables the agent to create and join groups. 
+>>>>>>> main
 
 ```python
 #agent.py
-from peak import Agent, JoinGroup, OneShotBehaviour, Message
 from asyncio import sleep
+
+from peak import Agent, JoinCommunity, LeaveCommunity, Message, OneShotBehaviour
+
 
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
+<<<<<<< HEAD
+        async def on_start(self):
+            await self.wait_for(JoinCommunity("group1", f"conference.{self.agent.jid.domain}"))
+=======
         async def on_start(self) -> None:
             await self.wait_for(JoinGroup("group1", f"conference.{self.agent.jid.domain}"))
+>>>>>>> main
 
-        async def run(self) -> None:
+        async def run(self):
             msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
             msg.body = "Hello World"
-            await self.send_to_group(msg)
+            await self.send_to_community(msg)
             await sleep(5)
             msg.body = "Goodbye World"
-            await self.send_to_group(msg)
-            await self.agent.stop()
-
-    async def setup(self) -> None:
-        self.add_behaviour(self.HelloWorld())
-```
-As you can see in the example above, the agent has a behavior `HelloWorld`. This behavior will first use the `JoinGroup` behavior to join a group called 'group1@conference.localhost' (assuming the domain is ``localhost``). If the group does not exists it will create it. It waits until the agent joins the group. After that it will run the `run` function. The ``run`` function will send a `Hello World` message to the group, waits for 5 seconds and then sends a `Goodbye World` and exits. If you want to leave the group without terminating the agent you can import the ``LeaveGroup`` behavior from ``peak`` package and use it the same way as the `JoinGroup`.
-
-> **Note:**
-> For the this functionality to work the server must have Multi-User Chat functionality activated. You need to create a component in the server and give it a prefix, in this case is 'conference'. 
-
-> **Tip:**
-> You can see the messages being sent if you use the XMPP client and enter in the same room as the agent. Is a good way to debug the multi-agent.
-
-### Group tagging
-
-Group tagging, as the name suggests, is for tagging the groups. This allows the agents to identify the groups and then search for them using the tags to filter the groups. Let's see.
-
-```python
-#group_searcher.py
-from peak import Agent, JoinGroup, SearchGroup
-import logging
-logger = logging.getLogger(self.__class__.__name__)
-
-class group_searcher(Agent):
-    async def setup(self) -> None:
-        self.add_behaviour(
-            JoinGroup("group1", "conference.localhost", ["test", "awesome", "cool"])
-        )
-        self.add_behaviour(
-            JoinGroup("group2", "conference.localhost", ["test", "awesome"])
-        )
-        self.add_behaviour(
-            JoinGroup("group3", "conference.localhost", ["test"],)
-        )
-        self.add_behaviour(JoinGroup("group4", "conference.localhost"))
+            await self.send_to_community(msg)
+            self.kill()
         
-        def print_groups(tags, groups):
-            logger.info(str(tags), str(groups))
-            
-        self.add_behaviour(SearchGroup(["test"], print_groups))
-        self.add_behaviour(SearchGroup(["awesome"], print_groups))
-        self.add_behaviour(SearchGroup(["awesome", "cool"], print_groups))
-```
-In the example above we create an agent called `group_searcher`. This agent will create 4 different groups: `group1@conference.localhost` with the tags `test`, `awesome` and `cool`; `group2@conference.localhost` with the tags `test` and `awesome`; `group3@conference.localhost` with the tag `test`; and finally the fourth group `group4@conference.localhost`. After that will search for groups using the `SearchGroup` behavior.
-
-Firstly, the `JoinGroup` is used to create the groups and tag them. The groups can have more than one tag. To search the groups it's used the `SearchGroup` behavior. You can search for more than one tag, but be careful because it used conjugation to search for them. In other words it will get you the list of groups that have all the tags the you mentioned.
-
-### Group Hierarchy
-
-The group hierarchy allows the user to create subgroups in different depths. This does not only allow you to organize your multiagent system (e.g., society of agent) but also to communicate more efficiently through the hierarchical branches. You can send a single message to every agent that is in a specific branch, or every agent bellow some specific node.
-
-For this functionality you need to activate the Directory Facilitator (DF) agent. DF coordinates and monitors the hierarchical structure. To activate it you just need to run the following command:
-
-```bash
-$ peak df
-```
-
-To change the server domain use the `-d` argument.
-Let's see an example of the group hierarchy.
-```python
-#agent.py
-from asyncio import sleep
-from peak import Agent, JoinGroup, LeaveGroup, Message, OneShotBehaviour
-
-class agent(Agent):
-    class HelloWorld(OneShotBehaviour):
-        async def run(self):
-            self.agent.add_behaviour(
-                JoinGroup("mas/retina/teste", f"conference.{self.agent.jid.domain}")
-            )
-            msg = Message(
-                to=f"retina@conference.{self.agent.jid.domain}"
-            )
-            msg.body = "Hello World"
-            await self.send_to_group(msg)
+        async def on_end(self):
+            await self.wait_for(LeaveCommunity("group1", f"conference.{self.agent.jid.domain}"))
+            await self.agent.stop()
 
     async def setup(self):
         self.add_behaviour(self.HelloWorld())
 ```
-In the JoinGroup behavior you can specify a path of groups. What these does is create an hierarchy of groups, being the first group the root and the last group an intermediate node or a leaf. In this path we call the last node the target group, because you only enter in that group specifically. Another interesting thing about this functionality is that for each node behind the target node you enter in a specially group which the names ends in \_down. The ideia behind this is to send messages to the whole branch, so every agent that enters a node bellow enters in this group. So if we want to send a message to the whole multi agent system we only have to send a message to, in the case of this example, ``mas_down``. In the example above the agent entered in 
+Then run the following command:
+```bash
+$ peak run agent.py -j dummy@localhost
+```
+As you can see in the example above, the agent has a behavior `HelloWorld`. This behavior will first use the `JoinCommunity` behavior to join a community called `group1@conference.localhost`. If the community does not exists it will create it automatically. It waits until the agent joins the community. After that it will send a `Hello World` message to the community, waits for 5 seconds and then sends a `Goodbye World` and leaves the community with the `LeaveCommunity` behaviour.
+
+> **Note:**
+> For the this functionality to work the server must have Multi-User Chat functionality activated. You need to create a component in the server and give it a prefix, in this case is 'conference'. See [this](xmpp_config.md) server configuration file example. 
+
+> **Tip:**
+> You can see the messages being sent if you use the XMPP client and enter in the same room as the agent. Is a good way to debug the multi-agent.
+
+> **Chalenge 1:**
+> Try to implement the [Communication between agents](#communication-between-agents-example-2) example using communities. ([Solution]())
+
+### Community tagging ([Example 4](https://github.com/gecad-group/peak-mas/tree/main/examples/4_community_tags))
+
+Community tagging, as the name suggests, is for tagging communities. This allows the agents to identify the communities and then search for them using the tags to filter them. Let's see.
+
+```python
+#agent.py
+from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour, SearchCommunity
+
+
+class agent(Agent):
+    class TagCommunities(OneShotBehaviour):
+        async def run(self) -> None:
+            self.agent.add_behaviour(
+                JoinCommunity(
+                    "group1",
+                    f"conference.{self.agent.jid.domain}",
+                    ["test", "awesome"],
+                )
+            )
+            self.agent.add_behaviour(
+                JoinCommunity(
+                    "group2", f"conference.{self.agent.jid.domain}", ["test"]
+                )
+            )
+            def print_communities(tags, communities):
+                print(f"Communities ({tags}): {communities}")
+
+            await self.wait_for(SearchCommunity(["awesome"], print_communities))
+            await self.wait_for(SearchCommunity(["test"], print_communities))
+            
+            await self.wait_for(
+                LeaveCommunity("group1", f"conference.{self.agent.jid.domain}")
+            )
+            await self.wait_for(
+                LeaveCommunity("group2", f"conference.{self.agent.jid.domain}")
+            )
+            await self.agent.stop()
+
+    async def setup(self) -> None:
+        self.add_behaviour(self.TagCommunities())
+```
+
+For this to work you need to execute the DF agent (more details [here]()). In the example above we create an agent that will create and tag two communities: `group1@conference.localhost` with tags `test` and `awesome`, and `group2@conference.localhost` with tag `test`. After that will search for communities using the `SearchCommunity` behavior. Note that for the `SearchCommunity` and for `LeaveCommunity` behaviours we do not add the behaviour directly to the agent, because the agent would stop before the behaviours would be accomplished. We use `wait_for` method, available in every behaviour, to wait for the completeness of the behaviour before continuing, making the behaviour synchrounous.
+
+In simple words the tagging system will search for the communities that have the tags that you want. For instance, if you search for three tags it will give you every community that have all those three tags.
+
+> **Chalenge 2:**
+> Try to implement this example with two agents: one that creates and tags the communities and other that searches for them. ([Solution](https://github.com/gecad-group/peak-mas/tree/main/examples/chalenge_2))
+
+### Community hierarchy ([Example 5](https://github.com/gecad-group/peak-mas/tree/main/examples/5_community_hierarchy))
+
+The community hierarchy allows the user to create different levels of communities associated with one another. This does not only allow your agents to organize themselves but also to communicate more efficiently through the hierarchical branches. For instance, consider the hirarchy bellow.
+
+_Image_
+
+For every community of the hierarchy two nodes are created: the actual node of the community, which only the members can interact, and a node which has all the members of that community all the way down to the roots. This special node that we call the `echo node` will work has an echoer for the whole branch beneaf. In other words, if you want to send a message from X to Y you just need to send a message to the X_down node.
+
+Let's see an example of the community hierarchy.
+
+```python
+#agent.py
+# Standard library imports
+from asyncio import sleep
+
+# Reader imports
+from peak import Agent, JoinCommunity, LeaveCommunity, Message, OneShotBehaviour
+
+
+class agent(Agent):
+    class HelloWorld(OneShotBehaviour):
+        async def run(self):
+            groups_tree = [
+                "peak/A0/B0",
+                "peak/A0",
+                "peak/A1",
+                "peak/A2/B2/C0",
+                "peak/A1/B3/C1",
+            ]
+            for groups_branch in groups_tree:
+                await self.wait_for(
+                    JoinCommunity(groups_branch, "conference." + self.agent.jid.domain)
+                )
+                await sleep(1)
+            for groups_branch in groups_tree:
+                await self.wait_for(
+                    LeaveCommunity(groups_branch, "conference." + self.agent.jid.domain)
+                )
+                await sleep(1)
+            await self.agent.stop()
+
+    async def setup(self):
+        self.add_behaviour(self.HelloWorld())
+```
+For this to work you need to execute the DF agent (more details [here]()). In the `JoinCommunity` behavior you can specify a path representing the hierarchy of the communities. For instance in path `peak/A0/B0`, `peak` is the root community, beneath is community `A0`, at level 1, and `B0` at level 2. The last node of the path does not need necessarilly to be a leaf. We call the last node the target onde, because you only enter in that community specifically. 
 
 > **Note:**
 > In the Dashboard, the groups that end in \_down do not appear in the node graph.
 
-## Create a simulation environment
+## Simulation Environment
 ### Clock
 ### Dynamic clock
 _In development_
 
-## Integrate data providers
-
-Normally a multi-agent system uses external data so it can process that data. In PEAK you can integrate different data providers like files from the file system of your machine, databases in the web and from real devices using some real-time communication protocol.
-
-### File System
-- Excel
-- CSV
-
-### Smart devices
-- ModBus/TCP
-- HTTPs
-- Extending
-
 ## PEAK Dashboard
-
 The PEAK Dashboard is a separate project from PEAK. The Dashboard allows you to see in an interactive way the PEAK ecosystem using a web app. The Dashboard needs a Directory Facilitator (DF) agent in the XMPP server so it can monitor the system. The Dashboard communicates with the DF through its REST API. 
 To know how to activate the DF run the following command:
 ```bash
 $ peak df -h
 ```
-### Ecosystem Insight
+### Ecosystem Overview
 ### Data Analysis
 ### Full Plot Customization

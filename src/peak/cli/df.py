@@ -1,12 +1,10 @@
-# Standard library imports
 import logging
 from time import sleep
 
-# Reader imports
 from peak import DF
 
 
-def exec(log_level: int, domain: str, verify_security: bool, port: int, *args, **kargs):
+def exec(domain: str, verify_security: bool, port: int, *args, **kargs):
     """Executes the Directory Facilitator agent.
 
     Args:
@@ -15,12 +13,11 @@ def exec(log_level: int, domain: str, verify_security: bool, port: int, *args, *
         verify_security: Verifies the SSL certificates.
         port: Port to be used by the DF REST API.
     """
-    logging.basicConfig(
-        level=log_level,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[logging.StreamHandler()],
+    logger = logging.getLogger(__name__).parent
+    logger.handlers[1].setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
     )
-    logger = logging.getLogger(__name__)
+
     logger.info("Starting DF")
     df = DF(domain, verify_security, port)
     df.start().result()
