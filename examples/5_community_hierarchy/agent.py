@@ -2,7 +2,7 @@
 from asyncio import sleep
 
 # Reader imports
-from peak import Agent, JoinCommunity, LeaveCommunity, Message, OneShotBehaviour
+from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour
 
 
 class agent(Agent):

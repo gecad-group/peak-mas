@@ -285,9 +285,9 @@ class DF(Agent):
                     in self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]]
                 ):
                     self.logger.debug(str(msg.sender) + " leaving " + path)
-                    self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]].remove(
-                        msg.sender
-                    )
+                    self.agent.ecosystemhierarchy_data["node_members"][
+                        nodes[-1]
+                    ].remove(msg.sender)
                     nodes = nodes[::-1]
                     # remove empty nodes and links
                     for i, node in enumerate(nodes):
@@ -325,9 +325,16 @@ class DF(Agent):
                         self.agent.ecosystemhierarchy_data["nodes"].add(
                             (node, level + str(i), domain)
                         )
-                        if node not in self.agent.ecosystemhierarchy_data["node_members"]:
-                            self.agent.ecosystemhierarchy_data["node_members"][node] = []
-                        self.agent.ecosystemhierarchy_data["categories"].add(level + str(i))
+                        if (
+                            node
+                            not in self.agent.ecosystemhierarchy_data["node_members"]
+                        ):
+                            self.agent.ecosystemhierarchy_data["node_members"][
+                                node
+                            ] = []
+                        self.agent.ecosystemhierarchy_data["categories"].add(
+                            level + str(i)
+                        )
                         if last != None:
                             self.agent.ecosystemhierarchy_data["links"].add(
                                 (
@@ -407,12 +414,12 @@ class DF(Agent):
 
     async def setup(self):
         self.ecosystemhierarchy_data = {
-                "nodes": set(),
-                "links": set(),
-                "categories": set(),
-                "node_members": {},
-                "tags": {},
-            }
+            "nodes": set(),
+            "links": set(),
+            "categories": set(),
+            "node_members": {},
+            "tags": {},
+        }
         self.dataanalysis_data = dict()
         self.group_tags = dict()
 

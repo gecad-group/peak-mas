@@ -1,5 +1,7 @@
-from peak import Agent, OneShotBehaviour, Message
-  
+# Reader imports
+from peak import Agent, Message, OneShotBehaviour
+
+
 class sender(Agent):
     class SendHelloWorld(OneShotBehaviour):
         async def run(self):

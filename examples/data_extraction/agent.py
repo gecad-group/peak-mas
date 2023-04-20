@@ -1,10 +1,9 @@
 # Standard library imports
+import json
 from random import random
 
 # Reader imports
 from peak import Agent, CreateGraph, PeriodicBehaviour
-
-import json
 
 
 class agent(Agent):
@@ -38,7 +37,7 @@ class agent(Agent):
                 0.373578536,
             ]
             with open("graph_options.json") as file:
-                self.graph = json.load(file) 
+                self.graph = json.load(file)
 
         async def run(self) -> None:
             if self.count >= 10:

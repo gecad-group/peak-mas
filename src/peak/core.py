@@ -1,8 +1,7 @@
 # Standard library imports
-import asyncio as _asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
-from typing import Any, List, Dict
+from typing import Dict, List
 
 # Third party imports
 import aioxmpp as _aioxmpp
@@ -76,13 +75,17 @@ class _Behaviour:
             Exception if the community JID is invalid.
         """
         if jid not in self.agent.communities:
-            room, _ = self.agent._muc_client.join(_aioxmpp.JID.fromstr(jid), self.agent.name)
+            room, _ = self.agent._muc_client.join(
+                _aioxmpp.JID.fromstr(jid), self.agent.name
+            )
             try:
                 await first_signal(room.on_enter, room.on_failure)
                 self.agent.communities[jid] = room
                 self._logger.debug(f"Joined community: {jid}")
             except Exception as error:
-                self._logger.exception(f"Couldn't join community (reason: {error}):  {jid}")
+                self._logger.exception(
+                    f"Couldn't join community (reason: {error}):  {jid}"
+                )
         else:
             self._logger.debug(f"Already joined this community: {jid}")
 

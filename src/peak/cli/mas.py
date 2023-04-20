@@ -1,5 +1,5 @@
 # Standard library imports
-from argparse import ArgumentError, ArgumentTypeError
+from argparse import ArgumentTypeError
 from logging import getLevelName, getLogger
 from os import chdir
 from pathlib import Path

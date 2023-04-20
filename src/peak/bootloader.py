@@ -1,13 +1,13 @@
 # Standard library imports
+import asyncio
 import importlib
 import logging
 import os
 import sys
 import time
 from multiprocessing import Process
-import asyncio
 from pathlib import Path
-from typing import Type, List
+from typing import List, Type
 
 # Third party imports
 from aioxmpp import JID
@@ -15,18 +15,28 @@ from spade import quit_spade
 
 logger = logging.getLogger(__name__)
 
+
 async def _wait_for_processes(processes):
     def join_process(process):
         process.join()
         if process.exitcode != 0:
             logger.error(f"{process.name}'s process ended unexpectedly.")
-    await asyncio.gather(*[asyncio.to_thread(join_process, process) for process in processes])
+
+    await asyncio.gather(
+        *[asyncio.to_thread(join_process, process) for process in processes]
+    )
+
 
 def bootloader(agents: list):
     logger.info("Loading agents")
     procs: List[Process] = []
     for i, agent in enumerate(agents):
-        proc = Process(target=boot_agent, kwargs=agent, daemon=False, name=agents[i]['jid'].localpart)
+        proc = Process(
+            target=boot_agent,
+            kwargs=agent,
+            daemon=False,
+            name=agents[i]["jid"].localpart,
+        )
         proc.start()
         procs.append(proc)
     logger.info("Agents loaded")
@@ -108,5 +118,6 @@ def _get_class(file: Path) -> Type:
         module = importlib.import_module(module_name)
         return getattr(module, module_name)
     except ModuleNotFoundError:
-        raise ModuleNotFoundError(f"the file does not exist or the file name wasn't used as the agent's class name ({file})")
-
+        raise ModuleNotFoundError(
+            f"the file does not exist or the file name wasn't used as the agent's class name ({file})"
+        )

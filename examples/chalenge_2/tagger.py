@@ -16,9 +16,7 @@ class tagger(Agent):
                 )
             )
             self.agent.add_behaviour(
-                JoinCommunity(
-                    "group2", f"conference.{self.agent.jid.domain}", ["test"]
-                )
+                JoinCommunity("group2", f"conference.{self.agent.jid.domain}", ["test"])
             )
             await sleep(10)
             await self.wait_for(
