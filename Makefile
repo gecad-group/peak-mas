@@ -17,7 +17,7 @@ minor: format
 major: format
 	python -m bumpver update --major
 
-publish: format
+publish:
 	python -m build
 	twine check dist/*
 	twine upload -u gecad-group dist/*
