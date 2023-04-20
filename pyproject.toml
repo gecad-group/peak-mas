@@ -25,7 +25,6 @@ dependencies = [
     "aiohttp_cors",
     "aioxmpp",
     "pandas",
-    "pyModbusTCP",
     "spade >= 3.2.2",
     "PyYAML"
 ]
@@ -33,7 +32,7 @@ requires-python = "==3.9.6"
 
 [project.optional-dependencies]
 build = ["build", "twine"]
-dev = ["black", "isort", "mypy", "bumpver", "pipreqs"]
+dev = ["black", "isort", "mypy", "bumpver", "pipreqs", "autoflake"]
 
 [project.urls]
 Homepage = "https://www.gecad.isep.ipp.pt/peak"
@@ -58,4 +57,4 @@ push            = false
 profile                   = "black"
 import_heading_stdlib     = "Standard library imports"
 import_heading_thirdparty = "Third party imports"
-import_heading_firstparty = "Reader imports"
+import_heading_firstparty = "First party imports"
