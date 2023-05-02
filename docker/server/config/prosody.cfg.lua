@@ -80,8 +80,7 @@ authentication = "internal_hashed"
 
 log = {
     -- Log files (change 'info' to 'debug' for debug logs):
-    info = "/var/log/prosody/prosody.log";
-    error = "/var/log/prosody/prosody.err";
+    { levels = { "info" }; to = "console"; };
     -- Syslog:
     { levels = { "error" }; to = "syslog"; };
 }

@@ -446,7 +446,7 @@ class DF(Agent):
             cors.add(route)
 
         # Start web API
-        self.web.start(port=self.port)
+        self.web.start("0.0.0.0", port=self.port)
         self.logger.info("REST API running on port " + self.port)
 
     async def get_groups(self, request):

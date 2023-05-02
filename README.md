@@ -1,6 +1,12 @@
 # PEAK: Python-based framework for heterogenous agent communities
 
-![DOI](https://img.shields.io/static/v1?link=https://doi.org/10.1007/978-3-031-18050-7_7&link=https://doi.org/10.1007/978-3-031-18050-7_7&label=DOI&message=978-3-031-18050-7&color=blue) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/peak-mas) ![PyPI](https://img.shields.io/pypi/v/peak-mas) ![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas) ![powered by](https://img.shields.io/static/v1?label=powered%20by&message=GECAD&color=177985&labelColor=de5d4a&?link=http://gecad.isep.ipp.pt&link=http://gecad.isep.ipp.pt/) ![code style](https://img.shields.io/badge/code%20style-black-black) ![imports isort](https://img.shields.io/static/v1?label=imports&message=isort&color=blue&labelColor=orange)
+[![DOI](https://img.shields.io/badge/DOI-10.1007%2F978--3--031--18050--7__7-blue)](https://link.springer.com/chapter/10.1007/978-3-031-18050-7_7)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/peak-mas)](https://pypi.org/project/peak-mas/)
+[![PyPI](https://img.shields.io/pypi/v/peak-mas)](https://pypi.org/project/peak-mas/)
+[![GitHub](https://img.shields.io/github/license/gecad-group/peak-mas)](https://github.com/gecad-group/peak-mas)
+[![powered by](https://img.shields.io/static/v1?label=powered%20by&message=GECAD&color=177985&labelColor=de5d4a)](https://www.gecad.isep.ipp.pt/GECAD/Pages/Presentation/Home.aspx)
+[![code style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
+[![imports isort](https://img.shields.io/static/v1?label=imports&message=isort&color=blue&labelColor=orange)](https://pycqa.github.io/isort/)
 
 PEAK is a multi-agent system framework which helps the users develop, monitor, analyze and maintain ecosystem of heterogeneous agent communities. This ecosystem is  where various multi-agent systems can coexist, interact and share resources between them. 
 This framework is based on <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a>.
