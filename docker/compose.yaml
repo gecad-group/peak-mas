@@ -1,16 +1,7 @@
 # Services: MySQL database, Prosody server and the PEAK's Directory Facilitator agent
 services:
-  database:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: prosody
-    volumes:
-      - './mysql:/var/lib/mysql'
-
   server:
+    container_name: peak-prosody
     image: unclev/prosody-docker-extended
     restart: unless-stopped
     ports:
@@ -21,8 +12,11 @@ services:
       - './server/log:/var/log/prosody'
       - './server/modules:/usr/lib/prosody/modules-community'
 
-  # df:
-    # build: .
-    # ports: 
-    #   - 10000:10000
-    # restart: unless-stopped
+  df:
+    container_name: peak-df
+    depends_on:
+      - server
+    build: .
+    ports: 
+      - 10000:10000
+    restart: unless-stopped
