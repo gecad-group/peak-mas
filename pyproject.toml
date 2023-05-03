@@ -42,11 +42,7 @@ Github = "https://github.com/gecad-group/peak-mas"
 peak = "peak.__main__:main"
 
 [tool.bumpver]
-<<<<<<< HEAD
 current_version = "1.0.6"
-=======
-current_version = "1.0.5"
->>>>>>> c44c1575441dd99761c340421d4a575601813158
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "chore: bump version {old_version} -> {new_version}"
 commit          = true
