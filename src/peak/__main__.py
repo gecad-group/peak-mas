@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -8,6 +9,7 @@ from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak.cli import df, mas
 
+sys.path.append(os.getcwd())
 _logger = logging.getLogger(peak_name)
 
 
@@ -19,7 +21,7 @@ def main(args=None):
     )
     _logger.addHandler(handler)
     try:
-        _main()
+        _main(args)
     except Exception as e:
         _logger.critical(e, exc_info=1)
     except KeyboardInterrupt:
