@@ -20,4 +20,4 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __author__ = "Bruno Ribeiro"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.0.6"
+__version__ = "1.0.7"
