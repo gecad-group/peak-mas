@@ -75,7 +75,6 @@ def boot_agent(
 
     logger.info("Creating agent from file")
     agent_class = _get_class(file)
-    os.chdir(file.parent.absolute())
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:

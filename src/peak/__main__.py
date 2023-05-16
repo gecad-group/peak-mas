@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -9,7 +8,6 @@ from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak.cli import df, mas
 
-sys.path.append(os.getcwd())
 _logger = logging.getLogger(peak_name)
 
 

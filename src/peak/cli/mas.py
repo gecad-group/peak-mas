@@ -1,6 +1,6 @@
+import sys
 from argparse import ArgumentTypeError
 from logging import getLevelName, getLogger
-from os import chdir
 from pathlib import Path
 
 import yaml
@@ -71,7 +71,7 @@ def multi_agent_exec(file: Path, log_level, *args, **kargs):
 
     with file.open() as f:
         yml = yaml.full_load(f)
-    chdir(file.parent)
+    sys.path.append(str(file.parent.absolute()))
 
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
