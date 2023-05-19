@@ -1,10 +1,10 @@
+import asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Dict, List, Optional
 
 import aioxmpp as _aioxmpp
 import spade as _spade
-import asyncio
 from aioxmpp import JID
 from aioxmpp.callbacks import first_signal
 
@@ -64,7 +64,9 @@ class _BehaviourMixin:
     agent: Agent
     _logger = _module_logger.getChild("_Behaviour")
 
-    async def receive(self, timeout: Optional[float] = None) -> Optional[_spade.message.Message]:
+    async def receive(
+        self, timeout: Optional[float] = None
+    ) -> Optional[_spade.message.Message]:
         """
         Receives a message for this behaviour and waits `timeout` seconds.
         If timeout is `None`, it will wait until it receives a message.
@@ -212,7 +214,9 @@ class PeriodicBehaviour(
     """This behaviour is executed periodically with an interval."""
 
 
-class CyclicBehaviour(_BehaviourMixin, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta):
+class CyclicBehaviour(
+    _BehaviourMixin, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta
+):
     """This behaviour is executed cyclically until it is stopped."""
 
 

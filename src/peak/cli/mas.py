@@ -1,6 +1,6 @@
 import sys
 from argparse import ArgumentTypeError
-from logging import getLevelName, getLogger
+from logging import getLogger
 from pathlib import Path
 
 import yaml
