@@ -45,7 +45,7 @@ def boot_agent(
     file: Path,
     jid: JID,
     cid: int,
-    log_level: int,
+    log_level: str,
     verify_security: bool,
 ):
     """Configures logging system and boots the agent.
@@ -68,6 +68,7 @@ def boot_agent(
     handler.setFormatter(
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
+    log_level = log_level.upper()
     logger.parent.handlers = []
     logger.parent.addHandler(handler)
     logger.parent.setLevel(log_level)

@@ -14,8 +14,8 @@ _logger = getLogger(__name__)
 def agent_exec(
     file: Path,
     jid: JID,
-    clones: int = 1,
-    log_level: int = getLevelName("INFO"),
+    clones: int,
+    log_level: str,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -51,7 +51,7 @@ def agent_exec(
     bootloader(agents)
 
 
-def multi_agent_exec(file: Path, log_level, *args, **kargs):
+def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
