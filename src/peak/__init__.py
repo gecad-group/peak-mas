@@ -15,6 +15,7 @@ from spade.template import Template
 from peak.core import *
 from peak.agents import *
 from peak.behaviours import *
+from peak.logging import *
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
