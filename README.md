@@ -52,16 +52,15 @@ One thing that was added in PEAK was the way the user executes the agents. PEAK 
 In this example we will show you how to execute a single agent. Save the following code in a file called `agent.py`.
 
 ```python 
-from peak import Agent
-from peak.behaviours import OneShotBehaviour
+from peak import Agent, OneShotBehaviour
 
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
-        async def run(self) -> None:
+        async def run(self):
             print("Hello World")
             await self.agent.stop()
 
-    async def setup(self) -> None:
+    async def setup(self):
         self.add_behaviour(self.HelloWorld())
 ```
 It is necessary that the name of the file is the same as the name of the agent's class so PEAK can do the proper parsing. This agent only has a behavior that prints to the terminal the "Hello World" message. To execute the agent just type the following command:
@@ -89,11 +88,11 @@ To alert an issue or a bug please post in the <a href="https://github.com/gecad-
 ## Roadmap
 
 This are some functionalities that are being developed and will be released in a near future:
-- [ ] Create a Docker for XMPP server and PEAK.
+- [ ] Integrate FIPA ACL messages in PEAK.
 - [ ] Add dynamic speed option to PEAK's internal clock.
-- [ ] Add multi-threading option to the execution configurations.
-- [ ] Implement Yellow Page Service in DF agent.
-- [ ] Implement Data Analysis section in the Dashboard.
+- [ ] Add multi-threading option to the Command Line Interface.
+- [ ] Implement Yellow Page Service in the Directory Facilitator agent.
+- [ ] Implement physical mobility in the agents.
 
 ## Scientific Publications
 
