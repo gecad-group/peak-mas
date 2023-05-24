@@ -15,9 +15,10 @@ from spade.template import Template
 from peak.core import *
 from peak.agents import *
 from peak.behaviours import *
+from peak.logging import *
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __author__ = "Bruno Ribeiro"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.0.7"
+__version__ = "1.0.9"

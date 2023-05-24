@@ -1,6 +1,7 @@
+import asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import aioxmpp as _aioxmpp
 import spade as _spade
@@ -52,7 +53,7 @@ class Agent(_spade.agent.Agent):
         )
 
 
-class _Behaviour:
+class _BehaviourMixin:
     """Adds XMPP functinalities to SPADE's base behaviours.
 
     Acts as Mixin in the SPADE's behaviours.
@@ -62,6 +63,28 @@ class _Behaviour:
 
     agent: Agent
     _logger = _module_logger.getChild("_Behaviour")
+
+    async def receive(
+        self, timeout: Optional[float] = None
+    ) -> Optional[_spade.message.Message]:
+        """
+        Receives a message for this behaviour and waits `timeout` seconds.
+        If timeout is `None`, it will wait until it receives a message.
+
+        Note: Redefinition of the receive method of SPADE Behaviours
+
+        Args:
+            timeout (float, optional): number of seconds until return
+
+        Returns:
+            Message | None
+        """
+        coro = self.queue.get()
+        try:
+            msg = await asyncio.wait_for(coro, timeout=timeout)
+        except asyncio.TimeoutError:
+            msg = None
+        return msg
 
     async def join_community(self, jid: str):
         """Joins a community.
@@ -180,21 +203,23 @@ class _Behaviour:
 
 
 class OneShotBehaviour(
-    _spade.behaviour.OneShotBehaviour, _Behaviour, metaclass=_ABCMeta
+    _BehaviourMixin, _spade.behaviour.OneShotBehaviour, metaclass=_ABCMeta
 ):
     """This behaviour is only executed once."""
 
 
 class PeriodicBehaviour(
-    _spade.behaviour.PeriodicBehaviour, _Behaviour, metaclass=_ABCMeta
+    _BehaviourMixin, _spade.behaviour.PeriodicBehaviour, metaclass=_ABCMeta
 ):
     """This behaviour is executed periodically with an interval."""
 
 
-class CyclicBehaviour(_spade.behaviour.CyclicBehaviour, _Behaviour, metaclass=_ABCMeta):
+class CyclicBehaviour(
+    _BehaviourMixin, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta
+):
     """This behaviour is executed cyclically until it is stopped."""
 
 
-class FSMBehaviour(_spade.behaviour.FSMBehaviour, _Behaviour, metaclass=_ABCMeta):
+class FSMBehaviour(_BehaviourMixin, _spade.behaviour.FSMBehaviour, metaclass=_ABCMeta):
     """A behaviour composed of states (oneshotbehaviours) that may transition from one
     state to another."""

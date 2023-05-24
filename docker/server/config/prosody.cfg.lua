@@ -17,7 +17,7 @@ use_libevent = true
 
 -- Paths for community models:
 plugin_paths = {
-    "/usr/local/lib/prosody/modules";
+    "/usr/lib/prosody/modules-community";
 }
 
 -- This is the list of modules Prosody will load on startup.
@@ -27,16 +27,16 @@ modules_enabled = {
         "roster"; -- Allow users to have a roster. Recommended ;)
         "saslauth"; -- Authentication for clients and servers. Recommended if you want to log in.
         "tls"; -- Add support for secure TLS on c2s/s2s connections
-        "dialback"; -- s2s dialback support
+        --"dialback"; -- s2s dialback support
         "disco"; -- Service discovery
 
     -- Not essential, but recommended
-        "carbons"; -- Keep multiple clients in sync
-        "pep"; -- Enables users to publish their avatar, mood, activity, playing music and more
+        --"carbons"; -- Keep multiple clients in sync
+        --"pep"; -- Enables users to publish their avatar, mood, activity, playing music and more
         "private"; -- Private XML storage (for room bookmarks, etc.)
         "blocklist"; -- Allow users to block communications with other users
-        "vcard4"; -- User profiles (stored in PEP)
-        "vcard_legacy"; -- Conversion between legacy vCard and PEP Avatar, vcard
+        --"vcard4"; -- User profiles (stored in PEP)
+        --"vcard_legacy"; -- Conversion between legacy vCard and PEP Avatar, vcard
 
     -- Nice to have
         "version"; -- Replies to server version requests
@@ -79,10 +79,12 @@ authentication = "internal_hashed"
 -- Logs errors to syslog also
 
 log = {
-    -- Log files (change 'info' to 'debug' for debug logs):
-    { levels = { "info" }; to = "console"; };
-    -- Syslog:
-    { levels = { "error" }; to = "syslog"; };
+    {levels = { min =  "info" }, to="console"};
+    -- Log all error messages to prosody.err
+    { levels = { min = "error" }, to = "file", filename = "/var/log/prosody/prosody.err" };
+    -- Log everything of level "info" and higher (that is, all except "debug" messages)
+    -- to prosody.log
+    { levels = { min = "debug" }, to = "file", filename = "/var/log/prosody/prosody.log" };
 }
 
 certificates = "certs"

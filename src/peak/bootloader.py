@@ -7,6 +7,7 @@ import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
+from peak.logging import FORMATTER
 
 from aioxmpp import JID
 from spade import quit_spade
@@ -45,7 +46,7 @@ def boot_agent(
     file: Path,
     jid: JID,
     cid: int,
-    log_level: int,
+    log_level: str,
     verify_security: bool,
 ):
     """Configures logging system and boots the agent.
@@ -65,9 +66,8 @@ def boot_agent(
     sys.stdout = open(log_file, "a", buffering=1)
     sys.stderr = sys.stdout
     handler = logging.FileHandler(log_file)
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
+    handler.setFormatter(FORMATTER)
+    log_level = log_level.upper()
     logger.parent.handlers = []
     logger.parent.addHandler(handler)
     logger.parent.setLevel(log_level)
@@ -75,7 +75,6 @@ def boot_agent(
 
     logger.info("Creating agent from file")
     agent_class = _get_class(file)
-    os.chdir(file.parent.absolute())
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:

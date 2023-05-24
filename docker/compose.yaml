@@ -17,6 +17,8 @@ services:
     depends_on:
       - server
     build: .
+    links:
+      - server:localhost
     ports: 
       - 10000:10000
     restart: unless-stopped
