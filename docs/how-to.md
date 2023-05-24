@@ -108,19 +108,11 @@ Let's create two agents one that sends the a message, the `sender.py`, and one t
 $ peak start mas.yaml
 ```
 
-<<<<<<< HEAD
 So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a `Hello World` to `harry` and `harry` printed it out.
 
 The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their individual parameters. Type `peak start -h` on the terminal to see the list of available parameters. 
 
 In this case we are defining, in the `defaults`, the default domain as `localhost` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In both agents we are defining their source file. The `agents` parameters will override the `defaults` parameters if they are the same.
-=======
-So, what happened? Two agents were created. One called `john@localhost` and the other called `harry@localhost`. `john` sent a message `Hello World` to `harry` and `harry` printed it out. The log file of `jonh` was in logging level `DEBUG`, and `harry`'s file was in level `INFO`.
-
-The way it works is simple. You can only define two root variables, the `defaults` and the `agents`. The `defaults` is used to define parameters to be applied to all agents. The `agents` variable defines the list of agents to be executed and their respective parameters. The parameters available in `defaults` and in the agents of the variable `agents` can be seen using the `-h` argument in the `peak run` command. 
-
-In this case we are defining, in the `defaults`, the default domain as `localhost` and the default logging level as `debug` for all agents. In `agents` variable, we are defining two different types of agents, the `john` and the `harry`. In `john` we are defining the agents source file. In `harry` we are defining the source file and the logging level, overriding the default value.
->>>>>>> main
 
 There is the list of options that you can define in the configuration file, inside each agent and in the `defaults` variable:
 - `file` - source file of the agent
@@ -128,10 +120,6 @@ There is the list of options that you can define in the configuration file, insi
 - `resource` - resource to be used in the JID
 - `log_level` - logging level of the log file
 - `clones` - number of clones to be executed
-<<<<<<< HEAD
-=======
-- `properties` - source file of the agent's properties (more on that later)
->>>>>>> main
 - `verify_security` - if present verifies the SSL certificates
 
 ### Thread vs. Process
@@ -140,7 +128,6 @@ This section will talk about how to run agents as different threads of the same 
 
 ## PEAK Communities
 
-<<<<<<< HEAD
 In PEAK, communities can be seen as groups of agents that share similar goals. Communities are a very useful and efficient way to make communication between three or more agents. What makes this usefull is that for each message sent to the community every member will receive the message. 
 
 <img src="peak_communities.png" height="300">
@@ -150,9 +137,6 @@ For this examples you will need to execute a pre-defined PEAK agent called Direc
 ### Creating a community ([Example 3](https://github.com/gecad-group/peak-mas/tree/main/examples/3_simple_community))
 
 To create a community is very simple. There is a pre defined behavior that enables the agent join communities. For only this functionality you don't need DF, but it is recommended.
-=======
-The groups are a very useful way to make the communication between more than two agents. To create a group is very simple. There is a pre defined behavior that enables the agent to create and join groups. 
->>>>>>> main
 
 ```python
 #agent.py
@@ -163,13 +147,8 @@ from peak import Agent, JoinCommunity, LeaveCommunity, Message, OneShotBehaviour
 
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
-<<<<<<< HEAD
         async def on_start(self):
             await self.wait_for(JoinCommunity("group1", f"conference.{self.agent.jid.domain}"))
-=======
-        async def on_start(self) -> None:
-            await self.wait_for(JoinGroup("group1", f"conference.{self.agent.jid.domain}"))
->>>>>>> main
 
         async def run(self):
             msg = Message(to=f"group1@conference.{self.agent.jid.domain}")
