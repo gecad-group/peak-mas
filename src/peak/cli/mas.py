@@ -93,9 +93,13 @@ def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
             "log_level": agent_args["log_level"],
             "verify_security": agent_args["ssl"],
         }
-        for cid in range(1, agent_args["clones"]):
+        if agent_args["clones"] == 1:
             agent = kwargs.copy()
             agents.append(agent)
-            kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
-            kwargs["cid"] = cid
+        else:
+            for cid in range(agent_args["clones"]):
+                agent = kwargs.copy()
+                agent["jid"] = agent["jid"].replace(localpart=f"{agent_name}{cid}")
+                agent["cid"] = cid
+                agents.append(agent)
     bootloader(agents)
