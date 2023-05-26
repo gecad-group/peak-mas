@@ -8,16 +8,16 @@ format:
 	isort --profile black .
 	black .
 
-patch: format
+patch: 
 	python -m bumpver update --patch
 
-minor: format
+minor: 
 	python -m bumpver update --minor
 
-major: format
+major: 
 	python -m bumpver update --major
 
-publish: format
+publish: 
 	python -m build
 	twine check dist/*
 	twine upload -u gecad-group dist/*
