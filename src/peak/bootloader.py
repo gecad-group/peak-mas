@@ -7,10 +7,11 @@ import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
-from peak.logging import FORMATTER
 
 from aioxmpp import JID
 from spade import quit_spade
+
+from peak.logging import FORMATTER
 
 logger = logging.getLogger(__name__)
 

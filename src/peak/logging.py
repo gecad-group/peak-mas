@@ -9,6 +9,7 @@ _handler = logging.StreamHandler(sys.stdout)
 _handler.setFormatter(FORMATTER)
 _logger.addHandler(_handler)
 
+
 def getLogger(name: Optional[str], level: int = logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -16,6 +17,7 @@ def getLogger(name: Optional[str], level: int = logging.INFO):
     handler.setFormatter(FORMATTER)
     logger.addHandler(handler)
     return logger
+
 
 def log(message: str, level: int = logging.INFO):
     _logger.log(level, message)
