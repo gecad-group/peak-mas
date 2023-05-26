@@ -93,7 +93,7 @@ def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
             "log_level": agent_args["log_level"],
             "verify_security": agent_args["ssl"],
         }
-        for cid in range(agent_args["clones"]):
+        for cid in range(1, agent_args["clones"]):
             agent = kwargs.copy()
             agents.append(agent)
             kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
