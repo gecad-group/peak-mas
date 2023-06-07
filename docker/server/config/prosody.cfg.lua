@@ -52,6 +52,7 @@ modules_enabled = {
 
     -- Other specific functionality
         "posix"; -- POSIX functionality, sends server to background, enables syslog, etc.
+        "http_file_share";
 }
 
 -- These modules are auto-loaded, but should you want
@@ -88,6 +89,7 @@ log = {
 }
 
 certificates = "certs"
+https_certificate = "certs/localhost.crt"
 
 
 ----------- Virtual hosts -----------
@@ -111,3 +113,5 @@ Component "conference.localhost" "muc"
 Component "pubsub.localhost" "pubsub"
     autocreate_on_subscribe = true
     autocreate_on_publish = true
+
+Component "upload.localhost" "http_file_share"
