@@ -25,7 +25,7 @@ dependencies = [
     "aiohttp_cors",
     "aioxmpp",
     "pandas",
-    "spade >= 3.2.2",
+    "spade < 3.3.0",
     "PyYAML"
 ]
 requires-python = "==3.9.6"
