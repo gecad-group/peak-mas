@@ -1,16 +1,12 @@
 from peak import Agent, OneShotBehaviour
-from aioxmpp.httpupload import request_slot
-from aioxmpp.httpupload.xso import Slot
-from aioxmpp import JID
-from mimetypes import guess_type
-import os
-import aiohttp
+import requests
 
 class downloader(Agent):
-    class UploadFile(OneShotBehaviour):
+    class DownloadFile(OneShotBehaviour):
         async def run(self):
-            filename = "dataset.txt"
-            filetype = guess_type(filename)
-            filesize = os.stat(filename).st_size
-            slot: Slot = await request_slot(self.agent.client, JID.fromstr("upload@localhost"), filename, filesize, filetype)
-            
+            url = "https://localhost:5281/file_share/2SrmubaGcRGhoXXh/dataset.txt"
+            r = requests.get(url, verify=False)
+            print(r)
+
+    async def setup(self):
+        self.add_behaviour(self.DownloadFile())

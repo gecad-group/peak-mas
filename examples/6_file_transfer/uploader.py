@@ -12,13 +12,12 @@ class uploader(Agent):
             filename = "dataset.txt"
             filetype, enconding = guess_type(filename)
             filesize = os.stat(filename).st_size
-            print(filetype)
-            print(filesize)
-            slot: Slot = await request_slot(self.agent.client, JID.fromstr("upload.localhost"), filename, filesize, filetype)
-            print(slot)
+            slot: Slot = await request_slot(self.agent.client, JID.fromstr("localhost"), filename, filesize+10000, filetype)
+            print(slot.put.url)
+            print(slot.get.url)
             with open(filename) as file:
-                r = requests.put(slot.put.url, headers=slot.put.headers, data=file)
-            print(r.json())
+                r = requests.put(slot.put.url, headers=slot.put.headers, files={filename: file}, verify=False)
+            print(r)
 
     async def setup(self):
         self.add_behaviour(self.UploadFile())
