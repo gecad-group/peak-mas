@@ -1,5 +1,7 @@
-from peak import Agent, OneShotBehaviour
 import requests
+
+from peak import Agent, OneShotBehaviour
+
 
 class downloader(Agent):
     class DownloadFile(OneShotBehaviour):
