@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import List, Type
 
 from aioxmpp import JID
-from spade import quit_spade
 
 from peak.logging import FORMATTER
 
@@ -92,7 +91,6 @@ def boot_agent(
         logger.info(f"Stoping agent (reason: KeyboardInterrupt)")
         agent_instance.stop().result()
     finally:
-        quit_spade()
         logger.info("Agent stoped")
 
 
