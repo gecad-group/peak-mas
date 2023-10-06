@@ -76,6 +76,7 @@ def boot_agent(
 
     logger.info("Creating agent from file")
     agent_class = _get_class(file)
+
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:
@@ -86,10 +87,12 @@ def boot_agent(
             time.sleep(1)
     except Exception as error:
         logger.exception(f"Stoping agent (reason: {error.__class__.__name__})")
+        #TODO leave community before stopping
         agent_instance.stop().result()
         raise SystemExit(1)
     except KeyboardInterrupt:
         logger.info(f"Stoping agent (reason: KeyboardInterrupt)")
+        #TODO leave community before stopping
         agent_instance.stop().result()
     finally:
         quit_spade()

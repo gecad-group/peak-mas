@@ -121,6 +121,15 @@ class _BehaviourMixin:
             await room.leave()
             self._logger.debug(f"Left community: {jid}")
 
+
+    async def leaving_community_when_crash(self, jid:str):
+
+        communities = self.agent.communities
+        for community in communities:
+            leave_community(self,jid)
+
+        self._logger.debug("Left all communities")
+
     async def list_communities(self, node_jid: str):
         """Retrieves the list of the existing community in the server.
 
