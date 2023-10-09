@@ -1,12 +1,13 @@
 import asyncio
 import logging as _logging
 from abc import ABCMeta as _ABCMeta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Coroutine, Union
 
 import aioxmpp as _aioxmpp
 import spade as _spade
 from aioxmpp import JID
 from aioxmpp.callbacks import first_signal
+from asyncio import Future
 
 _module_logger = _logging.getLogger(__name__)
 
@@ -31,6 +32,20 @@ class Agent(_spade.agent.Agent):
         self.communities: Dict[str, _aioxmpp.muc.Room] = dict()
         self.cid = cid
         self._muc_client = None
+
+    async def stop(self):
+        communities = self.communities.copy()
+        for community in communities:
+            await self.leaving_community(community)
+
+        # await super()._async_stop()
+        await super().stop()
+
+    async def leaving_community(self, jid: str):
+        room = self.communities.pop(jid, None)
+        if room:
+            await room.leave()
+            print(f"Left community: {jid}")
 
     async def _hook_plugin_after_connection(self):
         """Executed after SPADE Agent's connection.
@@ -65,7 +80,7 @@ class _BehaviourMixin:
     _logger = _module_logger.getChild("_Behaviour")
 
     async def receive(
-        self, timeout: Optional[float] = None
+            self, timeout: Optional[float] = None
     ) -> Optional[_spade.message.Message]:
         """
         Receives a message for this behaviour and waits `timeout` seconds.
@@ -120,15 +135,6 @@ class _BehaviourMixin:
         if room:
             await room.leave()
             self._logger.debug(f"Left community: {jid}")
-
-
-    async def leaving_community_when_crash(self, jid:str):
-
-        communities = self.agent.communities
-        for community in communities:
-            leave_community(self,jid)
-
-        self._logger.debug("Left all communities")
 
     async def list_communities(self, node_jid: str):
         """Retrieves the list of the existing community in the server.
@@ -192,9 +198,9 @@ class _BehaviourMixin:
             await self.leave_community(group)
 
     async def wait_for(
-        self,
-        behaviour: _spade.behaviour.CyclicBehaviour,
-        template: _spade.template.Template = None,
+            self,
+            behaviour: _spade.behaviour.CyclicBehaviour,
+            template: _spade.template.Template = None,
     ):
         """Awaits synchronously for a behaviour.
 
