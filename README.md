@@ -96,7 +96,10 @@ This are some functionalities that are being developed and will be released in a
 
 ## Scientific Publications
 
-- Ribeiro, B., Pereira, H., Gomes, L., Vale, Z. (2023). Python-Based Ecosystem for Agent Communities Simulation. In: , _et al._ 17th International Conference on Soft Computing Models in Industrial and Environmental Applications (SOCO 2022). SOCO 2022. Lecture Notes in Networks and Systems, vol 531. Springer, Cham. https://doi.org/10.1007/978-3-031-18050-7_7
+- Ribeiro, B., Pereira, H., Gomes, L., Vale, Z. (2023). Python-Based Ecosystem for Agent Communities Simulation. In: , et al. 17th International Conference on Soft Computing Models in Industrial and Environmental Applications (SOCO 2022). SOCO 2022. Lecture Notes in Networks and Systems, vol 531. Springer, Cham. https://doi.org/10.1007/978-3-031-18050-7_7
+- Pereira H, Ribeiro B, Gomes L, Vale Z. Smart Grid Ecosystem Modeling Using a Novel Framework for Heterogenous Agent Communities. Sustainability. 2022; 14(23):15983. https://doi.org/10.3390/su142315983
+- Silva C, Faria P, Ribeiro B, Gomes L, Vale Z. Demand Response Contextual Remuneration of Prosumers with Distributed Storage. Sensors. 2022; 22(22):8877. https://doi.org/10.3390/s22228877
+
 
 ## Contributing to PEAK
 
