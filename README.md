@@ -46,6 +46,14 @@ As already said PEAK is based on SPADE. This means that every functionality of S
 
 To run any PEAK's agent you will need a XMPP server. You can either configure one on your machine, remotely or use a public server. The only issue with the public servers is that they don't usually have all the configurations required to run some PEAK's functionalities. To configure the server you can read the "Configure XMPP server" section in the <a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">documentation</a>.
 
+#### Using docker
+
+To make it easier to configure the XMPP server we have created a docker image with the server already configured. To use it just type the following command in the /docker folder:
+
+```bash
+$ docker-compose up -d
+```
+
 ### Hello World Agent Example
 
 One thing that was added in PEAK was the way the user executes the agents. PEAK added a CLI, inspired in JADE, to help the user execute end configure each agent in a easy and intuitive manner.
