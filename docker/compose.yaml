@@ -1,9 +1,8 @@
 # Services: MySQL database, Prosody server and the PEAK's Directory Facilitator agent
 services:
   server:
-    container_name: peak-prosody
+    container_name: prosody.peak
     image: unclev/prosody-docker-extended
-    restart: unless-stopped
     ports:
       - 5222:5222
       - 5281:5281
@@ -12,14 +11,14 @@ services:
       - './server/data:/var/lib/prosody'
       - './server/log:/var/log/prosody'
       - './server/modules:/usr/lib/prosody/modules-community'
-
   df:
-    container_name: peak-df
+    container_name: df.peak
     depends_on:
       - server
     build: .
-    links:
-      - server:localhost
     ports: 
       - 10000:10000
-    restart: unless-stopped
+networks:
+  peak:
+    external: true
+

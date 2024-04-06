@@ -10,7 +10,7 @@
 
 -- This is the list of admins.
 -- DF agent must be admin for some features to work.
-admins = {"df@localhost"}
+admins = {"df@prosody.peak"}
 
 -- Enable use of libevent for better performance under high load
 use_libevent = true
@@ -89,10 +89,12 @@ log = {
 }
 
 certificates = "certs"
-https_certificate = "certs/localhost.crt"
+https_certificate = "certs/prosody.peak.crt"
 
 
 ----------- Virtual hosts -----------
+
+VirtualHost "prosody.peak"
 
 VirtualHost "localhost"
 
@@ -103,6 +105,18 @@ VirtualHost "localhost"
 -- For more information on components, see https://prosody.im/doc/components
 
 ---Set up a MUC (multi-user chat) room server on conference.example.com:
+
+Component "conference.prosody.peak" "muc"
+    muc_room_default_public = true
+    muc_room_default_public_jids = true
+    muc_room_locking = false
+    max_history_messages = 0
+
+Component "pubsub.prosody.peak" "pubsub"
+    autocreate_on_subscribe = true
+    autocreate_on_publish = true
+
+Component "upload.prosody.peak" "http_file_share"
 
 Component "conference.localhost" "muc"
     muc_room_default_public = true
