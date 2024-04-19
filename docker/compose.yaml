@@ -2,7 +2,8 @@
 services:
   server:
     container_name: peak-prosody
-    image: unclev/prosody-docker-extended
+    build: 
+      context: ./dockerfiles/server/
     restart: unless-stopped
     ports:
       - 5222:5222
@@ -16,7 +17,8 @@ services:
     container_name: peak-df
     depends_on:
       - server
-    build: .
+    build:
+      context: ./dockerfiles/df/
     ports: 
       - 10000:10000
     restart: unless-stopped
