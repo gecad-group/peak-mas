@@ -1,0 +1,6 @@
+defaults:
+    domain: localhost
+    log_level: DEBUG
+agents:
+    Bot: 
+        file: Bot.py
