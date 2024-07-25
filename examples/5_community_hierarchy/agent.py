@@ -30,22 +30,18 @@ class agent(Agent):
                 await sleep(1)
             await self.agent.stop()
 
-        async def send_to_lower_hierarchy(self, current_group: str, message: str):
-            lower_group = current_group + "/B0"
-            conference_name = lower_group.split("/")[-1] 
-            logger.info(f"Sending message to lower hierarchy: {conference_name}")
-            muc_jid = f"{conference_name}_down@conference.{self.agent.jid.domain}"
+        async def send_to_lower_hierarchy(self, group: str, message: str):
+            logger.info(f"Sending message to lower hierarchy: {group}")
+            muc_jid = f"{group}_down@conference.{self.agent.jid.domain}"
             msg = Message(to=muc_jid)
             msg.body = message
-            msg.sender = "a0@conference.localhost"
             await self.send_to_community(msg)
-            logger.info(f"Sent message to lower hierarchy: {lower_group}")
+            logger.info(f"Sent message to lower hierarchy: {group}")
 
         async def receive_message_from_higher_hierarchy(self):
             logger.info("Waiting for message from higher hierarchy")
-            msg = await self.receive(timeout=10)
             while True:
-                    msg = await self.receive(timeout=10)
+                    msg = await self.receive()
                     if msg:
                         if msg.body is not None:
                             logger.info(f"Received text message from higher hierarchy:")
@@ -54,7 +50,9 @@ class agent(Agent):
                             logger.info(f"  Body: {msg.body}")
                             logger.info(f"  Thread: {msg.thread}")
                             logger.info(f"  Metadata: {msg.metadata}")
+                            break
                         else:
+
                             logger.info(f"Received system message:")
                             logger.info(f"  From: {msg.sender}")
                             logger.info(f"  To: {msg.to}")
