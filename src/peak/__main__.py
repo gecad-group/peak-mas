@@ -1,11 +1,10 @@
 import logging
 import sys
+import io
 from argparse import ArgumentParser
 from pathlib import Path
 
-from peak import JID
-from peak import __name__ as peak_name
-from peak import __version__ as version
+from peak import JID, __name__ as peak_name, __version__ as version
 from peak.cli import df, mas
 
 _logger = logging.getLogger(peak_name)
@@ -61,7 +60,7 @@ def _main(args=None):
     # parser for the "run" command
     run_parser = subparsers.add_parser(
         name="run",
-        help="execute PEAK's agents",
+        help="execute a single-agent system using a Python script",
     )
     run_parser.add_argument(
         "file",
@@ -84,6 +83,13 @@ def _main(args=None):
         help="PEAK logging level (default: INFO)",
     )
     run_parser.add_argument(
+        "-o",
+        "--log_file",
+        type=io.TextIOWrapper,
+        default=sys.stdout,
+        help="file used for the logs (default: standard output)",
+    )
+    run_parser.add_argument(
         "--verify_security", action="store_true", help="verify SLL certificates"
     )
     run_parser.set_defaults(func=mas.agent_exec)
@@ -91,27 +97,23 @@ def _main(args=None):
     # parser for the "start" command
     start_parser = subparsers.add_parser(
         name="start",
-        help="execute a multiagent system using an YAML configuration file",
+        help="execute agents using an YAML configuration file",
     )
     start_parser.add_argument(
         "file",
         type=Path,
         help="YAML configuration file",
     )
-    start_parser.add_argument(
-        "-log_level",
-        type=str.upper,
-        default="INFO",
-        help="PEAK logging level (default: INFO)",
-    )
     start_parser.set_defaults(func=mas.multi_agent_exec)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
-        sys.exit(1)
+        sys.exit(0)
 
     args = parser.parse_args(args)
-    _logger.setLevel(args.log_level)
-    _logger.info("Starting PEAK")
+    _logger.info("starting PEAK")
     args.func(**vars(args))
-    _logger.info("Stoping PEAK")
+    _logger.info("stoping PEAK")
+#a path para os logs deve ser o path currente da sessao do terminal
+#deve ser dada a possibilidade de alterar o caminho da pasta dos logs, principalmente
+#quando e executado pelo ficheiro YAML

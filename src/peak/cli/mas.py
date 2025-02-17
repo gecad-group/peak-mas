@@ -1,21 +1,20 @@
 import sys
+import io
 from argparse import ArgumentTypeError
-from logging import getLogger
 from pathlib import Path
 
 import yaml
 
-from peak import JID
+from peak import JID, logger
 from peak.bootloader import bootloader
-
-_logger = getLogger(__name__)
-
 
 def agent_exec(
     file: Path,
     jid: JID,
     clones: int,
     log_level: str,
+    log_file: io.TextIOWrapper, #stream type
+    #log_file_mode: str,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -38,6 +37,7 @@ def agent_exec(
         "jid": jid,
         "cid": 0,
         "log_level": log_level,
+        "log_file": log_file if clones == 0 else file.parent,
         "verify_security": verify_security,
     }
 
@@ -51,20 +51,22 @@ def agent_exec(
     bootloader(agents)
 
 
-def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
+def multi_agent_exec(file: Path, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
         file: Path to the agent's python file.
     """
 
-    _logger.info("Parsing YAML file")
+    logger.info("parsing YAML configuration file")
     defaults = {
         "file": None,
         "domain": None,
         "resource": None,
         "ssl": False,
-        "log_level": log_level,
+        "log_level": logger.level,
+        "logs_folder": file.parent.joinpath('logs'),
+        "log_file_mode": "a",
         "clones": 1,
     }
     agents = []
@@ -90,7 +92,9 @@ def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
             "file": Path(agent_args["file"]),
             "jid": JID(agent_name, agent_args["domain"], agent_args["resource"]),
             "cid": 0,
-            "log_level": agent_args["log_level"],
+            "log_level": agent_args["log_level"].upper(),
+            "logs_folder": agent_args["logs_folder"],
+            "log_file_mode": agent_args["log_file_mode"],
             "verify_security": agent_args["ssl"],
         }
         for cid in range(agent_args["clones"]):
@@ -98,4 +102,5 @@ def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
             agents.append(agent)
             kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
             kwargs["cid"] = cid
+    logger.info('YAML configuration file parsed')
     bootloader(agents)

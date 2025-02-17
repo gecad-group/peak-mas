@@ -1,5 +1,6 @@
 defaults:
-  domain: localhost
+  domain: mas.gecad.isep.ipp.pt
+  log_level: debug
 agents:
   tagger:
     file: tagger.py

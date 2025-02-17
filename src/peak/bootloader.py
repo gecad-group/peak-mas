@@ -7,27 +7,30 @@ import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
-from peak.logging import FORMATTER
+from peak.logging import logger, FORMATTER
 
 from aioxmpp import JID
 from spade import quit_spade
-
-logger = logging.getLogger(__name__)
 
 
 async def _wait_for_processes(processes):
     def join_process(process):
         process.join()
         if process.exitcode != 0:
-            logger.error(f"{process.name}'s process ended unexpectedly.")
+            logger.error(f"{process.name}'s process ended with exitcode {process.exitcode}.")
 
     await asyncio.gather(
         *[asyncio.to_thread(join_process, process) for process in processes]
     )
 
+def boot_one_agent():
+    pass
+
+def boot_several_agents():
+    pass
 
 def bootloader(agents: list):
-    logger.info("Loading agents")
+    logger.info(f"creating a process for each of the {len(agents)} agents")
     procs: List[Process] = []
     for i, agent in enumerate(agents):
         proc = Process(
@@ -38,7 +41,7 @@ def bootloader(agents: list):
         )
         proc.start()
         procs.append(proc)
-    logger.info("Agents loaded")
+    logger.info(f"finished creating the {len(agents)} processes")
     asyncio.run(_wait_for_processes(procs))
 
 
@@ -48,6 +51,8 @@ def boot_agent(
     cid: int,
     log_level: str,
     verify_security: bool,
+    *args,
+    **kargs,
 ):
     """Configures logging system and boots the agent.
 
@@ -59,40 +64,36 @@ def boot_agent(
         verify_security: If true it validates the SSL certificates.
     """
     log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
-    logs_folder = file.parent.absolute().joinpath("logs")
     log_file = logs_folder.joinpath(f"{log_file_name}.log")
-
     os.makedirs(logs_folder, exist_ok=True)
-    sys.stdout = open(log_file, "a", buffering=1)
-    sys.stderr = sys.stdout
-    handler = logging.FileHandler(log_file)
+    handler = logging.FileHandler(log_file, log_file_mode)
     handler.setFormatter(FORMATTER)
-    log_level = log_level.upper()
-    logger.parent.handlers = []
-    logger.parent.addHandler(handler)
-    logger.parent.setLevel(log_level)
     handler.setLevel(log_level)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(handler)
+    root_logger.warning('teste')
+    logger.addHandler(handler)
 
-    logger.info("Creating agent from file")
+    logger.info(f"instanciating agent {jid.localpart} from file {file}")
     agent_class = _get_class(file)
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:
-        logger.info("Agent starting")
+        logger.info(f"starting agent {jid.localpart}")
         agent_instance.start().result()
-        logger.info("Agent initialized")
+        logger.info(f"agent {jid.localpart} started")
         while agent_instance.is_alive():
             time.sleep(1)
     except Exception as error:
-        logger.exception(f"Stoping agent (reason: {error.__class__.__name__})")
+        logger.exception(f"stoping agent {jid.localpart} (reason: {error.__class__.__name__})")
         agent_instance.stop().result()
         raise SystemExit(1)
     except KeyboardInterrupt:
-        logger.info(f"Stoping agent (reason: KeyboardInterrupt)")
+        logger.info(f"stoping agent {jid.localpart} (reason: KeyboardInterrupt)")
         agent_instance.stop().result()
     finally:
         quit_spade()
-        logger.info("Agent stoped")
+        logger.info(f"agent {jid.localpart} stoped")
 
 
 def _get_class(file: Path) -> Type:
