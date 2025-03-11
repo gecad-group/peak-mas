@@ -7,30 +7,27 @@ import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
-from peak.logging import logger, FORMATTER
+import spade
+from peak import configure_agent_root_logger, configure_single_agent_logging
 
 from aioxmpp import JID
-from spade import quit_spade
+
+_logger = logging.getLogger(__name__)
 
 
-async def _wait_for_processes(processes):
-    def join_process(process):
-        process.join()
-        if process.exitcode != 0:
-            logger.error(f"{process.name}'s process ended with exitcode {process.exitcode}.")
+def bootloader(agents: list[dict]):
+    if len(agents) == 1:
+        boot_single_agent(agents[0])
+    else:
+        boot_several_agents(agents)
 
-    await asyncio.gather(
-        *[asyncio.to_thread(join_process, process) for process in processes]
-    )
+def boot_single_agent(agent: dict):
+    _logger.info(f"booting single agent: {agent['jid']}")
+    configure_single_agent_logging()
+    boot_agent(**agent)
 
-def boot_one_agent():
-    pass
-
-def boot_several_agents():
-    pass
-
-def bootloader(agents: list):
-    logger.info(f"creating a process for each of the {len(agents)} agents")
+def boot_several_agents(agents: list[dict]):
+    _logger.info(f"creating a process for each of the {len(agents)} agents")
     procs: List[Process] = []
     for i, agent in enumerate(agents):
         proc = Process(
@@ -41,16 +38,18 @@ def bootloader(agents: list):
         )
         proc.start()
         procs.append(proc)
-    logger.info(f"finished creating the {len(agents)} processes")
+    _logger.info(f"all {len(agents)} processes created")
     asyncio.run(_wait_for_processes(procs))
-
 
 def boot_agent(
     file: Path,
     jid: JID,
     cid: int,
     log_level: str,
+    logs_folder: Path,
+    log_file_mode: str,
     verify_security: bool,
+    debug_mode: bool,
     *args,
     **kargs,
 ):
@@ -66,36 +65,21 @@ def boot_agent(
     log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
     log_file = logs_folder.joinpath(f"{log_file_name}.log")
     os.makedirs(logs_folder, exist_ok=True)
-    handler = logging.FileHandler(log_file, log_file_mode)
-    handler.setFormatter(FORMATTER)
-    handler.setLevel(log_level)
-    root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
-    root_logger.warning('teste')
-    logger.addHandler(handler)
-
-    logger.info(f"instanciating agent {jid.localpart} from file {file}")
+    agent_logger = configure_agent_root_logger(log_level, log_file, log_file_mode)
+    agent_logger.info(f"instanciating agent {jid.localpart} from file {file}")
     agent_class = _get_class(file)
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:
-        logger.info(f"starting agent {jid.localpart}")
-        agent_instance.start().result()
-        logger.info(f"agent {jid.localpart} started")
-        while agent_instance.is_alive():
-            time.sleep(1)
+        agent_logger.info(f"starting agent {jid.localpart}")
+        spade.run(agent_instance.start())
+        agent_logger.info(f"agent {jid.localpart} terminated")
     except Exception as error:
-        logger.exception(f"stoping agent {jid.localpart} (reason: {error.__class__.__name__})")
-        agent_instance.stop().result()
+        agent_logger.exception(f"agent {jid.localpart} terminated ({error.__class__.__name__})", stack_info=True)
         raise SystemExit(1)
     except KeyboardInterrupt:
-        logger.info(f"stoping agent {jid.localpart} (reason: KeyboardInterrupt)")
-        agent_instance.stop().result()
-    finally:
-        quit_spade()
-        logger.info(f"agent {jid.localpart} stoped")
-
-
+        agent_logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
+        
 def _get_class(file: Path) -> Type:
     """Gets class from a file.
 
@@ -119,3 +103,13 @@ def _get_class(file: Path) -> Type:
         raise ModuleNotFoundError(
             f"the file does not exist or the file name wasn't used as the agent's class name ({file})"
         )
+
+async def _wait_for_processes(processes):
+    def join_process(process):
+        process.join()
+        if process.exitcode != 0:
+            _logger.error(f"{process.name}'s process ended with exitcode {process.exitcode}.")
+
+    await asyncio.gather(
+        *[asyncio.to_thread(join_process, process) for process in processes]
+    )

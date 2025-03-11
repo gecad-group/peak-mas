@@ -2,13 +2,17 @@ import sys
 import io
 from argparse import ArgumentTypeError
 from pathlib import Path
+import logging
 
 import yaml
 
-from peak import JID, logger
+from peak import JID
 from peak.bootloader import bootloader
 
-def agent_exec(
+_logger = logging.getLogger(__name__)
+
+
+def execute_agent(
     file: Path,
     jid: JID,
     clones: int,
@@ -50,30 +54,30 @@ def agent_exec(
         kwargs["cid"] = cid
     bootloader(agents)
 
-
-def multi_agent_exec(file: Path, *args, **kargs):
+def execute_config_file(file: Path, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
         file: Path to the agent's python file.
     """
 
-    logger.info("parsing YAML configuration file")
+    _logger.info("parsing YAML configuration file")
     defaults = {
         "file": None,
-        "domain": None,
-        "resource": None,
+        "domain": 'localhost',
+        "resource": 'main',
         "ssl": False,
-        "log_level": logger.level,
+        "log_level": 'info',
         "logs_folder": file.parent.joinpath('logs'),
         "log_file_mode": "a",
+        "debug_mode": False,
         "clones": 1,
     }
     agents = []
 
     with file.open() as f:
         yml = yaml.full_load(f)
-    sys.path.append(str(file.parent.absolute()))
+    sys.path.append(str(file.parent.absolute())) #imports any python modules in the parent folder of the yaml file
 
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
@@ -96,11 +100,12 @@ def multi_agent_exec(file: Path, *args, **kargs):
             "logs_folder": agent_args["logs_folder"],
             "log_file_mode": agent_args["log_file_mode"],
             "verify_security": agent_args["ssl"],
+            "debug_mode": agent_args["debug_mode"],
         }
         for cid in range(agent_args["clones"]):
             agent = kwargs.copy()
             agents.append(agent)
             kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
             kwargs["cid"] = cid
-    logger.info('YAML configuration file parsed')
+    _logger.info('YAML configuration file parsed')
     bootloader(agents)

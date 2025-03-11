@@ -4,28 +4,25 @@ import io
 from argparse import ArgumentParser
 from pathlib import Path
 
-from peak import JID, __name__ as peak_name, __version__ as version
-from peak.cli import df, mas
+from peak import JID, __name__ as peak_name, __version__ as version, configure_peak_logger
+from peak.cli import df, run
 
-_logger = logging.getLogger(peak_name)
-
+_logger = logging.getLogger(__name__)
 
 def main(args=None):
-    _logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
-    _logger.addHandler(handler)
     try:
+        configure_peak_logger(logging.INFO)
+        _logger.info("initiating PEAK")
         _main(args)
+        _logger.info("PEAK terminated")
     except Exception as e:
         _logger.critical(e, exc_info=1)
     except KeyboardInterrupt:
-        _logger.info("Stoping PEAK: (reason: KeyboardInterrupt)")
+        _logger.info("PEAK terminated (KeyboardInterrupt)")
 
 
 def _main(args=None):
+    _logger.info('parsing console arguments')
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("--version", action="version", version=version)
     subparsers = parser.add_subparsers(required=True)
@@ -92,7 +89,7 @@ def _main(args=None):
     run_parser.add_argument(
         "--verify_security", action="store_true", help="verify SLL certificates"
     )
-    run_parser.set_defaults(func=mas.agent_exec)
+    run_parser.set_defaults(func=run.execute_agent)
 
     # parser for the "start" command
     start_parser = subparsers.add_parser(
@@ -104,16 +101,11 @@ def _main(args=None):
         type=Path,
         help="YAML configuration file",
     )
-    start_parser.set_defaults(func=mas.multi_agent_exec)
+    start_parser.set_defaults(func=run.execute_config_file)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(0)
 
     args = parser.parse_args(args)
-    _logger.info("starting PEAK")
     args.func(**vars(args))
-    _logger.info("stoping PEAK")
-#a path para os logs deve ser o path currente da sessao do terminal
-#deve ser dada a possibilidade de alterar o caminho da pasta dos logs, principalmente
-#quando e executado pelo ficheiro YAML
