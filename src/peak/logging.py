@@ -73,9 +73,9 @@ def getMainLogger(name: str = None) -> logging.Logger:
     return logging.getLogger(f"peak.main.{name}")
 
 def log(msg: str, level: Union[int, str] = logging.INFO):
-    """Logs to the file."""
+    """Logs to the file. Default level info."""
     logging.getLogger("peak").log(level, msg)
 
-def log_term(msg: str, level: Union[int, str] = logging.INFO):
-    """Logs to the terminal."""
+def debug(msg: str, level: Union[int, str] = logging.DEBUG):
+    """Logs to the terminal. Default level debug."""
     logging.getLogger("peak.main").log(level, msg)
