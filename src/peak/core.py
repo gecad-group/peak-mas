@@ -28,7 +28,7 @@ class Agent(_spade.agent.Agent):
             verify_security (bool, optional): If True, verifies the SSL certificates.
                 Defaults to False.
         """
-        super().__init__(str(jid), str(jid.bare()), verify_security)
+        super().__init__(str(jid), str(jid.bare()), verify_security=verify_security)
         self.communities: Dict[str, _aioxmpp.muc.Room] = dict()
         self.cid = cid
         self._muc_client = None
@@ -54,18 +54,18 @@ class Agent(_spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         """
         self.presence.approve_all = True
-        self._muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
-        self._disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
-        self.message_dispatcher.register_callback(
-            _aioxmpp.MessageType.GROUPCHAT,
-            None,
-            self._message_received,
-        )
-        self.message_dispatcher.register_callback(
-            _aioxmpp.MessageType.NORMAL,
-            None,
-            self._message_received,
-        )
+        #self._muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
+        #self._disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
+        #self.message_dispatcher.register_callback(
+        #    _aioxmpp.MessageType.GROUPCHAT,
+        #    None,
+        #    self._message_received,
+        #)
+        #self.message_dispatcher.register_callback(
+        #    _aioxmpp.MessageType.NORMAL,
+        #    None,
+        #    self._message_received,
+        #)
 
 
 class _BehaviourMixin:

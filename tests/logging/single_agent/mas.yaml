@@ -1,8 +1,7 @@
 defaults:
   domain: mas.gecad.isep.ipp.pt
   log_level: debug
+  debug_mode: True
 agents:
-  tagger:
-    file: tagger.py
-  searcher:
-    file: searcher.py
+  agent_test:
+    file: agent.py
