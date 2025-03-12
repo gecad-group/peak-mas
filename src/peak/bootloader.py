@@ -47,7 +47,7 @@ def boot_agent(
     jid: JID,
     cid: int,
     log_level: str,
-    logs_folder: Path,
+    log_folder: Path,
     log_file_mode: str,
     verify_security: bool,
     debug_mode: bool,
@@ -64,25 +64,24 @@ def boot_agent(
         cid: Clone ID, zero if its the original.
         verify_security: If true it validates the SSL certificates.
     """
-    log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
-    log_file = logs_folder.joinpath(f"{log_file_name}.log")
-    os.makedirs(logs_folder, exist_ok=True)
-    if single_agent:
-        configure_single_agent_logging(log_level, log_file, log_file_mode)
-    else:
-        configure_multiple_agent_logging(log_level, log_file, log_file_mode)
-    if debug_mode:
-        configure_debug_mode(log_level, log_file, log_file_mode)
-    _logger.info(f"instanciating agent {jid.localpart} from file {file}")
-    agent_class = _get_class(file)
-    agent_instance = agent_class(jid, cid, verify_security)
-
     try:
+        log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
+        log_file = log_folder.joinpath(f"{log_file_name}.log")
+        os.makedirs(log_folder, exist_ok=True)
+        if single_agent:
+            configure_single_agent_logging(log_level, log_file, log_file_mode)
+        else:
+            configure_multiple_agent_logging(log_level, log_file, log_file_mode)
+        if debug_mode:
+            configure_debug_mode(log_level, log_file, log_file_mode)
+        _logger.info(f"instanciating agent {jid.localpart} from file {file}")
+        agent_class = _get_class(file)
+        agent_instance = agent_class(jid, cid, verify_security)
         _logger.info(f"starting agent {jid.localpart}")
         spade.run(agent_instance.start())
         _logger.info(f"agent {jid.localpart} terminated")
     except Exception as error:
-        _logger.exception(f"agent {jid.localpart} terminated ({error.__class__.__name__})", stack_info=True)
+        _logger.critical(f"agent {jid.localpart} terminated ({error})", stack_info=True)
         raise SystemExit(1)
     except KeyboardInterrupt:
         _logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
