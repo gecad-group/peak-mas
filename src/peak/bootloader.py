@@ -10,7 +10,6 @@ from typing import List, Type
 from peak import configure_single_agent_logging, configure_multiple_agent_logging, configure_debug_mode
 
 from aioxmpp import JID
-import spade
 
 _logger = logging.getLogger(__name__)
 
@@ -78,7 +77,9 @@ def boot_agent(
         agent_class = _get_class(file)
         agent_instance = agent_class(jid, cid, verify_security)
         _logger.info(f"starting agent {jid.localpart}")
-        spade.run(agent_instance.start())
+        agent_instance.start().result()
+        while agent_instance.is_alive():
+            time.sleep(1)
         _logger.info(f"agent {jid.localpart} terminated")
     except Exception as error:
         _logger.critical(f"agent {jid.localpart} terminated ({error})", stack_info=True)

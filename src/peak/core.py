@@ -39,18 +39,18 @@ class Agent(_spade.agent.Agent):
         adds a message dispatcher for the group(MUC) messages.
         """
         self.presence.approve_all = True
-        #self._muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
-        #self._disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
-        #self.message_dispatcher.register_callback(
-        #    _aioxmpp.MessageType.GROUPCHAT,
-        #    None,
-        #    self._message_received,
-        #)
-        #self.message_dispatcher.register_callback(
-        #    _aioxmpp.MessageType.NORMAL,
-        #    None,
-        #    self._message_received,
-        #)
+        self._muc_client: _aioxmpp.MUCClient = self.client.summon(_aioxmpp.MUCClient)
+        self._disco: _aioxmpp.DiscoClient = self.client.summon(_aioxmpp.DiscoClient)
+        self.message_dispatcher.register_callback(
+            _aioxmpp.MessageType.GROUPCHAT,
+            None,
+            self._message_received,
+        )
+        self.message_dispatcher.register_callback(
+            _aioxmpp.MessageType.NORMAL,
+            None,
+            self._message_received,
+        )
 
 
 class _BehaviourMixin:
