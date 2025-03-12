@@ -1,4 +1,4 @@
-from peak import Agent, OneShotBehaviour, getFileLogger, getMainLogger, log, log_term
+from peak import Agent, OneShotBehaviour, getFileLogger, getMainLogger, log, debug
 file_logger = getFileLogger(__name__)
 main_logger = getMainLogger(__name__)
 
@@ -11,5 +11,5 @@ class agent(Agent):
 
     async def setup(self):
         log("Agent starting")
-        log_term("One two three")
+        debug("One two three")
         self.add_behaviour(self.MyBehaviour())

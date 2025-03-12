@@ -68,7 +68,7 @@ def execute_config_file(file: Path, *args, **kargs):
         "resource": 'main',
         "ssl": False,
         "log_level": 'info',
-        "logs_folder": file.parent.joinpath('logs'),
+        "log_folder": file.parent.joinpath('logs'),
         "log_file_mode": "a",
         "debug_mode": False,
         "clones": 1,
@@ -97,15 +97,19 @@ def execute_config_file(file: Path, *args, **kargs):
             "jid": JID(agent_name, agent_args["domain"], agent_args["resource"]),
             "cid": 0,
             "log_level": agent_args["log_level"].upper(),
-            "logs_folder": agent_args["logs_folder"],
+            "log_folder": file.parent.joinpath(agent_args["log_folder"]),
             "log_file_mode": agent_args["log_file_mode"],
             "verify_security": agent_args["ssl"],
             "debug_mode": agent_args["debug_mode"],
         }
-        for cid in range(agent_args["clones"]):
-            agent = kwargs.copy()
-            agents.append(agent)
-            kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
-            kwargs["cid"] = cid
+        if agent_args["clones"] > 1:
+            for cid in range(agent_args["clones"]):
+                kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
+                kwargs["cid"] = cid
+                agent = kwargs.copy()
+                agents.append(agent)
+        else:
+            agents.append(kwargs)
+
     _logger.info('YAML configuration file parsed')
     bootloader(agents)

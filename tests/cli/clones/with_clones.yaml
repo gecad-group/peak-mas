@@ -1,0 +1,9 @@
+defaults:
+  domain: mas.gecad.isep.ipp.pt
+  log_folder: logs/with_clones
+  log_level: debug
+agents:
+  agent_test:
+    file: dummy.py
+    clones: 2
+  
