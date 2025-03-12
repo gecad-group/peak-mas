@@ -2,6 +2,9 @@ defaults:
   domain: mas.gecad.isep.ipp.pt
   log_level: info
 agents:
-  agent_test:
+  agent_test0:
     file: agent.py
-    clones: 2
+  agent_test1:
+    file: agent.py
+    log_level: debug
+  
