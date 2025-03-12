@@ -1,21 +1,24 @@
 import sys
+import io
 from argparse import ArgumentTypeError
-from logging import getLogger
 from pathlib import Path
+import logging
 
 import yaml
 
 from peak import JID
 from peak.bootloader import bootloader
 
-_logger = getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
-def agent_exec(
+def execute_agent(
     file: Path,
     jid: JID,
     clones: int,
     log_level: str,
+    log_file: io.TextIOWrapper, #stream type
+    #log_file_mode: str,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -38,6 +41,7 @@ def agent_exec(
         "jid": jid,
         "cid": 0,
         "log_level": log_level,
+        "log_file": log_file if clones == 0 else file.parent,
         "verify_security": verify_security,
     }
 
@@ -50,28 +54,30 @@ def agent_exec(
         kwargs["cid"] = cid
     bootloader(agents)
 
-
-def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
+def execute_config_file(file: Path, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
         file: Path to the agent's python file.
     """
 
-    _logger.info("Parsing YAML file")
+    _logger.info("parsing YAML configuration file")
     defaults = {
         "file": None,
-        "domain": None,
-        "resource": None,
+        "domain": 'localhost',
+        "resource": 'main',
         "ssl": False,
-        "log_level": log_level,
+        "log_level": 'info',
+        "log_folder": file.parent.joinpath('logs'),
+        "log_file_mode": "a",
+        "debug_mode": False,
         "clones": 1,
     }
     agents = []
 
     with file.open() as f:
         yml = yaml.full_load(f)
-    sys.path.append(str(file.parent.absolute()))
+    sys.path.append(str(file.parent.absolute())) #imports any python modules in the parent folder of the yaml file
 
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
@@ -90,16 +96,20 @@ def multi_agent_exec(file: Path, log_level: str, *args, **kargs):
             "file": Path(agent_args["file"]),
             "jid": JID(agent_name, agent_args["domain"], agent_args["resource"]),
             "cid": 0,
-            "log_level": agent_args["log_level"],
+            "log_level": agent_args["log_level"].upper(),
+            "log_folder": file.parent.joinpath(agent_args["log_folder"]),
+            "log_file_mode": agent_args["log_file_mode"],
             "verify_security": agent_args["ssl"],
+            "debug_mode": agent_args["debug_mode"],
         }
-        if agent_args["clones"] == 1:
-            agent = kwargs.copy()
-            agents.append(agent)
-        else:
+        if agent_args["clones"] > 1:
             for cid in range(agent_args["clones"]):
+                kwargs["jid"] = kwargs["jid"].replace(localpart=f"{agent_name}{cid}")
+                kwargs["cid"] = cid
                 agent = kwargs.copy()
-                agent["jid"] = agent["jid"].replace(localpart=f"{agent_name}{cid}")
-                agent["cid"] = cid
                 agents.append(agent)
+        else:
+            agents.append(kwargs)
+
+    _logger.info('YAML configuration file parsed')
     bootloader(agents)

@@ -1,4 +1,4 @@
-from peak import Agent, OneShotBehaviour, getLogger, log
+from peak import Agent, OneShotBehaviour, getLogger
 
 logger = getLogger(__name__)
 
@@ -8,10 +8,7 @@ class receiver(Agent):
         async def run(self):
             logger.info("waiting for message")
             msg = await self.receive()
-            logger.info("message received")
-            print(f"{msg.sender} sent me a message: '{msg.body}'")
-            logger.info("agent stop")
-            log("testing testing")
+            logger.info(f"{msg.sender} sent me a message: '{msg.body}'")
             await self.agent.stop()
 
     async def setup(self):

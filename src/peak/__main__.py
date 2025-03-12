@@ -1,32 +1,28 @@
 import logging
 import sys
+import io
 from argparse import ArgumentParser
 from pathlib import Path
 
-from peak import JID
-from peak import __name__ as peak_name
-from peak import __version__ as version
-from peak.cli import df, mas
+from peak import JID, __name__ as peak_name, __version__ as version, configure_cli_logger
+from peak.cli import df, run
 
-_logger = logging.getLogger(peak_name)
-
+_logger = logging.getLogger(__name__)
 
 def main(args=None):
-    _logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
-    _logger.addHandler(handler)
     try:
+        configure_cli_logger()
+        _logger.info("initiating PEAK")
         _main(args)
+        _logger.info("PEAK terminated")
     except Exception as e:
         _logger.critical(e, exc_info=1)
     except KeyboardInterrupt:
-        _logger.info("Stoping PEAK: (reason: KeyboardInterrupt)")
+        _logger.info("PEAK terminated (KeyboardInterrupt)")
 
 
 def _main(args=None):
+    _logger.info('parsing console arguments')
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("--version", action="version", version=version)
     subparsers = parser.add_subparsers(required=True)
@@ -61,7 +57,7 @@ def _main(args=None):
     # parser for the "run" command
     run_parser = subparsers.add_parser(
         name="run",
-        help="execute PEAK's agents",
+        help="execute a single-agent system using a Python script",
     )
     run_parser.add_argument(
         "file",
@@ -84,34 +80,32 @@ def _main(args=None):
         help="PEAK logging level (default: INFO)",
     )
     run_parser.add_argument(
+        "-o",
+        "--log_file",
+        type=io.TextIOWrapper,
+        default=sys.stdout,
+        help="file used for the logs (default: standard output)",
+    )
+    run_parser.add_argument(
         "--verify_security", action="store_true", help="verify SLL certificates"
     )
-    run_parser.set_defaults(func=mas.agent_exec)
+    run_parser.set_defaults(func=run.execute_agent)
 
     # parser for the "start" command
     start_parser = subparsers.add_parser(
         name="start",
-        help="execute a multiagent system using an YAML configuration file",
+        help="execute agents using an YAML configuration file",
     )
     start_parser.add_argument(
         "file",
         type=Path,
         help="YAML configuration file",
     )
-    start_parser.add_argument(
-        "-log_level",
-        type=str.upper,
-        default="INFO",
-        help="PEAK logging level (default: INFO)",
-    )
-    start_parser.set_defaults(func=mas.multi_agent_exec)
+    start_parser.set_defaults(func=run.execute_config_file)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
-        sys.exit(1)
+        sys.exit(0)
 
     args = parser.parse_args(args)
-    _logger.setLevel(args.log_level)
-    _logger.info("Starting PEAK")
     args.func(**vars(args))
-    _logger.info("Stoping PEAK")
