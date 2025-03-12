@@ -4,14 +4,14 @@ import io
 from argparse import ArgumentParser
 from pathlib import Path
 
-from peak import JID, __name__ as peak_name, __version__ as version, configure_peak_logger
+from peak import JID, __name__ as peak_name, __version__ as version, configure_cli_logger
 from peak.cli import df, run
 
 _logger = logging.getLogger(__name__)
 
 def main(args=None):
     try:
-        configure_peak_logger(logging.INFO)
+        configure_cli_logger()
         _logger.info("initiating PEAK")
         _main(args)
         _logger.info("PEAK terminated")

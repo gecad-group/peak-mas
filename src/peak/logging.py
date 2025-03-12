@@ -6,43 +6,76 @@ from os import PathLike
 FORMATTER = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s") 
 
 
-def configure_peak_logger(log_level: Union[int, str]) -> logging.Logger:
-    """Configure logger 'peak' to log to terminal."""
+def configure_cli_logger() -> logging.Logger:
+    """Configure logger for command line interface."""
     logger = logging.getLogger("peak")
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(FORMATTER)
+    logger.addHandler(console_handler)
+    return logger
+
+def configure_single_agent_logging(log_level: Union[int, str], filename: Union[str, PathLike], mode: str) -> logging.Logger:
+    """Configure logging for single agent."""
+    logger = logging.getLogger("peak")
+    logger.setLevel(log_level)
+    logger.propagate = False
+    logger.handlers.clear()
+    file_handler = logging.FileHandler(filename, mode)
+    file_handler.setFormatter(FORMATTER)
+    logger.addHandler(file_handler)
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(FORMATTER)
+    logger.addHandler(console_handler)
+
+def configure_multiple_agent_logging(log_level: Union[int, str], filename: Union[str, PathLike], mode: str) -> logging.Logger:
+    logger = logging.getLogger("peak")
+    logger.setLevel(log_level)
+    logger.propagate = False
+    logger.handlers.clear()
+    file_handler = logging.FileHandler(filename, mode)
+    file_handler.setFormatter(FORMATTER)
+    logger.addHandler(file_handler)
+
+    logger = logging.getLogger("peak.main")
     logger.setLevel(log_level)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(FORMATTER)
     logger.addHandler(console_handler)
-    return logger
 
-def configure_agent_root_logger(log_level: Union[int, str], filename: Union[str, PathLike], mode: str, debug_mode: bool) -> logging.Logger:
+def configure_debug_mode(log_level: Union[int, str], filename: Union[str, PathLike], mode: str):
+    """Configure 'root' logger to consume logs from all other modules
+    using the 'peak' logger file handler. Only logs them to the file."""
     logger = logging.getLogger()
+    logger.setLevel(log_level)
     file_handler = logging.FileHandler(filename, mode)
     file_handler.setFormatter(FORMATTER)
-    if not debug_mode:
-        file_handler.addFilter(logging.Filter("peak"))
-    file_handler.setLevel(log_level)
     logger.addHandler(file_handler)
-    return logger
-
-def configure_single_agent_logging():
-    #configure root logger to log to console
-    logger = logging.getLogger()
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    console_handler.addFilter(logging.Filter("peak"))
-    #console_handler.addFilter(logging.Filter("root"))
-    logger.addHandler(console_handler)
-    
-    #remove all handlers from peak logger to not print logs twice
-    logger = logging.getLogger("peak")
-    logger.handlers.clear()
 
 def getLogger(name: str = None) -> logging.Logger:
+    """Same as getFileLogger, just renamed it."""
+    return getFileLogger(name)
+
+def getFileLogger(name: str = None) -> logging.Logger:
+    """Get 'peak' logger or a sublogger of 'peak.{name}'.
+    Prints to the file. It only prints in the terminal if there
+    is one agent running."""
     if name is None:
         return logging.getLogger("peak")
     return logging.getLogger(f"peak.{name}")
 
+def getMainLogger(name: str = None) -> logging.Logger:
+    """Get 'peak.main' logger. Always prints in the terminal."""
+    if name is None:
+        return logging.getLogger("peak.main")
+    return logging.getLogger(f"peak.main.{name}")
+
 def log(msg: str, level: Union[int, str] = logging.INFO):
-    """Logs to the terminal and to the file."""
+    """Logs to the file."""
     logging.getLogger("peak").log(level, msg)
+
+def log_term(msg: str, level: Union[int, str] = logging.INFO):
+    """Logs to the terminal."""
+    logging.getLogger("peak.main").log(level, msg)

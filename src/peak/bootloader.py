@@ -8,7 +8,7 @@ from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
 import spade
-from peak import configure_agent_root_logger, configure_single_agent_logging
+from peak import configure_single_agent_logging, configure_multiple_agent_logging, configure_debug_mode
 
 from aioxmpp import JID
 
@@ -23,18 +23,19 @@ def bootloader(agents: list[dict]):
 
 def boot_single_agent(agent: dict):
     _logger.info(f"booting single agent: {agent['jid']}")
-    configure_single_agent_logging()
-    boot_agent(**agent)
+    #configure_single_agent_logging()
+    boot_agent(**agent, single_agent=True)
 
 def boot_several_agents(agents: list[dict]):
-    _logger.info(f"creating a process for each of the {len(agents)} agents")
+    _logger.info(f"booting {len(agents)} agents (multiprocess)")
+    #configure_multiple_agent_logging()
     procs: List[Process] = []
     for i, agent in enumerate(agents):
         proc = Process(
             target=boot_agent,
             kwargs=agent,
             daemon=False,
-            name=agents[i]["jid"].localpart,
+            name=agents[i]["jid"].localpart
         )
         proc.start()
         procs.append(proc)
@@ -50,6 +51,7 @@ def boot_agent(
     log_file_mode: str,
     verify_security: bool,
     debug_mode: bool,
+    single_agent: bool = False,
     *args,
     **kargs,
 ):
@@ -65,20 +67,25 @@ def boot_agent(
     log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
     log_file = logs_folder.joinpath(f"{log_file_name}.log")
     os.makedirs(logs_folder, exist_ok=True)
-    agent_logger = configure_agent_root_logger(log_level, log_file, log_file_mode)
-    agent_logger.info(f"instanciating agent {jid.localpart} from file {file}")
+    if single_agent:
+        configure_single_agent_logging(log_level, log_file, log_file_mode)
+    else:
+        configure_multiple_agent_logging(log_level, log_file, log_file_mode)
+    if debug_mode:
+        configure_debug_mode(log_level, log_file, log_file_mode)
+    _logger.info(f"instanciating agent {jid.localpart} from file {file}")
     agent_class = _get_class(file)
     agent_instance = agent_class(jid, cid, verify_security)
 
     try:
-        agent_logger.info(f"starting agent {jid.localpart}")
+        _logger.info(f"starting agent {jid.localpart}")
         spade.run(agent_instance.start())
-        agent_logger.info(f"agent {jid.localpart} terminated")
+        _logger.info(f"agent {jid.localpart} terminated")
     except Exception as error:
-        agent_logger.exception(f"agent {jid.localpart} terminated ({error.__class__.__name__})", stack_info=True)
+        _logger.exception(f"agent {jid.localpart} terminated ({error.__class__.__name__})", stack_info=True)
         raise SystemExit(1)
     except KeyboardInterrupt:
-        agent_logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
+        _logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
         
 def _get_class(file: Path) -> Type:
     """Gets class from a file.
