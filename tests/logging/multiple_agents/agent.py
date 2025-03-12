@@ -1,6 +1,8 @@
-from peak import Agent, OneShotBehaviour, getFileLogger, getMainLogger, log, debug
+from peak import Agent, OneShotBehaviour, debug, getFileLogger, getMainLogger, log
+
 file_logger = getFileLogger(__name__)
 main_logger = getMainLogger(__name__)
+
 
 class agent(Agent):
     class MyBehaviour(OneShotBehaviour):

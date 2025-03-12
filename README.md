@@ -41,6 +41,7 @@ $ pip install peak-mas
 ### Notes on SPADE
 
 As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a> examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
+For now PEAK is not compatible with version above 3.2.2 of SPADE.
 
 ### Notes on XMPP
 

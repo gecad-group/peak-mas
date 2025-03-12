@@ -1,7 +1,16 @@
 from asyncio import sleep
 
-from peak import Agent, JoinCommunity, LeaveCommunity, OneShotBehaviour, Message, getLogger
+from peak import (
+    Agent,
+    JoinCommunity,
+    LeaveCommunity,
+    Message,
+    OneShotBehaviour,
+    getLogger,
+)
+
 logger = getLogger(__name__)
+
 
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
@@ -41,26 +50,26 @@ class agent(Agent):
         async def receive_message_from_higher_hierarchy(self):
             logger.info("Waiting for message from higher hierarchy")
             while True:
-                    msg = await self.receive()
-                    if msg:
-                        if msg.body is not None:
-                            logger.info(f"Received text message from higher hierarchy:")
-                            logger.info(f"  From: {msg.sender}")
-                            logger.info(f"  To: {msg.to}")
-                            logger.info(f"  Body: {msg.body}")
-                            logger.info(f"  Thread: {msg.thread}")
-                            logger.info(f"  Metadata: {msg.metadata}")
-                            break
-                        else:
-
-                            logger.info(f"Received system message:")
-                            logger.info(f"  From: {msg.sender}")
-                            logger.info(f"  To: {msg.to}")
-                            logger.info(f"  Thread: {msg.thread}")
-                            logger.info(f"  Metadata: {msg.metadata}")
-                    else:
-                        logger.info("No message received from higher hierarchy")
+                msg = await self.receive()
+                if msg:
+                    if msg.body is not None:
+                        logger.info(f"Received text message from higher hierarchy:")
+                        logger.info(f"  From: {msg.sender}")
+                        logger.info(f"  To: {msg.to}")
+                        logger.info(f"  Body: {msg.body}")
+                        logger.info(f"  Thread: {msg.thread}")
+                        logger.info(f"  Metadata: {msg.metadata}")
                         break
+                    else:
+
+                        logger.info(f"Received system message:")
+                        logger.info(f"  From: {msg.sender}")
+                        logger.info(f"  To: {msg.to}")
+                        logger.info(f"  Thread: {msg.thread}")
+                        logger.info(f"  Metadata: {msg.metadata}")
+                else:
+                    logger.info("No message received from higher hierarchy")
+                    break
 
     async def setup(self):
         self.add_behaviour(self.HelloWorld())

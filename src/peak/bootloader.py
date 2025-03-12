@@ -7,9 +7,14 @@ import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
-from peak import configure_single_agent_logging, configure_multiple_agent_logging, configure_debug_mode
 
 from aioxmpp import JID
+
+from peak import (
+    configure_debug_mode,
+    configure_multiple_agent_logging,
+    configure_single_agent_logging,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -20,26 +25,29 @@ def bootloader(agents: list[dict]):
     else:
         boot_several_agents(agents)
 
+
 def boot_single_agent(agent: dict):
     _logger.info(f"booting single agent: {agent['jid']}")
-    #configure_single_agent_logging()
+    # configure_single_agent_logging()
     boot_agent(**agent, single_agent=True)
+
 
 def boot_several_agents(agents: list[dict]):
     _logger.info(f"booting {len(agents)} agents (multiprocess)")
-    #configure_multiple_agent_logging()
+    # configure_multiple_agent_logging()
     procs: List[Process] = []
     for i, agent in enumerate(agents):
         proc = Process(
             target=boot_agent,
             kwargs=agent,
             daemon=False,
-            name=agents[i]["jid"].localpart
+            name=agents[i]["jid"].localpart,
         )
         proc.start()
         procs.append(proc)
     _logger.info(f"all {len(agents)} processes created")
     asyncio.run(_wait_for_processes(procs))
+
 
 def boot_agent(
     file: Path,
@@ -64,7 +72,9 @@ def boot_agent(
         verify_security: If true it validates the SSL certificates.
     """
     try:
-        log_file_name: str = jid.localpart + (f"_{jid.resource}" if jid.resource else "")
+        log_file_name: str = jid.localpart + (
+            f"_{jid.resource}" if jid.resource else ""
+        )
         log_file = log_folder.joinpath(f"{log_file_name}.log")
         os.makedirs(log_folder, exist_ok=True)
         if single_agent:
@@ -86,7 +96,8 @@ def boot_agent(
         raise SystemExit(1)
     except KeyboardInterrupt:
         _logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
-        
+
+
 def _get_class(file: Path) -> Type:
     """Gets class from a file.
 
@@ -111,11 +122,14 @@ def _get_class(file: Path) -> Type:
             f"the file does not exist or the file name wasn't used as the agent's class name ({file})"
         )
 
+
 async def _wait_for_processes(processes):
     def join_process(process):
         process.join()
         if process.exitcode != 0:
-            _logger.error(f"{process.name}'s process ended with exitcode {process.exitcode}.")
+            _logger.error(
+                f"{process.name}'s process ended with exitcode {process.exitcode}."
+            )
 
     await asyncio.gather(
         *[asyncio.to_thread(join_process, process) for process in processes]

@@ -1,13 +1,17 @@
+import io
 import logging
 import sys
-import io
 from argparse import ArgumentParser
 from pathlib import Path
 
-from peak import JID, __name__ as peak_name, __version__ as version, configure_cli_logger
+from peak import JID
+from peak import __name__ as peak_name
+from peak import __version__ as version
+from peak import configure_cli_logger
 from peak.cli import df, run
 
 _logger = logging.getLogger(__name__)
+
 
 def main(args=None):
     try:
@@ -22,7 +26,7 @@ def main(args=None):
 
 
 def _main(args=None):
-    _logger.info('parsing console arguments')
+    _logger.info("parsing console arguments")
     parser = ArgumentParser(prog=peak_name)
     parser.add_argument("--version", action="version", version=version)
     subparsers = parser.add_subparsers(required=True)

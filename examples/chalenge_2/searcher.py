@@ -17,6 +17,7 @@ class searcher(Agent):
 
     async def setup(self) -> None:
         import logging
-        root = logging.getLogger()
+
+        logging.getLogger()
         logging.StreamHandler().setStream()
         self.add_behaviour(self.SearchForTags())

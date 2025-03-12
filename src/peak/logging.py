@@ -1,9 +1,9 @@
-import sys
 import logging
-from typing import Union
+import sys
 from os import PathLike
+from typing import Union
 
-FORMATTER = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s") 
+FORMATTER = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 def configure_cli_logger() -> logging.Logger:
@@ -16,7 +16,10 @@ def configure_cli_logger() -> logging.Logger:
     logger.addHandler(console_handler)
     return logger
 
-def configure_single_agent_logging(log_level: Union[int, str], filename: Union[str, PathLike], mode: str) -> logging.Logger:
+
+def configure_single_agent_logging(
+    log_level: Union[int, str], filename: Union[str, PathLike], mode: str
+) -> logging.Logger:
     """Configure logging for single agent."""
     logger = logging.getLogger("peak")
     logger.setLevel(log_level)
@@ -30,7 +33,10 @@ def configure_single_agent_logging(log_level: Union[int, str], filename: Union[s
     console_handler.setFormatter(FORMATTER)
     logger.addHandler(console_handler)
 
-def configure_multiple_agent_logging(log_level: Union[int, str], filename: Union[str, PathLike], mode: str) -> logging.Logger:
+
+def configure_multiple_agent_logging(
+    log_level: Union[int, str], filename: Union[str, PathLike], mode: str
+) -> logging.Logger:
     logger = logging.getLogger("peak")
     logger.setLevel(log_level)
     logger.propagate = False
@@ -45,7 +51,10 @@ def configure_multiple_agent_logging(log_level: Union[int, str], filename: Union
     console_handler.setFormatter(FORMATTER)
     logger.addHandler(console_handler)
 
-def configure_debug_mode(log_level: Union[int, str], filename: Union[str, PathLike], mode: str):
+
+def configure_debug_mode(
+    log_level: Union[int, str], filename: Union[str, PathLike], mode: str
+):
     """Configure 'root' logger to consume logs from all other modules
     using the 'peak' logger file handler. Only logs them to the file."""
     logger = logging.getLogger()
@@ -54,9 +63,11 @@ def configure_debug_mode(log_level: Union[int, str], filename: Union[str, PathLi
     file_handler.setFormatter(FORMATTER)
     logger.addHandler(file_handler)
 
+
 def getLogger(name: str = None) -> logging.Logger:
     """Same as getFileLogger, just renamed it."""
     return getFileLogger(name)
+
 
 def getFileLogger(name: str = None) -> logging.Logger:
     """Get 'peak' logger or a sublogger of 'peak.{name}'.
@@ -66,15 +77,18 @@ def getFileLogger(name: str = None) -> logging.Logger:
         return logging.getLogger("peak")
     return logging.getLogger(f"peak.{name}")
 
+
 def getMainLogger(name: str = None) -> logging.Logger:
     """Get 'peak.main' logger. Always prints in the terminal."""
     if name is None:
         return logging.getLogger("peak.main")
     return logging.getLogger(f"peak.main.{name}")
 
+
 def log(msg: str, level: Union[int, str] = logging.INFO):
     """Logs to the file. Default level info."""
     logging.getLogger("peak").log(level, msg)
+
 
 def debug(msg: str, level: Union[int, str] = logging.DEBUG):
     """Logs to the terminal. Default level debug."""

@@ -1,5 +1,6 @@
 from peak import Agent, OneShotBehaviour, debug
 
+
 class dummy(Agent):
     class MyBehaviour(OneShotBehaviour):
         async def run(self):

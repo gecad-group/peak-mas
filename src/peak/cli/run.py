@@ -1,8 +1,8 @@
-import sys
 import io
+import logging
+import sys
 from argparse import ArgumentTypeError
 from pathlib import Path
-import logging
 
 import yaml
 
@@ -17,8 +17,8 @@ def execute_agent(
     jid: JID,
     clones: int,
     log_level: str,
-    log_file: io.TextIOWrapper, #stream type
-    #log_file_mode: str,
+    log_file: io.TextIOWrapper,  # stream type
+    # log_file_mode: str,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -54,6 +54,7 @@ def execute_agent(
         kwargs["cid"] = cid
     bootloader(agents)
 
+
 def execute_config_file(file: Path, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
@@ -64,11 +65,11 @@ def execute_config_file(file: Path, *args, **kargs):
     _logger.info("parsing YAML configuration file")
     defaults = {
         "file": None,
-        "domain": 'localhost',
-        "resource": 'main',
+        "domain": "localhost",
+        "resource": "main",
         "ssl": False,
-        "log_level": 'info',
-        "log_folder": file.parent.joinpath('logs'),
+        "log_level": "info",
+        "log_folder": file.parent.joinpath("logs"),
         "log_file_mode": "a",
         "debug_mode": False,
         "clones": 1,
@@ -77,7 +78,9 @@ def execute_config_file(file: Path, *args, **kargs):
 
     with file.open() as f:
         yml = yaml.full_load(f)
-    sys.path.append(str(file.parent.absolute())) #imports any python modules in the parent folder of the yaml file
+    sys.path.append(
+        str(file.parent.absolute())
+    )  # imports any python modules in the parent folder of the yaml file
 
     if "defaults" in yml:
         defaults = defaults | yml["defaults"]
@@ -111,5 +114,5 @@ def execute_config_file(file: Path, *args, **kargs):
         else:
             agents.append(kwargs)
 
-    _logger.info('YAML configuration file parsed')
+    _logger.info("YAML configuration file parsed")
     bootloader(agents)
