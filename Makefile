@@ -20,4 +20,4 @@ major:
 publish: 
 	python -m build
 	twine check dist/*
-	twine upload -u gecad-group dist/*
+	twine upload dist/*
