@@ -1,7 +1,6 @@
-import logging
 from time import sleep
 
-from peak import DF
+from peak import DF, getMainLogger
 
 
 def exec(domain: str, verify_security: bool, port: int, *args, **kargs):
@@ -13,10 +12,7 @@ def exec(domain: str, verify_security: bool, port: int, *args, **kargs):
         verify_security: Verifies the SSL certificates.
         port: Port to be used by the DF REST API.
     """
-    logger = logging.getLogger(__name__).parent
-    logger.handlers[1].setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-    )
+    logger = getMainLogger('DF')
 
     logger.info("Starting DF")
     df = DF(domain, verify_security, port)
