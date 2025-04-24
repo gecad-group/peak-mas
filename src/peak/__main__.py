@@ -3,6 +3,7 @@ import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+import os
 
 from peak import JID
 from peak import __name__ as peak_name
@@ -84,11 +85,23 @@ def _main(args=None):
         help="PEAK logging level (default: INFO)",
     )
     run_parser.add_argument(
-        "-o",
-        "--log_file",
-        type=io.TextIOWrapper,
-        default=sys.stdout,
-        help="file used for the logs (default: standard output)",
+        "-f",
+        "--log_folder",
+        type=Path,
+        default=Path(os.getcwd()).joinpath("logs"),
+        help="logs folder (default: folder named 'logs' in current working directory)",
+    )
+    run_parser.add_argument(
+        "-a",
+        "--log_file_mode",
+        type=str,
+        default='a',
+        help="mode for logs' file (default: append)",
+    )
+    run_parser.add_argument(
+        "--debug_mode",
+        action="store_true",
+        help="mode for logs' file (default: false)",
     )
     run_parser.add_argument(
         "--verify_security", action="store_true", help="verify SLL certificates"

@@ -17,8 +17,9 @@ def execute_agent(
     jid: JID,
     clones: int,
     log_level: str,
-    log_file: io.TextIOWrapper,  # stream type
-    # log_file_mode: str,
+    log_folder: Path,
+    log_file_mode: str,
+    debug_mode: bool = False,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -41,7 +42,9 @@ def execute_agent(
         "jid": jid,
         "cid": 0,
         "log_level": log_level,
-        "log_file": log_file if clones == 0 else file.parent,
+        "log_folder": log_folder,
+        "log_file_mode": log_file_mode,
+        "debug_mode": debug_mode,
         "verify_security": verify_security,
     }
 
