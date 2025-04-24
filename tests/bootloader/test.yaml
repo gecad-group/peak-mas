@@ -1,0 +1,7 @@
+deafults:
+  domain: mas.gecad.isep.ipp.pt #localhost
+agents:
+  agent:
+    file: non_existing_module_agent.py
+  other_one:
+    file: file_and_class_name_different_agent.py

@@ -106,21 +106,16 @@ def _get_class(file: Path) -> Type:
 
     Args:
         file: Python module. Must have a class with the same name as the file.
-            Example: agent.py --> class agent(...)
+            Example: agent123.py --> class agent123(...)
 
     Returns:
         A class object with the same name as the file.
     """
-    try:
-        module_path, module_file = os.path.split(file.absolute())
-        module_name = module_file.split(".")[0]
-        sys.path.append(module_path)
-        module = importlib.import_module(module_name)
-        return getattr(module, module_name)
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            f"the file does not exist or the file name wasn't used as the agent's class name ({file})"
-        )
+    module_path, module_file = os.path.split(file.absolute())
+    module_name = module_file.split(".")[0]
+    sys.path.append(module_path)
+    module = importlib.import_module(module_name)
+    return getattr(module, module_name)
 
 
 async def _wait_for_processes(processes):
