@@ -1,9 +1,8 @@
-import io
 import logging
+import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-import os
 
 from peak import JID
 from peak import __name__ as peak_name
@@ -95,7 +94,7 @@ def _main(args=None):
         "-a",
         "--log_file_mode",
         type=str,
-        default='a',
+        default="a",
         help="mode for logs' file (default: append)",
     )
     run_parser.add_argument(

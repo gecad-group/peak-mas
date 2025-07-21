@@ -12,7 +12,7 @@ def exec(domain: str, verify_security: bool, port: int, *args, **kargs):
         verify_security: Verifies the SSL certificates.
         port: Port to be used by the DF REST API.
     """
-    logger = getMainLogger('DF')
+    logger = getMainLogger("DF")
 
     logger.info("Starting DF")
     df = DF(domain, verify_security, port)
