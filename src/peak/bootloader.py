@@ -91,9 +91,9 @@ def boot_agent(
         while agent_instance.is_alive():
             time.sleep(1)
         _logger.info(f"agent {jid.localpart} terminated")
-    except Exception as error:
-        _logger.critical(f"agent {jid.localpart} terminated ({error.__class__.__name__}: {error})", exc_info=True)
-        raise SystemExit(1)
+    #except Exception as error:
+    #    _logger.critical(f"agent {jid.localpart} terminated ({error.__class__.__name__}: {error})", exc_info=True)
+    #    raise SystemExit(1)
     except KeyboardInterrupt:
         _logger.info(f"agent {jid.localpart} terminated (KeyboardInterrupt)")
 
