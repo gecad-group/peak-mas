@@ -17,4 +17,4 @@ from peak.logging import *
 
 __author__ = "GECAD"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.0.14"
+__version__ = "1.0.15"
