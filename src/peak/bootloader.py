@@ -8,7 +8,7 @@ from multiprocessing import Process
 from pathlib import Path
 from typing import List, Type
 
-from aioxmpp import JID
+from aioxmpp import JID, node
 
 from peak import (
     configure_debug_mode,
@@ -58,6 +58,7 @@ def boot_agent(
     log_file_mode: str,
     verify_security: bool,
     debug_mode: bool,
+    port: int,
     single_agent: bool = False,
     *args,
     **kargs,
@@ -84,6 +85,8 @@ def boot_agent(
         if debug_mode:
             configure_debug_mode(log_level, log_file, log_file_mode)
         _logger.info(f"instanciating agent {jid.localpart} from file {file}")
+        # add port to aioxmpp
+        node.discover_connectors = _change_discover_connectors_port(node.discover_connectors, port)
         agent_class = _get_class(file)
         agent_instance = agent_class(jid, cid, verify_security)
         _logger.info(f"starting agent {jid.localpart}")
@@ -129,3 +132,15 @@ async def _wait_for_processes(processes):
     await asyncio.gather(
         *[asyncio.to_thread(join_process, process) for process in processes]
     )
+
+def _change_discover_connectors_port(original_function, new_port):
+    async def new_function(*args, **kwargs):
+        server_list = await original_function(*args, **kwargs)
+        new_server_list = []
+        for domain, _, connector in server_list:
+            new_server_list.append(
+                (domain, new_port, connector)  # Change the port to the new one
+            )
+        return new_server_list
+
+    return new_function

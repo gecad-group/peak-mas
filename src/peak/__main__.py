@@ -98,6 +98,13 @@ def _main(args=None):
         help="mode for logs' file (default: append)",
     )
     run_parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=5222,
+        help="XMPP server port (default: 5222)",
+    )
+    run_parser.add_argument(
         "--debug_mode",
         action="store_true",
         help="mode for logs' file (default: false)",

@@ -19,6 +19,7 @@ def execute_agent(
     log_folder: Path,
     log_file_mode: str,
     debug_mode: bool = False,
+    port: int = 5222,
     verify_security: bool = False,
     *args,
     **kargs,
@@ -44,6 +45,7 @@ def execute_agent(
         "log_folder": log_folder,
         "log_file_mode": log_file_mode,
         "debug_mode": debug_mode,
+        "port": port,
         "verify_security": verify_security,
     }
 
@@ -74,7 +76,9 @@ def execute_config_file(file: Path, *args, **kargs):
         "log_folder": file.parent.joinpath("logs"),
         "log_file_mode": "a",
         "debug_mode": False,
+        "port": 5222,
         "clones": 1,
+        "verify_security": False,
     }
     agents = []
 
@@ -106,6 +110,7 @@ def execute_config_file(file: Path, *args, **kargs):
             "log_file_mode": agent_args["log_file_mode"],
             "verify_security": agent_args["ssl"],
             "debug_mode": agent_args["debug_mode"],
+            "port": agent_args["port"],
         }
         if agent_args["clones"] > 1:
             for cid in range(agent_args["clones"]):
