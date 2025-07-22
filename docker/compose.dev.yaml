@@ -1,0 +1,25 @@
+# Services: MySQL database, Prosody server and the PEAK's Directory Facilitator agent
+services:
+  server:
+    container_name: peak-prosody
+    build: 
+      context: dockerfiles
+      dockerfile: server.Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5222:5222
+    volumes:
+      - './server/config:/etc/prosody'
+      - './server/data:/var/lib/prosody'
+      - './server/log:/var/log/prosody'
+      - './server/modules:/usr/lib/prosody/modules-community'
+
+  df:
+    container_name: peak-df
+    depends_on:
+      - server
+    build:
+      context: ./dockerfiles/df/
+    ports: 
+      - 10000:10000
+    restart: unless-stopped
