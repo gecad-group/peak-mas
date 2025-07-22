@@ -1,6 +1,5 @@
 from peak import Agent, OneShotBehaviour
 
-
 class agent(Agent):
     class HelloWorld(OneShotBehaviour):
         async def run(self):
