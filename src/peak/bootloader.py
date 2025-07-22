@@ -86,7 +86,9 @@ def boot_agent(
             configure_debug_mode(log_level, log_file, log_file_mode)
         _logger.info(f"instanciating agent {jid.localpart} from file {file}")
         # add port to aioxmpp
-        node.discover_connectors = _change_discover_connectors_port(node.discover_connectors, port)
+        node.discover_connectors = _change_discover_connectors_port(
+            node.discover_connectors, port
+        )
         agent_class = _get_class(file)
         agent_instance = agent_class(jid, cid, verify_security)
         _logger.info(f"starting agent {jid.localpart}")
@@ -132,6 +134,7 @@ async def _wait_for_processes(processes):
     await asyncio.gather(
         *[asyncio.to_thread(join_process, process) for process in processes]
     )
+
 
 def _change_discover_connectors_port(original_function, new_port):
     async def new_function(*args, **kwargs):
