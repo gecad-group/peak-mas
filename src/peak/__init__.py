@@ -7,10 +7,9 @@ resources and information with each other easly.
 isort: skip_file
 """
 
-from spade.message import Message
-from spade.template import Template
-
 from peak.core import *
+from peak.message import *
+from peak.template import *
 from peak.agents import *
 from peak.behaviours import *
 from peak.logging import *

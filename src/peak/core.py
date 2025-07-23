@@ -1,14 +1,11 @@
 import asyncio
-import logging as _logging
 from abc import ABCMeta as _ABCMeta
 from typing import Dict, List, Optional
 
 import aioxmpp as _aioxmpp
-import spade as _spade
 from aioxmpp import JID
+import spade as _spade
 from aioxmpp.callbacks import first_signal
-
-_module_logger = _logging.getLogger(__name__)
 
 
 class Agent(_spade.agent.Agent):
@@ -56,13 +53,9 @@ class Agent(_spade.agent.Agent):
 class _BehaviourMixin:
     """Adds XMPP functinalities to SPADE's base behaviours.
 
-    Acts as Mixin in the SPADE's behaviours.
-
-    Attributes:
-        logger (:obj:`Logger`): Used to log every event in a behaviour."""
+    Acts as Mixin in the SPADE's behaviours."""
 
     agent: Agent
-    _logger = _module_logger.getChild("_Behaviour")
 
     async def receive(
         self, timeout: Optional[float] = None
@@ -201,7 +194,7 @@ class _BehaviourMixin:
             self.agent.add_behaviour(behaviour, template)
         await behaviour.join()
 
-
+    
 class OneShotBehaviour(
     _BehaviourMixin, _spade.behaviour.OneShotBehaviour, metaclass=_ABCMeta
 ):
