@@ -2,6 +2,6 @@ defaults:
     domain: localhost
 agents:
     john:
-        file: sender.py
+        file: sender/agent.py
     harry: 
-        file: receiver.py
+        file: receiver/agent.py
