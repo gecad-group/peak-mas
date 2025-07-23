@@ -3,8 +3,8 @@ from abc import ABCMeta as _ABCMeta
 from typing import Dict, List, Optional
 
 import aioxmpp as _aioxmpp
-from aioxmpp import JID
 import spade as _spade
+from aioxmpp import JID
 from aioxmpp.callbacks import first_signal
 
 
@@ -194,7 +194,7 @@ class _BehaviourMixin:
             self.agent.add_behaviour(behaviour, template)
         await behaviour.join()
 
-    
+
 class OneShotBehaviour(
     _BehaviourMixin, _spade.behaviour.OneShotBehaviour, metaclass=_ABCMeta
 ):

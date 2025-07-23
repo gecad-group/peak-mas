@@ -1,7 +1,9 @@
 import aioxmpp
-from aioxmpp import MessageType
 import aioxmpp.forms.xso as forms_xso
-from spade.message import Message as SpadeMessage, SPADE_X_METADATA
+from aioxmpp import MessageType
+from spade.message import SPADE_X_METADATA
+from spade.message import Message as SpadeMessage
+
 
 class Message(SpadeMessage):
     def prepare(self) -> aioxmpp.Message:
@@ -12,7 +14,6 @@ class Message(SpadeMessage):
           aioxmpp.stanza.Message: the message prepared to be sent
 
         """
-        print('sdfjslkdfjsldjlk')
         msg = aioxmpp.stanza.Message(
             to=self.to,
             from_=self.sender,
