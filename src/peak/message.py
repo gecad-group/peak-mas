@@ -2,10 +2,14 @@ import aioxmpp
 import aioxmpp.forms.xso as forms_xso
 from aioxmpp import MessageType
 from spade.message import SPADE_X_METADATA
-from spade.message import Message as SpadeMessage
+from spade.message import Message as _SpadeMessage
+
+from peak.logging import getLogger
+
+logger = getLogger(__name__)
 
 
-class Message(SpadeMessage):
+class Message(_SpadeMessage):
     def prepare(self) -> aioxmpp.Message:
         """
         Returns an aioxmpp.stanza.Message built from the Message and prepared to be sent.
