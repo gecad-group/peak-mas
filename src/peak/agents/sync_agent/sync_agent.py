@@ -5,6 +5,7 @@ from datetime import datetime
 from aioxmpp import JID
 
 from peak import Agent, Template
+
 from .behaviors import StepBehaviour
 
 
@@ -14,6 +15,7 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
     Every agent that needs to be synchronized needs
     to extend this class.
     """
+
     def __init__(self, jid: JID, verify_security: bool = False):
         """Inits the SyncAgent with the JID provided.
 
@@ -41,4 +43,3 @@ class SyncAgent(Agent, metaclass=_ABCMeta):
             time (datetime, optional): Current datetime inside the simulation. It must be
                 configured in the Synchronizer."""
         raise NotImplementedError()
-

@@ -11,12 +11,9 @@ class Synchronizer(Agent):
     the agents to join the group and starts the clock of the
     simulation.
     """
+
     async def sync_group_period(
-        self, 
-        group_jid: str, 
-        n_agents: int, 
-        interval: float, 
-        periods: int
+        self, group_jid: str, n_agents: int, interval: float, periods: int
     ):
         """Synchronizes a group of agents.
 

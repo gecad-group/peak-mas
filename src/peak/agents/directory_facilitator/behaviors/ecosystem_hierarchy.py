@@ -4,6 +4,7 @@ from peak import CyclicBehaviour, Template, getLogger
 
 logger = getLogger(__name__)
 
+
 class EcosystemHierarchy(CyclicBehaviour):
     """Manages the group structure of all the multi-agent systems."""
 
@@ -30,9 +31,9 @@ class EcosystemHierarchy(CyclicBehaviour):
                 in self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]]
             ):
                 logger.debug(str(msg.sender) + " leaving " + path)
-                self.agent.ecosystemhierarchy_data["node_members"][
-                    nodes[-1]
-                ].remove(msg.sender)
+                self.agent.ecosystemhierarchy_data["node_members"][nodes[-1]].remove(
+                    msg.sender
+                )
                 nodes = nodes[::-1]
                 # remove empty nodes and links
                 for i, node in enumerate(nodes):
@@ -70,16 +71,9 @@ class EcosystemHierarchy(CyclicBehaviour):
                     self.agent.ecosystemhierarchy_data["nodes"].add(
                         (node, level + str(i), domain)
                     )
-                    if (
-                        node
-                        not in self.agent.ecosystemhierarchy_data["node_members"]
-                    ):
-                        self.agent.ecosystemhierarchy_data["node_members"][
-                            node
-                        ] = []
-                    self.agent.ecosystemhierarchy_data["categories"].add(
-                        level + str(i)
-                    )
+                    if node not in self.agent.ecosystemhierarchy_data["node_members"]:
+                        self.agent.ecosystemhierarchy_data["node_members"][node] = []
+                    self.agent.ecosystemhierarchy_data["categories"].add(level + str(i))
                     if last != None:
                         self.agent.ecosystemhierarchy_data["links"].add(
                             (

@@ -1,6 +1,5 @@
 import asyncio as _asyncio
 
-
 from peak import Message, PeriodicBehaviour
 
 
@@ -26,9 +25,7 @@ class PeriodicClock(PeriodicBehaviour):
 
     async def on_start(self):
         self.logger.info("Waiting for all agents to enter the group...")
-        while (
-            not len(await self.agent.group_members(self.group_jid)) >= self.n_agents
-        ):
+        while not len(await self.agent.group_members(self.group_jid)) >= self.n_agents:
             await _asyncio.sleep(1)
         self.current_period = 0
         self.logger.info("Starting simulation...")
@@ -50,5 +47,3 @@ class PeriodicClock(PeriodicBehaviour):
     async def on_end(self):
         self.logger.info("Ending simulation...")
         await self.agent.stop()
-
-    

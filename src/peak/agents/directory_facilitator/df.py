@@ -2,6 +2,7 @@ import aiohttp_cors
 from aioxmpp import JID
 
 from peak import Agent
+
 from .behaviors import CreateGraph, EcosystemHierarchy, SearchCommunity
 
 
@@ -12,6 +13,7 @@ class DF(Agent):
     publicly through a REST API. It also provides a Yellow Page Service to the
     agents.
     """
+
     def __init__(self, domain, verify_security, port):
         super().__init__(
             JID.fromstr("df@" + domain + "/admin"), verify_security=verify_security
@@ -83,4 +85,3 @@ class DF(Agent):
 
     async def get_plots(self, request):
         return self.dataanalysis_data
-

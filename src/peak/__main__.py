@@ -69,10 +69,7 @@ def _main(args=None):
         help="Python file containing the class of the agent to be executed (the same name must be used in the class and in the file) ",
     )
     run_parser.add_argument(
-        "-jid", 
-        type=JID.fromstr, 
-        help="agent XMPP ID", 
-        required=True
+        "-jid", type=JID.fromstr, help="agent XMPP ID", required=True
     )
     run_parser.add_argument(
         "-clones",
@@ -135,25 +132,14 @@ def _main(args=None):
         help="sends a message to an agent",
     )
     send_parser.add_argument(
-        "-to",
-        type=JID.fromstr, 
-        help="Jabber ID of the receiver agent", 
-        required=True
+        "-to", type=JID.fromstr, help="Jabber ID of the receiver agent", required=True
     )
     send_parser.add_argument(
-        "-sender",
-        type=JID.fromstr,
-        help="Jabber ID of the sender agent (optional)"
+        "-sender", type=JID.fromstr, help="Jabber ID of the sender agent (optional)"
     )
+    send_parser.add_argument("-body", type=str, help="message body (optional)")
     send_parser.add_argument(
-        "-body",
-        type=str,
-        help="message body (optional)"
-    )
-    send_parser.add_argument(
-        "--thread",
-        type=str,
-        help="thread ID for the message (optional)"
+        "--thread", type=str, help="thread ID for the message (optional)"
     )
     send_parser.add_argument(
         "-metadata",
@@ -161,8 +147,6 @@ def _main(args=None):
         help="message's metadata (optional)",
     )
     send_parser.set_defaults(func=send.send_message)
-
-    
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)

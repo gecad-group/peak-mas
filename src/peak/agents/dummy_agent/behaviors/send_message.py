@@ -1,10 +1,11 @@
-from peak import OneShotBehaviour, Message, getLogger
+from peak import Message, OneShotBehaviour, getLogger
 
 logger = getLogger(__name__)
 
 
 class SendMessage(OneShotBehaviour):
     """Sends a message to another agent."""
+
     def __init__(self, msg: Message):
         super().__init__()
         self.msg = msg
