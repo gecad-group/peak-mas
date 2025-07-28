@@ -35,7 +35,7 @@ def execute_agent(
     """
     # TODO: verify at argsparser level
     if file and not file.is_file():
-        raise ArgumentTypeError(f"Agent's file must be a python file, not '{file}'.")
+        raise ArgumentTypeError(f"file argument must be a python file, not '{file}'")
 
     kwargs = {
         "file": file,

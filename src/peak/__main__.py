@@ -8,7 +8,7 @@ from peak import JID
 from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak import configure_cli_logger
-from peak.cli import df, run
+from peak.cli import df, run, send
 
 _logger = logging.getLogger(__name__)
 
@@ -69,7 +69,10 @@ def _main(args=None):
         help="Python file containing the class of the agent to be executed (the same name must be used in the class and in the file) ",
     )
     run_parser.add_argument(
-        "-jid", type=JID.fromstr, help="agent XMPP ID", required=True
+        "-jid", 
+        type=JID.fromstr, 
+        help="agent XMPP ID", 
+        required=True
     )
     run_parser.add_argument(
         "-clones",
@@ -125,6 +128,41 @@ def _main(args=None):
         help="YAML configuration file",
     )
     start_parser.set_defaults(func=run.execute_config_file)
+
+    # parser for the "send" command
+    send_parser = subparsers.add_parser(
+        name="send",
+        help="sends a message to an agent",
+    )
+    send_parser.add_argument(
+        "-to",
+        type=JID.fromstr, 
+        help="Jabber ID of the receiver agent", 
+        required=True
+    )
+    send_parser.add_argument(
+        "-sender",
+        type=JID.fromstr,
+        help="Jabber ID of the sender agent (optional)"
+    )
+    send_parser.add_argument(
+        "-body",
+        type=str,
+        help="message body (optional)"
+    )
+    send_parser.add_argument(
+        "--thread",
+        type=str,
+        help="thread ID for the message (optional)"
+    )
+    send_parser.add_argument(
+        "-metadata",
+        type=dict,
+        help="message's metadata (optional)",
+    )
+    send_parser.set_defaults(func=send.send_message)
+
+    
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
