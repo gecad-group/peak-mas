@@ -117,7 +117,9 @@ def _get_class(file: Path) -> Type:
         A class object with the same name as the file.
     """
     if not file.is_file():
-        raise FileNotFoundError(f"cannot instatiate agent from a non-existing file ({file})")
+        raise FileNotFoundError(
+            f"cannot instatiate agent from a non-existing file ({file})"
+        )
     module_path, module_file = os.path.split(file.absolute())
     module_name = module_file.split(".")[0]
     sys.path.append(module_path)
