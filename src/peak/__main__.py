@@ -8,7 +8,7 @@ from peak import JID
 from peak import __name__ as peak_name
 from peak import __version__ as version
 from peak import configure_cli_logger
-from peak.cli import df, run, send
+from peak.cli import df, run, send, start
 
 _logger = logging.getLogger(__name__)
 
@@ -124,7 +124,7 @@ def _main(args=None):
         type=Path,
         help="YAML configuration file",
     )
-    start_parser.set_defaults(func=run.execute_config_file)
+    start_parser.set_defaults(func=start.execute_config_file)
 
     # parser for the "send" command
     send_parser = subparsers.add_parser(
