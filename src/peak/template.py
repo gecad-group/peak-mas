@@ -1,17 +1,32 @@
 from typing import Type
 
-from spade.message import MessageBase as _MessageBase
-from spade.template import Template as SpadeTemplate
+from spade.template import Template as _Template
 
 from peak.logging import getLogger
+from peak.message import MessageBase
 
 logger = getLogger(__name__)
 
 
-class Template(SpadeTemplate):
+class Template(MessageBase, _Template):
     """PEAK's template for matching messages."""
 
-    def match(self, message: Type["_MessageBase"]) -> bool:
+    def set_metadata(self, key: str, value: str = None) -> None:
+        """
+        Add a new metadata to the message
+
+        Args:
+          key (str): name of the metadata
+          value (str): value of the metadata
+
+        """
+        if not isinstance(key, str):
+            raise TypeError("'key' of metadata MUST be string")
+        if value is not None and not isinstance(value, str):
+            raise TypeError("'value' of metadata MUST be string or None")
+        self.metadata[key] = value
+
+    def match(self, message: Type["MessageBase"]) -> bool:
         """
         Returns wether a message matches with this message or not.
         The message can be a Message object or a Template object.
@@ -50,7 +65,9 @@ class Template(SpadeTemplate):
             return False
 
         for key, value in self.metadata.items():
-            if message.get_metadata(key) != value:
+            if key not in message.metadata:
+                return False
+            if value is not None and message.get_metadata(key) != value:
                 return False
 
         logger.debug(f"message matched {self} == {message}")
