@@ -39,7 +39,7 @@ Homepage = "https://www.gecad.isep.ipp.pt/peak"
 Github = "https://github.com/gecad-group/peak-mas"
 
 [project.scripts]
-peak = "peak.__main__:main"
+peak = "peak.main:main"
 
 [tool.bumpver]
 current_version = "1.2.2"
