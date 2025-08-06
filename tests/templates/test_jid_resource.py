@@ -1,4 +1,4 @@
-from peak import Message, Template
+from peak import Message, Template, JID
 
 template = Template()
 template.sender = "sender1@host"
@@ -44,3 +44,37 @@ message = Message()
 message.sender = "sender1@host"
 
 assert template.match(message)
+
+template = Template()
+template.set_metadata("host")
+
+message = Message()
+message.set_metadata("host", "192.168.1.1")
+
+assert template.match(message)
+
+template = Template()
+template.set_metadata("host", "192.168.1.2")
+
+message = Message()
+message.set_metadata("host", "192.168.1.1")
+
+assert not template.match(message)
+
+template = Template()
+template.set_metadata("host")
+
+message = Message()
+message.set_metadata("ip", "192.168.1.1")
+
+assert not template.match(message)
+
+template = Template()
+template.to = JID.fromstr("recv1@host/main")
+template.sender = JID.fromstr("sender1@host/main")
+
+message = Message()
+message.to = JID.fromstr("recv1@host/main")
+message.sender = JID.fromstr("sender1@host")
+
+assert not template.match(message)
