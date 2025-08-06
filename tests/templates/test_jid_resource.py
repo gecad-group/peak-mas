@@ -1,4 +1,4 @@
-from peak import Message, Template, JID
+from peak import JID, Message, Template
 
 template = Template()
 template.sender = "sender1@host"
