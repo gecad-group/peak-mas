@@ -16,4 +16,4 @@ from peak.behaviours import *
 
 __author__ = "GECAD"
 __email__ = "brgri@isep.ipp.pt"
-__version__ = "1.2.4"
+__version__ = "1.2.5"
