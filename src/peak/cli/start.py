@@ -24,7 +24,7 @@ def execute_config_file(file: Path, *args, **kargs):
         "resource": "main",
         "ssl": False,
         "log_level": "info",
-        "log_folder": file.parent.joinpath("logs"),
+        "log_folder": "logs",
         "log_file_mode": "a",
         "debug_mode": False,
         "port": 5222,
