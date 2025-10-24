@@ -26,14 +26,14 @@ dependencies = [
     "aioxmpp",
     "pandas",
     "spade == 3.2.2",
-    "PyYAML".
-    "sphinx"
+    "PyYAML"
 ]
 requires-python = "==3.9.6"
 
 [dependency-groups]
 build = ["build", "twine", "pyotp"]
 dev = ["black", "isort", "mypy", "bumpver", "pipreqs", "autoflake", "pylint"]
+docs = ["sphinx"]
 
 [project.urls]
 Homepage = "https://www.gecad.isep.ipp.pt/peak"
