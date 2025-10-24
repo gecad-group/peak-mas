@@ -7,6 +7,10 @@ import spade as _spade
 from aioxmpp import JID
 from aioxmpp.callbacks import first_signal
 
+from peak.logging import getLogger
+
+_logger = getLogger(__name__)
+
 
 class Agent(_spade.agent.Agent):
     """PEAK's base agent.
@@ -95,13 +99,11 @@ class _BehaviourMixin:
             try:
                 await first_signal(room.on_enter, room.on_failure)
                 self.agent.communities[jid] = room
-                self._logger.debug(f"Joined community: {jid}")
+                _logger.debug(f"Joined community: {jid}")
             except Exception as error:
-                self._logger.exception(
-                    f"Couldn't join community (reason: {error}):  {jid}"
-                )
+                _logger.exception(f"Couldn't join community (reason: {error}):  {jid}")
         else:
-            self._logger.debug(f"Already joined this community: {jid}")
+            _logger.debug(f"Already joined this community: {jid}")
 
     async def leave_community(self, jid: str):
         """Leaves a community.
@@ -112,7 +114,7 @@ class _BehaviourMixin:
         room = self.agent.communities.pop(jid, None)
         if room:
             await room.leave()
-            self._logger.debug(f"Left community: {jid}")
+            _logger.debug(f"Left community: {jid}")
 
     async def list_communities(self, node_jid: str):
         """Retrieves the list of the existing community in the server.
@@ -163,12 +165,12 @@ class _BehaviourMixin:
             msg: The XMPP message.
         """
         raw_msg = msg.prepare()
-        self._logger.debug(f"Sending message: {msg}")
+        _logger.debug(f"Sending message: {msg}")
         group = str(msg.to)
         try:
             await self.agent.communities[group].send_message(raw_msg)
         except:
-            self._logger.debug(
+            _logger.debug(
                 f"Sending a message to a group which the agent is not a member of: {group}"
             )
             await self.join_community(group)
@@ -189,7 +191,7 @@ class _BehaviourMixin:
             behaviour: SPADE's behaviour.
             tempalte: SPADE's template.
         """
-        self._logger.debug(f"Waiting for behaviour: {behaviour}")
+        _logger.debug(f"Waiting for behaviour: {behaviour}")
         if not behaviour.is_running:
             self.agent.add_behaviour(behaviour, template)
         await behaviour.join()
@@ -207,6 +209,12 @@ class PeriodicBehaviour(
     """This behaviour is executed periodically with an interval."""
 
 
+class TimeoutBehaviour(
+    _BehaviourMixin, _spade.behaviour.TimeoutBehaviour, metaclass=_ABCMeta
+):
+    """This behaviour is executed once after a timeout."""
+
+
 class CyclicBehaviour(
     _BehaviourMixin, _spade.behaviour.CyclicBehaviour, metaclass=_ABCMeta
 ):
@@ -216,3 +224,7 @@ class CyclicBehaviour(
 class FSMBehaviour(_BehaviourMixin, _spade.behaviour.FSMBehaviour, metaclass=_ABCMeta):
     """A behaviour composed of states (oneshotbehaviours) that may transition from one
     state to another."""
+
+
+class State(_BehaviourMixin, _spade.behaviour.State, metaclass=_ABCMeta):
+    """A state of a FSMBehaviour."""

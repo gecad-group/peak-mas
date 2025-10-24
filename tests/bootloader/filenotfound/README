@@ -1,0 +1,2 @@
+In the terminal enter in the folder `filenotfound` and try to execute the peak.yaml file.
+It should throw an error describing the wrong path to the file.
