@@ -8,85 +8,54 @@
 [![code style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 [![imports isort](https://img.shields.io/static/v1?label=imports&message=isort&color=blue&labelColor=orange)](https://pycqa.github.io/isort/)
 
-PEAK is a multi-agent system framework which helps the users develop, monitor, analyze and maintain ecosystem of heterogeneous agent communities. This ecosystem is  where various multi-agent systems can coexist, interact and share resources between them. 
-This framework is based on <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a>.
+PEAK is a software framework that can help you develop classic multi-agent systems in Python (3.9.6). PEAK has its roots in <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a> and is distinguished by helping you streamline agent development through the use of agent configuration files, a dedicated command line interface, and available pre defined behaviors and agents. Some functionalities of SPADE were tweaked to make it easier to develop agents. 
+
+## Features
+
+- Run your agents in individual processes
+- Use the command line interface to run your agents
+- Configure your multi-agent system execution with YAML
+- Develop your agents using the behavior-driven development paradigm
+- Distribute your PEAK system between different machines
+- It uses Extensible Messaging and Presence Protocol (XMPP) for communication
+- Create agent group chats where you can talk with your agents
+- Make your agents data easily available to dashboards
 
 
-## Prerequisites
+## Installation
 
-- Python == 3.9.6
-- XMPP Server ([see docs](https://www.gecad.isep.ipp.pt/peak))
+Install PEAK in your Python (3.9.6) environment using the following command:
 
-
-## Installing PEAK
-
-### Conda
-
-To install using conda, download the environment.yml file from the repository and then use the following command:
-```bash
-$ conda env create --file environment.yml	
-```
-This will create a conda environment called _peak_.
-
-### Pip
-
-To install using pip, just type the following command:
 ```bash
 $ pip install peak-mas
 ```
 
+## Example
 
-## Using PEAK
-
-### Notes on SPADE
-
-As already said PEAK is based on SPADE. This means that every functionality of SPADE is available to the user. We highly recommend you to see <a href="https://spade-mas.readthedocs.io/en/latest/" target="_blank">SPADE</a> examples and documentation before starting using PEAK. Once you are familiarized with SPADE's mechanics you can start using PEAK.
-For now PEAK is not compatible with version above 3.2.2 of SPADE.
-
-### Notes on XMPP
-
-To run any PEAK's agent you will need a XMPP server. You can either configure one on your machine, remotely or use a public server. The only issue with the public servers is that they don't usually have all the configurations required to run some PEAK's functionalities. To configure the server you can read the "Configure XMPP server" section in the <a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">documentation</a>.
-
-#### Using docker
-
-To make it easier to configure the XMPP server we have created a docker image with the server already configured. To use it just type the following command in the /docker folder:
-
-```bash
-$ docker-compose up -d
-```
-
-### Hello World Agent Example
-
-One thing that was added in PEAK was the way the user executes the agents. PEAK added a CLI, inspired in JADE, to help the user execute end configure each agent in a easy and intuitive manner.
-In this example we will show you how to execute a single agent. Save the following code in a file called `agent.py`.
+Run your first agent by saving the following code in a file called `agent.py`.
 
 ```python 
-from peak import Agent, OneShotBehaviour
+from peak import Agent, OneShotBehaviour, getLogger
+
+logger = getLogger(__name__)
+
+class HelloWorld(OneShotBehaviour):
+    async def run(self):
+        logger.info("Hello World!!!")
+        await self.agent.stop()
 
 class agent(Agent):
-    class HelloWorld(OneShotBehaviour):
-        async def run(self):
-            print("Hello World")
-            await self.agent.stop()
-
     async def setup(self):
-        self.add_behaviour(self.HelloWorld())
+        self.add_behaviour(HelloWorld())
 ```
-It is necessary that the name of the file is the same as the name of the agent's class so PEAK can do the proper parsing. This agent only has a behavior that prints to the terminal the "Hello World" message. To execute the agent just type the following command:
+
+Chose a XMPP server (e.g. localhost or chose one from [here](https://list.jabber.at/)) and execute your agent in the terminal:
+
 ```bash 
 $ peak run path/to/agent.py -j agent@localhost
 ```
-Change the `localhost` to the domain of the XMPP server you want to connect.
 
-<details><summary>Note</summary>
-<p>
-
-If you want to know more about each command we recommend reading the [documentation](http://www.gecad.isep.ipp.pt/peak) or using the `-h` option to see the help message.
-
-</p>
-</details>
-
-For more advanced functionalities and examples we recommend you to head forward to the <a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">documentation website</a>.
+<a href="http://www.gecad.isep.ipp.pt/peak" target="_blank">See the docs for more info.</a>
 
 
 ## Support
@@ -94,24 +63,14 @@ For more advanced functionalities and examples we recommend you to head forward 
 Use the <a href="https://github.com/gecad-group/peak-mas/discussions" target="_blank">Discussion</a> page if you have any questions or ideas you would like so see implemented.
 To alert an issue or a bug please post in the <a href="https://github.com/gecad-group/peak-mas/issues" target="_blank">Issues</a> page.
 
-## Roadmap
-
-This are some functionalities that are being developed and will be released in a near future:
-- [ ] Integrate FIPA ACL messages in PEAK.
-- [ ] Add dynamic speed option to PEAK's internal clock.
-- [ ] Add multi-threading option to the Command Line Interface.
-- [ ] Implement Yellow Page Service in the Directory Facilitator agent.
-- [ ] Implement physical mobility in the agents.
-
 ## Scientific Publications
 
 - Ribeiro, B., Dias, D., Gomes, L., & Vale, Z. (2025). PEAK: Python-based framework for heterogeneous agent communities. SoftwareX, 30, 102190. https://doi.org/10.1016/j.softx.2025.102190
-- Ribeiro, B., Pereira, H., Gomes, L., Vale, Z. (2023). Python-Based Ecosystem for Agent Communities Simulation. In: , et al. 17th International Conference on Soft Computing Models in Industrial and Environmental Applications (SOCO 2022). SOCO 2022. Lecture Notes in Networks and Systems, vol 531. Springer, Cham. https://doi.org/10.1007/978-3-031-18050-7_7
 - Pereira H, Ribeiro B, Gomes L, Vale Z. Smart Grid Ecosystem Modeling Using a Novel Framework for Heterogenous Agent Communities. Sustainability. 2022; 14(23):15983. https://doi.org/10.3390/su142315983
 - Silva C, Faria P, Ribeiro B, Gomes L, Vale Z. Demand Response Contextual Remuneration of Prosumers with Distributed Storage. Sensors. 2022; 22(22):8877. https://doi.org/10.3390/s22228877
 
 
-## Contributing to PEAK
+## Contribute
 
 Pull requests are welcome. For major changes, please open a discussion first to discuss what you would like to change.
 
@@ -121,6 +80,9 @@ To format the code please use the <a href="https://pypi.org/project/black/" targ
 
 For the commits please follow the <a href="www.conventionalcommits.org" target="_blank">Conventional Commits Guideline</a>.
 
+- Issue Tracker: https://github.com/gecad-group/peak-mas/issues
+- Source Code: https://github.com/gecad-group/peak-mas/tree/main/src/peak
+
 ## License
 
-`PEAK` is free and open-source software licensed under the <a href="https://github.com/gecad-group/peak-mas/blob/develop/LICENSE" target="_blank">GNU General Public License v3.0</a>.
+`PEAK` is free and open-source, licensed under the <a href="https://github.com/gecad-group/peak-mas/blob/develop/LICENSE" target="_blank">GNU General Public License v3.0</a>.
