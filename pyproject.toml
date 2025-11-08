@@ -34,6 +34,11 @@ requires-python = "==3.9.6"
 build = ["build", "twine", "pyotp"]
 dev = ["black", "isort", "mypy", "bumpver", "pipreqs", "autoflake", "pylint"]
 docs = ["sphinx"]
+all = [
+    {include-group = "build"},
+    {include-group = "dev"},
+    {include-group = "docs"}
+]
 
 [project.urls]
 Homepage = "https://www.gecad.isep.ipp.pt/peak"
