@@ -60,8 +60,7 @@ $ peak run path/to/agent.py -j agent@localhost
 
 ## Support
 
-Use the <a href="https://github.com/gecad-group/peak-mas/discussions" target="_blank">Discussion</a> page if you have any questions or ideas you would like so see implemented.
-To alert an issue or a bug please post in the <a href="https://github.com/gecad-group/peak-mas/issues" target="_blank">Issues</a> page.
+Use the <a href="https://github.com/gecad-group/peak-mas/discussions" target="_blank">discussion page</a> if you have any questions or ideas you would like so see implemented. If you find any issue or bug, please report it in <a href="https://github.com/gecad-group/peak-mas/issues" target="_blank">issues page</a>.
 
 ## Scientific Publications
 
