@@ -15,11 +15,7 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   user_guide/prerequisites
-   user_guide/installation
-   user_guide/getting_started
-   user_guide/examples
-   api_documentation
+   user_guide
    contributer_guide
    glossary
    publications

@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'peak-mas'
-copyright = '2025, Bruno Ribeiro, Luis Gomes, Zita Vale'
-author = 'Bruno Ribeiro, Luis Gomes, Zita Vale'
+copyright = '2025, GECAD'
+author = 'GECAD'
 release = '1.2.8'
 
 # -- General configuration ---------------------------------------------------
