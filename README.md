@@ -84,4 +84,4 @@ For the commits please follow the <a href="www.conventionalcommits.org" target="
 
 ## License
 
-`PEAK` is free and open-source, licensed under the <a href="https://github.com/gecad-group/peak-mas/blob/develop/LICENSE" target="_blank">GNU General Public License v3.0</a>.
+`PEAK` is free and open-source, licensed under the <a href="https://github.com/gecad-group/peak-mas/blob/master/LICENSE" target="_blank">GNU General Public License v3.0</a>.
