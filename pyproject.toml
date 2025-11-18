@@ -33,7 +33,7 @@ requires-python = "==3.9.6"
 [dependency-groups]
 build = ["build", "twine", "pyotp"]
 dev = ["black", "isort", "mypy", "bumpver", "pipreqs", "autoflake", "pylint"]
-docs = ["sphinx"]
+docs = ["sphinx", "restview"]
 all = [
     {include-group = "build"},
     {include-group = "dev"},
