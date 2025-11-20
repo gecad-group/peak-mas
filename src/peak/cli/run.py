@@ -15,6 +15,7 @@ def execute_agent(
     debug_mode: bool = False,
     port: int = 5222,
     verify_security: bool = False,
+    thread: bool = False,
     *args,
     **kargs,
 ):
@@ -40,7 +41,7 @@ def execute_agent(
         "log_file_mode": log_file_mode,
         "debug_mode": debug_mode,
         "port": port,
-        "verify_security": verify_security,
+        "verify_security": verify_security
     }
 
     name = jid.localpart
@@ -50,4 +51,4 @@ def execute_agent(
         agents.append(agent)
         kwargs["jid"] = kwargs["jid"].replace(localpart=f"{name}{cid}")
         kwargs["cid"] = cid
-    bootloader(agents)
+    bootloader(agents, thread=thread)

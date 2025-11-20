@@ -5,6 +5,7 @@ import os
 import sys
 import time
 from multiprocessing import Process
+from threading import Thread
 from pathlib import Path
 from typing import List, Type
 
@@ -19,9 +20,11 @@ from peak import (
 _logger = logging.getLogger(__name__)
 
 
-def bootloader(agents: list[dict]):
+def bootloader(agents: list[dict], thread: bool = False):
     if len(agents) == 1:
         boot_single_agent(agents[0])
+    elif thread:
+        boot_several_agents_multithreading(agents)
     else:
         boot_several_agents(agents)
 
@@ -47,6 +50,30 @@ def boot_several_agents(agents: list[dict]):
         procs.append(proc)
     _logger.info(f"all {len(agents)} processes created")
     asyncio.run(_wait_for_processes(procs))
+
+def boot_several_agents_multithreading(agents: list[dict]):
+    """Boot several agents using multithreading.
+    Python's GIL may limit performance when using threads, since
+    only one thread can execute Python bytecode at a time.
+    However, for I/O-bound tasks like network communication, threads
+    can be more efficient than processes due to lower overhead.
+    Args:
+        agents: List of agents' configuration.
+    """
+    _logger.info(f"booting {len(agents)} agents (multithreading)")
+    # configure_multiple_agent_logging()
+    threads: List[Thread] = []
+    for i, agent in enumerate(agents):
+        t = Thread(
+            target=boot_agent,
+            kwargs=agent,
+            daemon=False,
+            name=agents[i]["jid"].localpart,
+        )
+        t.start()
+        threads.append(t)
+    _logger.info(f"all {len(agents)} processes created")
+    asyncio.run(_wait_for_processes(threads))
 
 
 def boot_agent(

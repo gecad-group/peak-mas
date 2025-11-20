@@ -112,6 +112,9 @@ def _main(args=None):
     run_parser.add_argument(
         "--verify_security", action="store_true", help="verify SLL certificates"
     )
+    run_parser.add_argument(
+        "--thread", action="store_true", help="execute agents as threads instead of processes"
+    )
     run_parser.set_defaults(func=run.execute_agent)
 
     # parser for the "start" command
@@ -123,6 +126,9 @@ def _main(args=None):
         "file",
         type=Path,
         help="YAML configuration file",
+    )
+    run_parser.add_argument(
+        "--thread", action="store_true", help="execute agents as threads instead of processes"
     )
     start_parser.set_defaults(func=start.execute_config_file)
 

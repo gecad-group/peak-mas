@@ -10,7 +10,7 @@ from peak.bootloader import bootloader
 _logger = logging.getLogger(__name__)
 
 
-def execute_config_file(file: Path, *args, **kargs):
+def execute_config_file(file: Path, thread: bool, *args, **kargs):
     """Executes agents using a YAML configuration file.
 
     Args:
@@ -73,4 +73,4 @@ def execute_config_file(file: Path, *args, **kargs):
             agents.append(kwargs)
 
     _logger.info("YAML configuration file parsed")
-    bootloader(agents)
+    bootloader(agents, thread=thread)
